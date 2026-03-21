@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: ontology-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ontology
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ontology-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  ontology-postgres-data:

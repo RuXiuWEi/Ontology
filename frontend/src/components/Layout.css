@@ -1,0 +1,58 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.app-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  color: #334155;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.nav-link:hover {
+  background: #e2e8f0;
+}
+
+.nav-link.active {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.btn-logout {
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-logout:hover {
+  background: #f1f5f9;
+}
+
+.app-main {
+  flex: 1;
+  padding: 1.25rem;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+}
