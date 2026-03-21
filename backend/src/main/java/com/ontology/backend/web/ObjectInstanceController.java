@@ -7,6 +7,7 @@ import com.ontology.backend.web.dto.PageResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ public class ObjectInstanceController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN','EDITOR','VIEWER')")
     public ApiResponse<PageResponse<ObjectInstanceResponse>> list(
             @RequestParam(required = false) Long typeId,
             @PageableDefault(size = 20) Pageable pageable
@@ -38,16 +40,19 @@ public class ObjectInstanceController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','EDITOR','VIEWER')")
     public ApiResponse<ObjectInstanceResponse> get(@PathVariable Long id) {
         return ApiResponse.ok(objectInstanceService.get(id));
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN','EDITOR')")
     public ApiResponse<ObjectInstanceResponse> create(@Valid @RequestBody ObjectInstanceRequest request) {
         return ApiResponse.ok(objectInstanceService.create(request));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','EDITOR')")
     public ApiResponse<ObjectInstanceResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody ObjectInstanceRequest request
@@ -56,6 +61,7 @@ public class ObjectInstanceController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ApiResponse<Void> delete(@PathVariable Long id) {
         objectInstanceService.delete(id);
         return ApiResponse.ok(null);

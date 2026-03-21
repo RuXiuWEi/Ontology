@@ -45,6 +45,8 @@ export type DashboardDailyPointDto = {
   auditEvents: number
 }
 
+export type DashboardDimension = 'OBJECT_TYPE' | 'OBJECT_INSTANCE'
+
 export type DashboardSummaryDto = {
   objectTypeTotal: number
   objectTypeCreatedLast7Days: number
@@ -64,3 +66,20 @@ export type AuditLogDto = {
   details: string | null
   createdAt: string
 }
+
+export type RoleDto = {
+  id: number
+  name: string
+}
+
+export type UserSummaryDto = {
+  id: number
+  username: string
+  enabled: boolean
+  roles: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export type RbacRoleDto = RoleDto
+export type RbacUserDto = UserSummaryDto

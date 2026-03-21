@@ -15,8 +15,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.data.domain.Sort;
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Service
@@ -44,15 +52,96 @@ public class AuditLogService {
 
     @Transactional(readOnly = true)
     public PageResponse<AuditLogResponse> list(AuditLogListRequest req, Pageable pageable) {
-        Specification<AuditLog> spec = Specification.allOf(
+        Specification<AuditLog> spec = buildSpec(withPreset(req));
+        Page<AuditLogResponse> page = auditLogRepository.findAll(spec, pageable).map(this::toResponse);
+        return PageResponse.of(page);
+    }
+
+    @Transactional(readOnly = true)
+    public void exportCsv(AuditLogListRequest req, HttpServletResponse response) {
+        Specification<AuditLog> spec = buildSpec(withPreset(req));
+        var rows = auditLogRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"audit-logs.csv\"");
+        try {
+            var out = response.getWriter();
+            out.write("id,createdAt,username,action,resource,resourceId,details\n");
+            for (AuditLog log : rows) {
+                out.write(csv(log.getId()));
+                out.write(',');
+                out.write(csv(log.getCreatedAt()));
+                out.write(',');
+                out.write(csv(log.getUsername()));
+                out.write(',');
+                out.write(csv(log.getAction()));
+                out.write(',');
+                out.write(csv(log.getResource()));
+                out.write(',');
+                out.write(csv(log.getResourceId()));
+                out.write(',');
+                out.write(csv(log.getDetails()));
+                out.write('\n');
+            }
+            out.flush();
+        } catch (IOException e) {
+            throw new IllegalStateException("导出审计日志失败", e);
+        }
+    }
+
+    private AuditLogListRequest withPreset(AuditLogListRequest req) {
+        String preset = req.timeRangePreset();
+        if (!StringUtils.hasText(preset) || req.createdFrom() != null || req.createdTo() != null) {
+            return req;
+        }
+        Instant now = Instant.now();
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        return switch (preset.trim().toUpperCase()) {
+            case "TODAY" -> new AuditLogListRequest(
+                    req.username(),
+                    req.action(),
+                    req.resource(),
+                    today.atStartOfDay().toInstant(ZoneOffset.UTC),
+                    now,
+                    req.timeRangePreset()
+            );
+            case "LAST_7_DAYS" -> new AuditLogListRequest(
+                    req.username(),
+                    req.action(),
+                    req.resource(),
+                    now.minus(7, ChronoUnit.DAYS),
+                    now,
+                    req.timeRangePreset()
+            );
+            case "LAST_30_DAYS" -> new AuditLogListRequest(
+                    req.username(),
+                    req.action(),
+                    req.resource(),
+                    now.minus(30, ChronoUnit.DAYS),
+                    now,
+                    req.timeRangePreset()
+            );
+            default -> req;
+        };
+    }
+
+    private Specification<AuditLog> buildSpec(AuditLogListRequest req) {
+        return Specification.allOf(
                 likeIgnoreCase("username", req.username()),
                 equalsValue("action", req.action()),
                 equalsValue("resource", req.resource()),
                 gteCreatedAt(req.createdFrom()),
                 lteCreatedAt(req.createdTo())
         );
-        Page<AuditLogResponse> page = auditLogRepository.findAll(spec, pageable).map(this::toResponse);
-        return PageResponse.of(page);
+    }
+
+    private String csv(Object value) {
+        if (value == null) {
+            return "\"\"";
+        }
+        String s = String.valueOf(value).replace("\"", "\"\"");
+        return "\"" + s + "\"";
     }
 
     private Optional<String> resolveCurrentUsername() {
