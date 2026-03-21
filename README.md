@@ -76,6 +76,23 @@ npm run lint
 npm run build
 ```
 
+## 前端云环境一键配置（Cloud Agent）
+
+如果你希望新代理开箱可用前端环境（含 Vitest/Testing Library/jsdom），可在仓库根目录执行：
+
+```bash
+./scripts/setup_frontend_cloud_env.sh
+./scripts/verify_frontend_cloud_env.sh
+```
+
+脚本能力：
+
+- 自动输出 Node/npm 版本诊断
+- 在 `frontend/` 内优先执行 `npm ci`，若 lock 不匹配自动回退 `npm install`
+- 验证 `npm run build` 与 `npm run test`
+- 失败时将安装日志、构建日志、测试日志写入 `/workspace/.cloud-env-logs/`
+- 输出可缓存路径建议：`~/.npm`、`frontend/node_modules`
+
 ## 五、目录说明
 
 - `backend/`：Spring Boot 后端
