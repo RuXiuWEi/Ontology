@@ -4,6 +4,7 @@ import { Layout } from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
+import { DashboardPage } from './pages/dashboard/DashboardPage'
 import { InstanceDetailPage } from './pages/instances/InstanceDetailPage'
 import { InstanceFormPage } from './pages/instances/InstanceFormPage'
 import { InstanceListPage } from './pages/instances/InstanceListPage'
@@ -21,10 +22,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Layout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route
-                path="dashboard"
-                element={<PlaceholderPage title="总览" subtitle="关键指标与系统概览正在建设中。" />}
-              />
+              <Route path="dashboard" element={<DashboardPage />} />
               <Route path="object-types">
                 <Route index element={<ObjectTypeListPage />} />
                 <Route path="new" element={<ObjectTypeFormPage mode="create" />} />
