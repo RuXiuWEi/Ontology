@@ -12,14 +12,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class ObjectTypeService {
 
     private final ObjectTypeRepository repository;
+    private final AuditLogService auditLogService;
 
-    public ObjectTypeService(ObjectTypeRepository repository) {
+    public ObjectTypeService(ObjectTypeRepository repository, AuditLogService auditLogService) {
         this.repository = repository;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional(readOnly = true)
@@ -44,12 +48,20 @@ public class ObjectTypeService {
         entity.setDescription(request.description());
         entity.setCreatedAt(Instant.now());
         entity.setUpdatedAt(Instant.now());
-        return toResponse(repository.save(entity));
+        ObjectType saved = repository.save(entity);
+        auditLogService.log(
+                "CREATE",
+                "OBJECT_TYPE",
+                String.valueOf(saved.getId()),
+                buildDetails(saved, "OBJECT_TYPE_CREATED")
+        );
+        return toResponse(saved);
     }
 
     @Transactional
     public ObjectTypeResponse update(Long id, ObjectTypeRequest request) {
         ObjectType entity = repository.findById(id).orElseThrow(() -> new BusinessException(40401, "对象类型不存在"));
+        String before = "code=" + entity.getCode() + ",name=" + entity.getName();
         if (!entity.getCode().equals(request.code()) && repository.existsByCode(request.code())) {
             throw new BusinessException(40901, "code 已存在");
         }
@@ -57,15 +69,40 @@ public class ObjectTypeService {
         entity.setName(request.name().trim());
         entity.setDescription(request.description());
         entity.setUpdatedAt(Instant.now());
-        return toResponse(repository.save(entity));
+        ObjectType saved = repository.save(entity);
+        Map<String, Object> details = buildDetails(saved, "OBJECT_TYPE_UPDATED");
+        details.put("before", before);
+        auditLogService.log(
+                "UPDATE",
+                "OBJECT_TYPE",
+                String.valueOf(saved.getId()),
+                details
+        );
+        return toResponse(saved);
     }
 
     @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
+        ObjectType entity = repository.findById(id).orElse(null);
+        if (entity == null) {
             throw new BusinessException(40401, "对象类型不存在");
         }
         repository.deleteById(id);
+        auditLogService.log(
+                "DELETE",
+                "OBJECT_TYPE",
+                String.valueOf(id),
+                buildDetails(entity, "OBJECT_TYPE_DELETED")
+        );
+    }
+
+    private Map<String, Object> buildDetails(ObjectType entity, String event) {
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("event", event);
+        details.put("code", entity.getCode());
+        details.put("name", entity.getName());
+        details.put("description", entity.getDescription());
+        return details;
     }
 
     private ObjectTypeResponse toResponse(ObjectType e) {

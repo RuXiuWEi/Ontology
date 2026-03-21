@@ -37,3 +37,30 @@ export type MeDto = {
   username: string
   roles: string[]
 }
+
+export type DashboardDailyPointDto = {
+  day: string
+  objectTypeCreated: number
+  objectInstanceCreated: number
+  auditEvents: number
+}
+
+export type DashboardSummaryDto = {
+  objectTypeTotal: number
+  objectTypeCreatedLast7Days: number
+  objectInstanceTotal: number
+  objectInstanceCreatedLast7Days: number
+  activeUserTotal: number
+  auditEventsLast7Days: number
+  dailyTrend: DashboardDailyPointDto[]
+}
+
+export type AuditLogDto = {
+  id: number
+  username: string | null
+  action: string
+  resource: string
+  resourceId: string | null
+  details: string | null
+  createdAt: string
+}
