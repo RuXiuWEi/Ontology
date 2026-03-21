@@ -1,8 +1,16 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { listAuditLogsPage } from '../../api/auditLogs'
+import {
+  type AuditTimePreset,
+  exportAuditLogsCsv,
+  listAuditLogsPage,
+} from '../../api/auditLogs'
 import { getDashboardSummary } from '../../api/dashboard'
-import type { AuditLogDto, DashboardSummaryDto } from '../../api/types'
+import type {
+  AuditLogDto,
+  DashboardDimension,
+  DashboardSummaryDto,
+} from '../../api/types'
 import '../PageShell.css'
 import './DashboardPage.css'
 
@@ -10,6 +18,7 @@ type Filters = {
   username: string
   action: string
   resource: string
+  preset: AuditTimePreset | ''
 }
 
 function errMessage(err: unknown): string {
@@ -24,6 +33,7 @@ const PAGE_SIZE = 10
 
 export function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummaryDto | null>(null)
+  const [dimension, setDimension] = useState<DashboardDimension>('OBJECT_TYPE')
   const [summaryLoading, setSummaryLoading] = useState(true)
   const [summaryError, setSummaryError] = useState<string | null>(null)
 
@@ -31,6 +41,7 @@ export function DashboardPage() {
     username: '',
     action: '',
     resource: '',
+    preset: 'LAST_7_DAYS',
   })
   const [page, setPage] = useState(0)
   const [auditRows, setAuditRows] = useState<AuditLogDto[]>([])
@@ -38,20 +49,21 @@ export function DashboardPage() {
   const [auditTotalPages, setAuditTotalPages] = useState(0)
   const [auditLoading, setAuditLoading] = useState(true)
   const [auditError, setAuditError] = useState<string | null>(null)
-  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [exporting, setExporting] = useState(false)
+  const [expandedRows, setExpandedRows] = useState<Record<number, Set<string>>>({})
 
   const loadSummary = useCallback(async () => {
     setSummaryLoading(true)
     setSummaryError(null)
     try {
-      const data = await getDashboardSummary()
+      const data = await getDashboardSummary(dimension)
       setSummary(data)
     } catch (e: unknown) {
       setSummaryError(errMessage(e))
     } finally {
       setSummaryLoading(false)
     }
-  }, [])
+  }, [dimension])
 
   const loadAudits = useCallback(async () => {
     setAuditLoading(true)
@@ -63,6 +75,7 @@ export function DashboardPage() {
         username: filters.username || undefined,
         action: filters.action || undefined,
         resource: filters.resource || undefined,
+        preset: filters.preset || undefined,
       })
       setAuditRows(pageData.content)
       setAuditTotal(pageData.totalElements)
@@ -74,12 +87,118 @@ export function DashboardPage() {
     }
   }, [filters, page])
 
-  function renderDetails(details: string | null): string {
-    if (!details) return '{}'
+  function parseDetails(details: string | null): unknown {
+    if (!details) return {}
     try {
-      return JSON.stringify(JSON.parse(details), null, 2)
+      return JSON.parse(details) as unknown
     } catch {
       return details
+    }
+  }
+
+  function isJsonObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+  }
+
+  function toggleFieldCollapse(rowId: number, path: string) {
+    setExpandedRows((prev) => {
+      const current = new Set(prev[rowId] ?? [])
+      if (current.has(path)) {
+        current.delete(path)
+      } else {
+        current.add(path)
+      }
+      return { ...prev, [rowId]: current }
+    })
+  }
+
+  function fieldCollapsed(rowId: number, path: string): boolean {
+    return expandedRows[rowId]?.has(path) ?? false
+  }
+
+  function renderJsonValue(rowId: number, label: string, value: unknown, path: string): ReactNode {
+    if (isJsonObject(value)) {
+      const collapsed = fieldCollapsed(rowId, path)
+      const keys = Object.keys(value)
+      return (
+        <div className="json-node" key={path}>
+          <button
+            type="button"
+            className="json-toggle"
+            onClick={() => toggleFieldCollapse(rowId, path)}
+          >
+            <span className="json-key">{label}</span>
+            <span className="json-toggle-hint">
+              {collapsed ? `+ 展开对象 (${keys.length})` : '- 折叠对象'}
+            </span>
+          </button>
+          {!collapsed ? (
+            <div className="json-children">
+              {keys.map((key) =>
+                renderJsonValue(rowId, key, value[key], `${path}.${key}`),
+              )}
+            </div>
+          ) : null}
+        </div>
+      )
+    }
+    if (Array.isArray(value)) {
+      const collapsed = fieldCollapsed(rowId, path)
+      return (
+        <div className="json-node" key={path}>
+          <button
+            type="button"
+            className="json-toggle"
+            onClick={() => toggleFieldCollapse(rowId, path)}
+          >
+            <span className="json-key">{label}</span>
+            <span className="json-toggle-hint">
+              {collapsed ? `+ 展开数组 (${value.length})` : '- 折叠数组'}
+            </span>
+          </button>
+          {!collapsed ? (
+            <div className="json-children">
+              {value.map((item, index) =>
+                renderJsonValue(rowId, `[${index}]`, item, `${path}.${index}`),
+              )}
+            </div>
+          ) : null}
+        </div>
+      )
+    }
+    const rendered =
+      typeof value === 'string' ? value : value === null ? 'null' : String(value)
+    return (
+      <div className="json-leaf" key={path}>
+        <span className="json-key">{label}</span>
+        <span className={typeof value === 'string' ? 'json-value-string' : 'json-value'}>
+          {typeof value === 'string' ? `"${rendered}"` : rendered}
+        </span>
+      </div>
+    )
+  }
+
+  async function handleExport() {
+    setExporting(true)
+    try {
+      const blob = await exportAuditLogsCsv({
+        username: filters.username || undefined,
+        action: filters.action || undefined,
+        resource: filters.resource || undefined,
+        preset: filters.preset || undefined,
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (e: unknown) {
+      setAuditError(errMessage(e))
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -95,11 +214,13 @@ export function DashboardPage() {
     () =>
       (summary?.dailyTrend ?? []).map((point) => ({
         day: point.day.slice(5),
-        类型新增: point.objectTypeCreated,
-        实例新增: point.objectInstanceCreated,
+        新增数量:
+          dimension === 'OBJECT_TYPE'
+            ? point.objectTypeCreated
+            : point.objectInstanceCreated,
         审计事件: point.auditEvents,
       })),
-    [summary],
+    [summary, dimension],
   )
 
   function updateFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
@@ -143,7 +264,19 @@ export function DashboardPage() {
       </div>
 
       <div className="panel">
-        <h2 className="panel-title">近7天趋势</h2>
+        <div className="panel-title-row">
+          <h2 className="panel-title">近7天趋势</h2>
+          <label className="field small">
+            <span>资源维度</span>
+            <select
+              value={dimension}
+              onChange={(e) => setDimension(e.target.value as DashboardDimension)}
+            >
+              <option value="OBJECT_TYPE">OBJECT_TYPE</option>
+              <option value="OBJECT_INSTANCE">OBJECT_INSTANCE</option>
+            </select>
+          </label>
+        </div>
         {summaryLoading ? (
           <p className="status">加载中…</p>
         ) : (
@@ -153,8 +286,7 @@ export function DashboardPage() {
                 <XAxis dataKey="day" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Line type="monotone" dataKey="类型新增" stroke="#0f2847" strokeWidth={2} />
-                <Line type="monotone" dataKey="实例新增" stroke="#2563eb" strokeWidth={2} />
+                <Line type="monotone" dataKey="新增数量" stroke="#0f2847" strokeWidth={2} />
                 <Line type="monotone" dataKey="审计事件" stroke="#7c3aed" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
@@ -197,10 +329,29 @@ export function DashboardPage() {
                 <option value="OBJECT_INSTANCE">OBJECT_INSTANCE</option>
               </select>
             </label>
+            <label className="field small">
+              <span>时间范围</span>
+              <select
+                value={filters.preset}
+                onChange={(e) =>
+                  updateFilter('preset', e.target.value as Filters['preset'])
+                }
+              >
+                <option value="">全部</option>
+                <option value="TODAY">今天</option>
+                <option value="LAST_7_DAYS">近7天</option>
+                <option value="LAST_30_DAYS">近30天</option>
+              </select>
+            </label>
           </div>
-          <button type="button" className="btn" onClick={() => void loadAudits()}>
-            刷新
-          </button>
+          <div className="toolbar-actions">
+            <button type="button" className="btn" onClick={() => void loadAudits()}>
+              刷新
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => void handleExport()} disabled={exporting}>
+              {exporting ? '导出中…' : '导出CSV'}
+            </button>
+          </div>
         </div>
 
         {auditLoading ? (
@@ -228,9 +379,11 @@ export function DashboardPage() {
                       </td>
                     </tr>
                   ) : (
-                    auditRows.map((row) => (
-                      <Fragment key={String(row.id)}>
-                        <tr>
+                    auditRows.map((row) => {
+                      const parsed = parseDetails(row.details)
+                      const jsonObject = isJsonObject(parsed)
+                      return (
+                        <tr key={String(row.id)}>
                           <td>{row.id}</td>
                           <td>{new Date(row.createdAt).toLocaleString()}</td>
                           <td>{row.username || 'anonymous'}</td>
@@ -238,28 +391,27 @@ export function DashboardPage() {
                           <td>{row.resource}</td>
                           <td>{row.resourceId || '—'}</td>
                           <td>
-                            <button
-                              type="button"
-                              className="btn btn-light"
-                              onClick={() =>
-                                setExpandedId((prev) => (prev === row.id ? null : row.id))
-                              }
-                            >
-                              {expandedId === row.id ? '收起详情' : '查看详情JSON'}
-                            </button>
+                            {jsonObject ? (
+                              <div className="json-view">
+                                {Object.keys(parsed).length === 0 ? (
+                                  <span className="json-empty">{'{ }'}</span>
+                                ) : (
+                                  Object.keys(parsed).map((key) =>
+                                    renderJsonValue(row.id, key, parsed[key], key),
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <pre className="json-view json-view-light">
+                                {typeof parsed === 'string'
+                                  ? parsed
+                                  : JSON.stringify(parsed, null, 2)}
+                              </pre>
+                            )}
                           </td>
                         </tr>
-                        {expandedId === row.id ? (
-                          <tr>
-                            <td colSpan={7}>
-                              <pre className="json-view json-view-light">
-                                {renderDetails(row.details)}
-                              </pre>
-                            </td>
-                          </tr>
-                        ) : null}
-                      </Fragment>
-                    ))
+                      )
+                    })
                   )}
                 </tbody>
               </table>

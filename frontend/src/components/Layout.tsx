@@ -72,6 +72,13 @@ function resolveBreadcrumb(pathname: string): string {
   return map[pathname] ?? '总览'
 }
 
+function prettifyRole(role: string): string {
+  if (role === 'ADMIN') return '管理员'
+  if (role === 'EDITOR') return '编辑者'
+  if (role === 'VIEWER') return '只读用户'
+  return role
+}
+
 export function Layout() {
   const { logout } = useAuth()
   const location = useLocation()
@@ -85,7 +92,7 @@ export function Layout() {
         const me = await getMe()
         if (cancelled) return
         setUsername(me.username)
-        setRoleLabel(me.roles[0] ?? '普通用户')
+        setRoleLabel(prettifyRole(me.roles[0] ?? '普通用户'))
       } catch {
         if (cancelled) return
         setUsername('当前用户')

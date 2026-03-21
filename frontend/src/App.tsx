@@ -11,6 +11,7 @@ import { InstanceListPage } from './pages/instances/InstanceListPage'
 import { ObjectTypeDetailPage } from './pages/objectTypes/ObjectTypeDetailPage'
 import { ObjectTypeFormPage } from './pages/objectTypes/ObjectTypeFormPage'
 import { ObjectTypeListPage } from './pages/objectTypes/ObjectTypeListPage'
+import { RbacPage } from './pages/rbac/RbacPage'
 import './App.css'
 
 export default function App() {
@@ -61,7 +62,7 @@ export default function App() {
               />
               <Route
                 path="rbac"
-                element={<PlaceholderPage title="权限" subtitle="权限模块将在后续批次接入。" />}
+                element={<RbacPage />}
               />
               <Route
                 path="integration"

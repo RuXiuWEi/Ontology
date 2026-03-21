@@ -4,6 +4,7 @@ import com.ontology.backend.repository.AuditLogRepository;
 import com.ontology.backend.repository.ObjectInstanceRepository;
 import com.ontology.backend.repository.ObjectTypeRepository;
 import com.ontology.backend.repository.UserRepository;
+import com.ontology.backend.web.dto.DashboardDimension;
 import com.ontology.backend.web.dto.DashboardDailyPointResponse;
 import com.ontology.backend.web.dto.DashboardSummaryResponse;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
-    public DashboardSummaryResponse summary() {
+    public DashboardSummaryResponse summary(DashboardDimension dimension) {
         Instant now = Instant.now();
         Instant last7Days = now.minus(6, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
         long totalObjectTypes = objectTypeRepository.count();
@@ -46,7 +47,7 @@ public class DashboardService {
         long createdInstancesLast7Days = objectInstanceRepository.countByCreatedAtBetween(last7Days, now);
         long activeUsers = userRepository.countByEnabledTrue();
         long auditEventsLast7Days = auditLogRepository.countByCreatedAtBetween(last7Days, now);
-        List<DashboardDailyPointResponse> trend = buildDailyTrend(now);
+        List<DashboardDailyPointResponse> trend = buildDailyTrend(dimension);
         return new DashboardSummaryResponse(
                 totalObjectTypes,
                 createdObjectTypesLast7Days,
@@ -58,15 +59,17 @@ public class DashboardService {
         );
     }
 
-    private List<DashboardDailyPointResponse> buildDailyTrend(Instant now) {
+    private List<DashboardDailyPointResponse> buildDailyTrend(DashboardDimension dimension) {
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
         List<DashboardDailyPointResponse> points = new ArrayList<>();
         for (int i = 6; i >= 0; i--) {
             LocalDate day = today.minusDays(i);
             Instant start = day.atStartOfDay().toInstant(ZoneOffset.UTC);
             Instant end = day.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-            long objectTypes = objectTypeRepository.countByCreatedAtBetween(start, end);
-            long instances = objectInstanceRepository.countByCreatedAtBetween(start, end);
+            long objectTypes = dimension == DashboardDimension.OBJECT_TYPE
+                    ? objectTypeRepository.countByCreatedAtBetween(start, end) : 0;
+            long instances = dimension == DashboardDimension.OBJECT_INSTANCE
+                    ? objectInstanceRepository.countByCreatedAtBetween(start, end) : 0;
             long audits = auditLogRepository.countByCreatedAtBetween(start, end);
             points.add(new DashboardDailyPointResponse(day.toString(), objectTypes, instances, audits));
         }

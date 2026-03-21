@@ -4,6 +4,7 @@ import com.ontology.backend.domain.Role;
 import com.ontology.backend.domain.User;
 import com.ontology.backend.repository.RoleRepository;
 import com.ontology.backend.repository.UserRepository;
+import com.ontology.backend.security.RoleNames;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -37,8 +38,8 @@ public class AdminUserInitializer implements ApplicationRunner {
         if (userRepository.existsByUsername("admin")) {
             return;
         }
-        Role admin = roleRepository.findByName("ROLE_ADMIN")
-                .orElseThrow(() -> new IllegalStateException("ROLE_ADMIN 未在数据库中初始化"));
+        Role admin = roleRepository.findByName(RoleNames.ADMIN)
+                .orElseThrow(() -> new IllegalStateException("ADMIN 未在数据库中初始化"));
         User user = new User();
         user.setUsername("admin");
         user.setPasswordHash(passwordEncoder.encode("admin123"));

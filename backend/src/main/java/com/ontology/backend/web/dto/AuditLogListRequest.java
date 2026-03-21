@@ -9,6 +9,7 @@ public record AuditLogListRequest(
         String action,
         String resource,
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdFrom,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdTo
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdTo,
+        String timeRangePreset
 ) {
 }

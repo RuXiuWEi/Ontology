@@ -2,6 +2,7 @@ package com.ontology.backend.bootstrap;
 
 import com.ontology.backend.domain.Role;
 import com.ontology.backend.repository.RoleRepository;
+import com.ontology.backend.security.RoleNames;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -27,10 +28,13 @@ public class TestReferenceDataRunner implements ApplicationRunner {
             return;
         }
         Role admin = new Role();
-        admin.setName("ROLE_ADMIN");
+        admin.setName(RoleNames.ADMIN);
         roleRepository.save(admin);
-        Role user = new Role();
-        user.setName("ROLE_USER");
-        roleRepository.save(user);
+        Role editor = new Role();
+        editor.setName(RoleNames.EDITOR);
+        roleRepository.save(editor);
+        Role viewer = new Role();
+        viewer.setName(RoleNames.VIEWER);
+        roleRepository.save(viewer);
     }
 }

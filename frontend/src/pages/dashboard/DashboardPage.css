@@ -38,6 +38,83 @@
   height: 280px;
 }
 
+.panel-title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.json-view {
+  margin: 0;
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: #0b1220;
+  color: #e2e8f0;
+  min-width: 320px;
+}
+
+.json-node {
+  margin-bottom: 0.35rem;
+}
+
+.json-toggle {
+  width: 100%;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #111827;
+  color: #e2e8f0;
+  padding: 0.35rem 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.json-children {
+  margin-top: 0.35rem;
+  margin-left: 0.85rem;
+  border-left: 1px dashed #334155;
+  padding-left: 0.65rem;
+}
+
+.json-leaf {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+}
+
+.json-key {
+  color: #93c5fd;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.json-toggle-hint {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.json-value {
+  color: #cbd5e1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.json-value-string {
+  color: #fca5a5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.json-empty {
+  color: #94a3b8;
+}
+
 .json-view-light {
   background: #0f172a;
   color: #e2e8f0;
