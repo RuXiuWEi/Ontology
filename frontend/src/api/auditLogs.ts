@@ -5,12 +5,14 @@ export type ListAuditLogsParams = {
   username?: string
   action?: string
   resource?: string
-  preset?: 'TODAY' | 'LAST_7_DAYS' | 'LAST_30_DAYS'
+  preset?: AuditTimePreset
   from?: string
   to?: string
   page?: number
   size?: number
 }
+
+export type AuditTimePreset = 'TODAY' | 'LAST_7_DAYS' | 'LAST_30_DAYS'
 
 export async function listAuditLogsPage(
   params?: ListAuditLogsParams,
