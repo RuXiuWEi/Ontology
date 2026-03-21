@@ -31,3 +31,9 @@ export type ObjectInstanceDto = {
   createdAt: string
   updatedAt: string
 }
+
+export type MeDto = {
+  id: number
+  username: string
+  roles: string[]
+}
