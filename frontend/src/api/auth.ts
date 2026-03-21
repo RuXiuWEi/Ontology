@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { ApiResponse } from './types'
+import type { ApiResponse, MeDto } from './types'
 
 export type LoginRequest = {
   username: string
@@ -22,4 +22,9 @@ export async function login(body: LoginRequest): Promise<string> {
     throw new Error('登录响应中未包含 token')
   }
   return token
+}
+
+export async function getMe(): Promise<MeDto> {
+  const { data } = await apiClient.get<ApiResponse<MeDto>>('/api/auth/me')
+  return data.data
 }
