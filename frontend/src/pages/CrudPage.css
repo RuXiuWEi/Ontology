@@ -1,0 +1,120 @@
+.crud-page h1 {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+}
+
+.filter-row {
+  margin-bottom: 1rem;
+}
+
+.filter-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  max-width: 280px;
+}
+
+.filter-row select,
+.crud-form select,
+.crud-form input,
+.crud-form textarea {
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font: inherit;
+}
+
+.crud-form {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.crud-form h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.crud-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.crud-form-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  min-width: 200px;
+}
+
+.crud-field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.crud-form-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.crud-form-actions button {
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+}
+
+.crud-form-actions button[type='submit'] {
+  background: #1e293b;
+  color: #fff;
+  border-color: #1e293b;
+}
+
+.crud-error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.crud-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.crud-table th,
+.crud-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.crud-table th {
+  background: #f1f5f9;
+}
+
+.crud-cell-data {
+  max-width: 240px;
+  word-break: break-word;
+}
+
+.crud-actions {
+  white-space: nowrap;
+}
+
+.crud-actions button {
+  margin-right: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
