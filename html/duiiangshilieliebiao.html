@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>对象实例 - 企业级本体管理系统</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#284678",
+                        "surface-tint": "#415e91",
+                        "tertiary-fixed": "#dae2ff",
+                        "background": "#f7f9fc",
+                        "on-tertiary-fixed-variant": "#00409f",
+                        "surface-dim": "#d8dadd",
+                        "on-secondary-container": "#4c587f",
+                        "on-tertiary-container": "#7ca2ff",
+                        "on-surface-variant": "#43474f",
+                        "primary-container": "#1a3a6b",
+                        "surface-container-low": "#f2f4f7",
+                        "surface-variant": "#e0e3e6",
+                        "inverse-primary": "#abc7ff",
+                        "primary-fixed": "#d7e2ff",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-secondary-fixed-variant": "#39456b",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f7f9fc",
+                        "on-surface": "#191c1e",
+                        "secondary-fixed-dim": "#b9c5f2",
+                        "tertiary-fixed-dim": "#b1c5ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001b3f",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#003586",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#c4d0fd",
+                        "inverse-on-surface": "#eff1f4",
+                        "surface-container-high": "#e6e8eb",
+                        "primary-fixed-dim": "#abc7ff",
+                        "tertiary": "#00215a",
+                        "on-primary-container": "#89a5dd",
+                        "inverse-surface": "#2d3133",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface": "#f7f9fc",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c4c6d0",
+                        "secondary": "#515d84",
+                        "primary": "#002451",
+                        "on-tertiary-fixed": "#001847",
+                        "outline": "#747780",
+                        "surface-container": "#eceef1",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#0b1a3d",
+                        "on-background": "#191c1e"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "HarmonyOS Sans"],
+                        "body": ["Inter", "HarmonyOS Sans"],
+                        "label": ["Inter", "HarmonyOS Sans"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>      
+        body { font-family: 'Inter', 'HarmonyOS Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-nav { border-left: 3px solid #2D6BE4; background-color: rgba(45, 107, 228, 0.1); color: #FFFFFF !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e0e3e6; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex min-h-screen text-on-surface antialiased overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] bg-[#0D1B3E] z-50 flex flex-col py-6 shadow-xl overflow-y-auto no-scrollbar">
+<!-- Logo Section -->
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-8 h-8 bg-tertiary-fixed flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<div>
+<h1 class="text-white font-bold text-sm leading-tight tracking-tight">企业本体管理系统</h1>
+<p class="text-white/40 text-[10px] uppercase tracking-wider">ENT ONTOLOGY MGMT</p>
+</div>
+</div>
+<!-- Navigation Groups -->
+<nav class="flex-1 space-y-6">
+<div>
+<a class="flex items-center gap-3 px-6 py-3 text-white/65 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_20}}">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">总览概览</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">建模中心</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_38}}">
+<span class="material-symbols-outlined text-[20px]">category</span>
+<span class="text-sm">对象类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_21}}">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">关联类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_26}}">
+<span class="material-symbols-outlined text-[20px]">api</span>
+<span class="text-sm">集成管理</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">数据运营</h3>
+<a class="active-nav flex items-center gap-3 px-6 py-3 text-white/65 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_6}}">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">database</span>
+<span class="text-sm font-medium">对象实例</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_24}}">
+<span class="material-symbols-outlined text-[20px]">folder_shared</span>
+<span class="text-sm">对象集合</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">动作中心</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_17}}">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+<span class="text-sm">动作管理</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">分析与治理</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_13}}">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="text-sm">图谱探索</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_18}}">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm">版本管理</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_16}}">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">数据血缘</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">系统设置</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_22}}">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+<span class="text-sm">权限管理</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Content Shell -->
+<main class="flex-1 ml-[240px] flex flex-col h-screen">
+<!-- TopNavBar -->
+<header class="h-[56px] bg-white border-b border-[#DEE2E6] flex justify-between items-center px-6 z-40">
+<div class="flex items-center gap-2 text-sm">
+<span class="text-slate-400">数据运营</span>
+<span class="text-slate-300">/</span>
+<span class="text-slate-400">对象实例</span>
+<span class="text-slate-300">/</span>
+<span class="text-[#1A3A6B] font-bold">企业客户</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-500 hover:bg-slate-50 rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-500 hover:bg-slate-50 rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-slate-200">
+<img alt="用户头像" class="w-full h-full object-cover" data-alt="User profile avatar icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZ65sgF_JtzZ4IjfIvRcREsydVpAkHAbRF-HBZ4c_bh-Wn0dc5KT5GCp23t1w0CcxRUpvN58XcvZTuF6H-3EKawwgXWlWIBIpbqUdRMtE-SKIIbC_hBi1nsbiOIlhQkadJ3ceOK9_-vQ7IMDWVZlXgmtG9w5c3THVAF9rjN0WDS8_5iv97yyiEu-uOj05kCVkpENE1nCrCLJkAJI908hNdloKuplbzWJjfZmcaWNLwHO98i3QjKRjpQteMUd5szqmOGc46EHe1UWo"/>
+</div>
+</div>
+</header>
+<!-- Two-Column Layout Container -->
+<div class="flex flex-1 overflow-hidden bg-[#F0F2F5]">
+<!-- Left Filter Panel -->
+<aside class="w-[280px] bg-white border-r border-[#DEE2E6] flex flex-col h-full flex-shrink-0">
+<div class="p-4 border-b border-slate-100">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2 px-2 py-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer hover:bg-slate-100">
+<span class="material-symbols-outlined text-blue-600 text-[18px]">corporate_fare</span>
+<span class="text-sm font-medium text-[#1A3A6B]">企业客户</span>
+<span class="material-symbols-outlined text-slate-400 text-[16px]">expand_more</span>
+</div>
+</div>
+<div class="text-[12px] text-slate-500 font-mono">12,847条记录</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
+<div>
+<div class="flex justify-between items-center mb-4">
+<span class="text-sm font-bold text-on-surface">高级筛选</span>
+<button class="text-[12px] text-blue-600 hover:underline">清除全部</button>
+</div>
+<!-- Filter Groups -->
+<div class="space-y-5">
+<!-- Name -->
+<div class="space-y-1.5">
+<label class="text-[12px] font-medium text-slate-500">客户名称</label>
+<input class="w-full h-9 px-3 text-sm border-slate-200 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="输入名称搜索..." type="text"/>
+</div>
+<!-- Category (Multi-select) -->
+<div class="space-y-1.5">
+<label class="text-[12px] font-medium text-slate-500">行业分类</label>
+<div class="flex flex-wrap gap-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm bg-blue-50 text-blue-600 text-[12px] border border-blue-100">
+                                        金融 <button class="ml-1 material-symbols-outlined text-[12px]">close</button>
+</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-sm bg-blue-50 text-blue-600 text-[12px] border border-blue-100">
+                                        制造业 <button class="ml-1 material-symbols-outlined text-[12px]">close</button>
+</span>
+<button class="p-1 text-slate-400 hover:text-blue-500"><span class="material-symbols-outlined text-[18px]">add_box</span></button>
+</div>
+</div>
+<!-- Capital -->
+<div class="space-y-1.5">
+<label class="text-[12px] font-medium text-slate-500">注册资本 (万元)</label>
+<div class="flex items-center gap-2">
+<input class="w-full h-9 px-2 text-sm border-slate-200 rounded outline-none" placeholder="最小" type="number"/>
+<span class="text-slate-300">-</span>
+<input class="w-full h-9 px-2 text-sm border-slate-200 rounded outline-none" placeholder="最大" type="number"/>
+</div>
+</div>
+<!-- Date Range -->
+<div class="space-y-1.5">
+<label class="text-[12px] font-medium text-slate-500">成立日期</label>
+<div class="relative">
+<input class="w-full h-9 px-3 pr-8 text-sm border-slate-200 rounded outline-none" placeholder="选择日期范围" type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-2 text-[18px] text-slate-400">calendar_month</span>
+</div>
+</div>
+<!-- Data Quality (Slider) -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="text-[12px] font-medium text-slate-500">数据质量</label>
+<span class="text-[12px] font-mono text-blue-600">≥80%</span>
+</div>
+<input class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" type="range"/>
+</div>
+<!-- Status -->
+<div class="space-y-2">
+<label class="text-[12px] font-medium text-slate-500">状态</label>
+<div class="space-y-1.5">
+<label class="flex items-center gap-2 cursor-pointer group">
+<input checked="" class="w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-0" type="checkbox"/>
+<span class="text-[13px] text-slate-600 group-hover:text-on-surface">活跃</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-0" type="checkbox"/>
+<span class="text-[13px] text-slate-600 group-hover:text-on-surface">暂停</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-0" type="checkbox"/>
+<span class="text-[13px] text-slate-600 group-hover:text-on-surface">已注销</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-slate-100">
+<button class="w-full h-10 bg-[#1A3A6B] text-white rounded font-medium text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">filter_alt</span>
+                        应用筛选
+                    </button>
+</div>
+</aside>
+<!-- Right Content Area -->
+<section class="flex-1 p-6 overflow-y-auto custom-scrollbar flex flex-col gap-4">
+<!-- Toolbar -->
+<div class="bg-white px-4 py-3 rounded shadow-sm flex justify-between items-center">
+<div class="flex items-center gap-4">
+<span class="text-[13px] text-slate-400">已选中 0 条</span>
+<div class="h-4 w-px bg-slate-200"></div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 text-slate-300 text-[13px] font-medium cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[18px]">edit</span> 批量编辑
+                            </button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 text-slate-300 text-[13px] font-medium cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[18px]">download</span> 批量导出
+                            </button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 text-slate-300 text-[13px] font-medium cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[18px]">delete</span> 批量删除
+                            </button>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-[13px] font-medium text-slate-600 hover:bg-white transition-colors">
+                            导出 <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+<button class="p-1.5 text-slate-500 hover:text-blue-600">
+<span class="material-symbols-outlined text-[20px]">view_column</span>
+</button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="bg-white rounded-xl shadow-sm border border-transparent overflow-hidden flex flex-col flex-1">
+<div class="overflow-x-auto flex-1">
+<table class="w-full border-collapse">
+<thead>
+<tr class="bg-[#F8FAFC] h-12 border-b border-slate-100">
+<th class="w-12 px-4 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-[#1A3A6B] focus:ring-0" type="checkbox"/>
+</th>
+<th class="text-left px-4 text-[13px] font-semibold text-slate-600 whitespace-nowrap">客户名称</th>
+<th class="text-left px-4 text-[13px] font-semibold text-slate-600 whitespace-nowrap">统一信用代码</th>
+<th class="text-left px-4 text-[13px] font-semibold text-slate-600 whitespace-nowrap">行业分类</th>
+<th class="text-right px-4 text-[13px] font-semibold text-slate-600 whitespace-nowrap">注册资本(万元)</th>
+<th class="text-left px-4 text-[13px] font-semibold text-slate-600 whitespace-nowrap">成立日期</th>
+<th class="text-left px-4 text-[13px] font-semibold text-slate-600 whitespace-nowrap">数据质量</th>
+<th class="text-center px-4 text-[13px] font-semibold text-slate-600 whitespace-nowrap">状态</th>
+<th class="text-center px-4 text-[13px] font-semibold text-slate-600 whitespace-nowrap">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50">
+<!-- Row 1 -->
+<tr class="h-[52px] hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-4 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-[#1A3A6B] focus:ring-0" type="checkbox"/>
+</td>
+<td class="px-4"><span class="text-[14px] font-bold text-on-surface">阿里巴巴集团</span></td>
+<td class="px-4 font-mono text-[12px] text-slate-400">91330100799655058L</td>
+<td class="px-4"><span class="px-2 py-0.5 rounded-sm bg-blue-50 text-blue-600 text-[12px] border border-blue-100">互联网</span></td>
+<td class="px-4 text-right font-mono text-[13px]">166,000</td>
+<td class="px-4 text-slate-500 text-[13px]">1999-09-09</td>
+<td class="px-4">
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500 w-[98%]"></div>
+</div>
+<span class="text-[11px] font-mono text-emerald-600">98%</span>
+</div>
+</td>
+<td class="px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-600 text-[12px]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 活跃
+                                        </span>
+</td>
+<td class="px-4 text-center">
+<div class="flex items-center justify-center gap-4">
+<button class="text-blue-600 text-[13px] hover:underline">查看</button>
+<button class="text-slate-400 hover:text-blue-600"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="h-[52px] hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-4 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-[#1A3A6B] focus:ring-0" type="checkbox"/>
+</td>
+<td class="px-4"><span class="text-[14px] font-bold text-on-surface">腾讯控股</span></td>
+<td class="px-4 font-mono text-[12px] text-slate-400">91440300MA5FD2LL0U</td>
+<td class="px-4"><span class="px-2 py-0.5 rounded-sm bg-blue-50 text-blue-600 text-[12px] border border-blue-100">互联网</span></td>
+<td class="px-4 text-right font-mono text-[13px]">350,000</td>
+<td class="px-4 text-slate-500 text-[13px]">1998-11-11</td>
+<td class="px-4">
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500 w-[95%]"></div>
+</div>
+<span class="text-[11px] font-mono text-emerald-600">95%</span>
+</div>
+</td>
+<td class="px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-600 text-[12px]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 活跃
+                                        </span>
+</td>
+<td class="px-4 text-center">
+<div class="flex items-center justify-center gap-4">
+<button class="text-blue-600 text-[13px] hover:underline">查看</button>
+<button class="text-slate-400 hover:text-blue-600"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="h-[52px] hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-4 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-[#1A3A6B] focus:ring-0" type="checkbox"/>
+</td>
+<td class="px-4"><span class="text-[14px] font-bold text-on-surface">比亚迪股份</span></td>
+<td class="px-4 font-mono text-[12px] text-slate-400">91440300770985480G</td>
+<td class="px-4"><span class="px-2 py-0.5 rounded-sm bg-orange-50 text-orange-600 text-[12px] border border-orange-100">汽车制造</span></td>
+<td class="px-4 text-right font-mono text-[13px]">280,000</td>
+<td class="px-4 text-slate-500 text-[13px]">1995-01-13</td>
+<td class="px-4">
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-orange-500 w-[72%]"></div>
+</div>
+<span class="text-[11px] font-mono text-orange-600">72%</span>
+</div>
+</td>
+<td class="px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-600 text-[12px]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 活跃
+                                        </span>
+</td>
+<td class="px-4 text-center">
+<div class="flex items-center justify-center gap-4">
+<button class="text-blue-600 text-[13px] hover:underline">查看</button>
+<button class="text-slate-400 hover:text-blue-600"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="h-[52px] hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-4 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-[#1A3A6B] focus:ring-0" type="checkbox"/>
+</td>
+<td class="px-4"><span class="text-[14px] font-bold text-on-surface">华为技术</span></td>
+<td class="px-4 font-mono text-[12px] text-slate-400">91440300192195279W</td>
+<td class="px-4"><span class="px-2 py-0.5 rounded-sm bg-blue-50 text-blue-600 text-[12px] border border-blue-100">通信设备</span></td>
+<td class="px-4 text-right font-mono text-[13px]">403,000</td>
+<td class="px-4 text-slate-500 text-[13px]">1987-09-15</td>
+<td class="px-4">
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500 w-[91%]"></div>
+</div>
+<span class="text-[11px] font-mono text-emerald-600">91%</span>
+</div>
+</td>
+<td class="px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-600 text-[12px]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 活跃
+                                        </span>
+</td>
+<td class="px-4 text-center">
+<div class="flex items-center justify-center gap-4">
+<button class="text-blue-600 text-[13px] hover:underline">查看</button>
+<button class="text-slate-400 hover:text-blue-600"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="h-[52px] hover:bg-[#EEF4FF] transition-colors group border-b-0">
+<td class="px-4 text-center">
+<input class="w-4 h-4 rounded border-slate-300 text-[#1A3A6B] focus:ring-0" type="checkbox"/>
+</td>
+<td class="px-4"><span class="text-[14px] font-bold text-on-surface">中国银行</span></td>
+<td class="px-4 font-mono text-[12px] text-slate-400">10100000000014203Y</td>
+<td class="px-4"><span class="px-2 py-0.5 rounded-sm bg-purple-50 text-purple-600 text-[12px] border border-purple-100">银行</span></td>
+<td class="px-4 text-right font-mono text-[13px]">2,940,000</td>
+<td class="px-4 text-slate-500 text-[13px]">1912-02-05</td>
+<td class="px-4">
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500 w-[88%]"></div>
+</div>
+<span class="text-[11px] font-mono text-emerald-600">88%</span>
+</div>
+</td>
+<td class="px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-emerald-50 text-emerald-600 text-[12px]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 活跃
+                                        </span>
+</td>
+<td class="px-4 text-center">
+<div class="flex items-center justify-center gap-4">
+<button class="text-blue-600 text-[13px] hover:underline">查看</button>
+<button class="text-slate-400 hover:text-blue-600"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="h-14 border-t border-slate-100 bg-white flex items-center justify-between px-6">
+<div class="text-[13px] text-slate-500">
+                            共 <span class="font-mono font-medium text-slate-700">12,847</span> 条记录
+                        </div>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-slate-50 disabled:opacity-50">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-[#1A3A6B] text-white text-[13px]">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-transparent text-slate-600 text-[13px] hover:bg-slate-50">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-transparent text-slate-600 text-[13px] hover:bg-slate-50">3</button>
+<span class="text-slate-400 mx-1">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-transparent text-slate-600 text-[13px] hover:bg-slate-50">643</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-600 hover:bg-slate-50">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+<div class="ml-4 flex items-center gap-2">
+<span class="text-[13px] text-slate-400">20条/页</span>
+<span class="material-symbols-outlined text-slate-400 text-[18px] cursor-pointer">arrow_drop_down</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- FAB for Create -->
+<div class="fixed bottom-8 right-8">
+<button class="w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+</div>
+</body></html>

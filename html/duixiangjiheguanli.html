@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', 'HarmonyOS Sans', sans-serif; }
+        .headline { font-family: 'Manrope', sans-serif; }
+        .code-font { font-family: 'JetBrains Mono', monospace; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    
+      .active-nav { border-left: 3px solid #2D6BE4; background-color: rgba(45, 107, 228, 0.1); color: #FFFFFF !important; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#284678",
+                        "surface-tint": "#415e91",
+                        "tertiary-fixed": "#dae2ff",
+                        "background": "#f7f9fc",
+                        "on-tertiary-fixed-variant": "#00409f",
+                        "surface-dim": "#d8dadd",
+                        "on-secondary-container": "#4c587f",
+                        "on-tertiary-container": "#7ca2ff",
+                        "on-surface-variant": "#43474f",
+                        "primary-container": "#1a3a6b",
+                        "surface-container-low": "#f2f4f7",
+                        "surface-variant": "#e0e3e6",
+                        "inverse-primary": "#abc7ff",
+                        "primary-fixed": "#d7e2ff",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-secondary-fixed-variant": "#39456b",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f7f9fc",
+                        "on-surface": "#191c1e",
+                        "secondary-fixed-dim": "#b9c5f2",
+                        "tertiary-fixed-dim": "#b1c5ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001b3f",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#003586",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#c4d0fd",
+                        "inverse-on-surface": "#eff1f4",
+                        "surface-container-high": "#e6e8eb",
+                        "primary-fixed-dim": "#abc7ff",
+                        "tertiary": "#00215a",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface": "#f7f9fc",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c4c6d0",
+                        "secondary": "#515d84",
+                        "primary": "#002451",
+                        "on-tertiary-fixed": "#001847",
+                        "outline": "#747780",
+                        "surface-container": "#eceef1",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#0b1a3d",
+                        "on-background": "#191c1e"
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] bg-[#0D1B3E] z-50 flex flex-col py-6 shadow-xl overflow-y-auto no-scrollbar">
+<!-- Logo Section -->
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-8 h-8 bg-tertiary-fixed flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<div>
+<h1 class="text-white font-bold text-sm leading-tight tracking-tight">企业本体管理系统</h1>
+<p class="text-white/40 text-[10px] uppercase tracking-wider">ENT ONTOLOGY MGMT</p>
+</div>
+</div>
+<!-- Navigation Groups -->
+<nav class="flex-1 space-y-6">
+<div>
+<a class="flex items-center gap-3 px-6 py-3 text-white/65 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">总览概览</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">建模中心</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">category</span>
+<span class="text-sm">对象类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">关联类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">api</span>
+<span class="text-sm">接口协议</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">数据运营</h3>
+<a class="active-nav flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_56}}">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">database</span>
+<span class="text-sm">对象实例</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">folder_shared</span>
+<span class="text-sm">对象集合</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">动作中心</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+<span class="text-sm">动作管理</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">分析与治理</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_33}}">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="text-sm">图谱探索</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm">版本管理</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">数据血缘</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">系统设置</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+<span class="text-sm">系统设置</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-[240px] h-[56px] z-40 bg-white border-b border-[#DEE2E6] flex justify-between items-center px-6">
+<div class="flex items-center gap-2 text-sm">
+<span class="text-slate-500">数据运营</span>
+<span class="text-slate-400 text-xs">/</span>
+<a class="text-slate-500 hover:text-primary transition-colors" href="{{DATA:SCREEN:SCREEN_56}}">对象实例</a>
+<span class="text-slate-400 text-xs">/</span>
+<span class="text-slate-500">企业客户</span>
+<span class="text-slate-400 text-xs">/</span>
+<span class="text-primary font-bold">阿里巴巴集团</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="hover:bg-slate-50 rounded-full p-2 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+</div>
+<div class="hover:bg-slate-50 rounded-full p-2 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-slate-600">settings</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img alt="用户头像" class="w-full h-full object-cover" data-alt="Professional user profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOjdJDiq4J3JFDNMaAs9oYFBrmfkJLybCFlxT63-5Vbn26Q0TrRDE9p6QUHbg2r61Iy2HAz4JOTjzTpCYQtQI0-jfad9EkffDuen4tFhae5sPv_y7rqyTyLps2vroVSalljCE01_0AMIbp4Jp8PqMuvP8-AGpNCLlukcodBpANHCDuRHtb6UzwBRBCXSTZy6d_NG4AhiyzoZ492VWb0AtlFzrGZoBrt9zkWFv_T1uR6W3YbdpELNUwc04oECfSdUcb1-kZP80srpw"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[240px] pt-[56px] min-h-screen bg-[#F0F2F5] p-6 space-y-6">
+<!-- Entity Header Card -->
+<section class="bg-surface-container-lowest rounded-xl p-[20px_24px_16px_24px] shadow-sm flex justify-between items-start">
+<div class="flex gap-5">
+<div class="w-[52px] h-[52px] rounded-full bg-[#1A3A6B] flex items-center justify-center text-white text-2xl font-bold">
+                    阿
+                </div>
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<h2 class="text-[22px] font-semibold text-[#1A1F36] tracking-tight">阿里巴巴集团</h2>
+<span class="px-2 py-0.5 rounded-[4px] bg-emerald-50 text-emerald-600 text-xs font-medium border border-emerald-100">活跃</span>
+<span class="px-2 py-0.5 rounded-[4px] bg-blue-50 text-blue-600 text-xs font-medium border border-blue-100">企业客户</span>
+</div>
+<p class="code-font text-xs text-slate-400 tracking-wider">91330100799655058L</p>
+<p class="text-xs text-slate-400">创建于 2026-01-15 · 最后同步 2026-03-18 16:32</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-primary-container text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all">
+                    执行动作
+                    <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<button class="px-4 py-2 border border-outline-variant text-on-surface rounded-lg text-sm font-medium hover:bg-slate-50 active:scale-95 transition-all">
+                    编辑
+                </button>
+<button class="px-2 py-2 text-slate-500 hover:text-primary transition-colors flex items-center gap-1 text-sm">
+                    更多
+                    <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+</section>
+<!-- Layout Grid -->
+<div class="grid grid-cols-[55%_30%_15%] gap-6">
+<!-- Left Column: Tab Content -->
+<div class="space-y-6">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm min-h-[600px] flex flex-col">
+<div class="border-b border-surface-container-high px-6 flex items-center gap-8">
+<button class="py-4 text-sm font-bold text-primary border-b-2 border-primary cursor-pointer">属性详情</button>
+<button class="py-4 text-sm font-medium text-slate-500 hover:text-primary cursor-pointer">关联对象</button>
+<button class="py-4 text-sm font-medium text-slate-500 hover:text-primary cursor-pointer">变更历史</button>
+</div>
+<div class="p-6 space-y-8">
+<!-- Group: 基础信息 -->
+<div class="space-y-4">
+<div class="flex items-center justify-between cursor-pointer group">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-lg transition-transform rotate-0">expand_more</span>
+<h3 class="text-sm font-bold text-on-surface">基础信息</h3>
+</div>
+<div class="h-[1px] flex-1 mx-4 bg-surface-container-high"></div>
+</div>
+<div class="grid grid-cols-1 gap-y-4 pl-6">
+<div class="flex text-sm">
+<span class="w-[120px] text-slate-500">客户名称：</span>
+<span class="text-on-surface font-medium">阿里巴巴集团控股有限公司</span>
+</div>
+<div class="flex text-sm items-center">
+<span class="w-[120px] text-slate-500">行业分类：</span>
+<span class="px-2 py-0.5 rounded-[4px] bg-blue-50 text-blue-600 text-xs font-medium">互联网</span>
+</div>
+<div class="flex text-sm">
+<span class="w-[120px] text-slate-500">注册资本：</span>
+<span class="text-on-surface font-medium">166,000 万元</span>
+</div>
+<div class="flex text-sm">
+<span class="w-[120px] text-slate-500">成立日期：</span>
+<span class="text-on-surface font-medium">1999-09-09</span>
+</div>
+<div class="flex text-sm items-center">
+<span class="w-[120px] text-slate-500">数据密级：</span>
+<span class="px-2 py-0.5 rounded-[4px] bg-blue-50 text-blue-600 text-xs font-medium">内部</span>
+</div>
+<div class="flex text-sm">
+<span class="w-[120px] text-slate-500">所属命名空间：</span>
+<span class="code-font text-on-surface">business_core</span>
+</div>
+</div>
+</div>
+<!-- Group: 联系信息 -->
+<div class="space-y-4">
+<div class="flex items-center justify-between cursor-pointer group">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+<h3 class="text-sm font-bold text-on-surface">联系信息</h3>
+</div>
+<div class="h-[1px] flex-1 mx-4 bg-surface-container-high"></div>
+</div>
+<div class="grid grid-cols-1 gap-y-4 pl-6">
+<div class="flex text-sm">
+<span class="w-[120px] text-slate-500">主要联系人：</span>
+<span class="text-on-surface font-medium">蔡崇信</span>
+</div>
+<div class="flex text-sm">
+<span class="w-[120px] text-slate-500">联系电话：</span>
+<span class="text-on-surface font-medium">0571-85022088</span>
+</div>
+<div class="flex text-sm">
+<span class="w-[120px] text-slate-500">企业邮箱：</span>
+<span class="text-on-surface font-medium">aligroup@alibaba-inc.com</span>
+</div>
+</div>
+</div>
+<!-- Group: 扩展信息 (Collapsed) -->
+<div class="space-y-4">
+<div class="flex items-center justify-between cursor-pointer hover:bg-slate-50 p-1 -mx-1 rounded transition-colors group">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-lg -rotate-90">expand_more</span>
+<h3 class="text-sm font-bold text-slate-500">扩展信息</h3>
+</div>
+<span class="text-xs text-blue-600 flex items-center gap-1">展开<span class="material-symbols-outlined text-xs">keyboard_arrow_down</span></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Middle Column: Visuals & Logs -->
+<div class="space-y-6">
+<!-- Card: 关系图 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-bold text-on-surface">关系图</h3>
+<a class="material-symbols-outlined text-slate-400 text-lg cursor-pointer hover:text-primary transition-colors" href="{{DATA:SCREEN:SCREEN_33}}">open_in_full</a>
+</div>
+<div class="relative h-[240px] bg-slate-50 rounded-lg flex items-center justify-center overflow-hidden">
+<!-- Abstract Visual Concept for Relation Map -->
+<svg class="w-full h-full" viewbox="0 0 300 240">
+<!-- Connection Lines -->
+<line stroke="#DEE2E6" stroke-width="1.5" x1="150" x2="80" y1="120" y2="60"></line>
+<line stroke="#DEE2E6" stroke-width="1.5" x1="150" x2="220" y1="120" y2="60"></line>
+<line stroke="#DEE2E6" stroke-width="1.5" x1="150" x2="50" y1="120" y2="160"></line>
+<line stroke="#DEE2E6" stroke-width="1.5" x1="150" x2="250" y1="120" y2="160"></line>
+<line stroke="#DEE2E6" stroke-width="1.5" x1="150" x2="150" y1="120" y2="200"></line>
+<!-- Relationship Labels -->
+<text fill="#94A3B8" font-size="10" text-anchor="middle" x="100" y="85">签订合同</text>
+<text fill="#94A3B8" font-size="10" text-anchor="middle" x="190" y="85">归属行业</text>
+<text fill="#94A3B8" font-size="10" text-anchor="middle" x="80" y="145">签订合同</text>
+<text fill="#94A3B8" font-size="10" text-anchor="middle" x="220" y="145">主要联系人</text>
+<text fill="#94A3B8" font-size="10" text-anchor="middle" x="150" y="175">签订合同</text>
+<!-- Nodes -->
+<circle cx="150" cy="120" fill="#1A3A6B" r="28"></circle>
+<text fill="white" font-size="11" font-weight="bold" text-anchor="middle" x="150" y="124">阿里巴巴</text>
+<!-- Satellite Nodes -->
+<circle cx="80" cy="60" fill="#F97316" r="14"></circle> <!-- Orange for Contracts -->
+<circle cx="220" cy="60" fill="#10B981" r="14"></circle> <!-- Green for Category -->
+<circle cx="50" cy="160" fill="#F97316" r="14"></circle>
+<circle cx="250" cy="160" fill="#A855F7" r="14"></circle> <!-- Purple for Contact -->
+<circle cx="150" cy="200" fill="#F97316" r="14"></circle>
+</svg>
+</div>
+<a class="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1 justify-center py-1" href="{{DATA:SCREEN:SCREEN_33}}">
+                        查看完整图谱
+                        <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+<!-- Card: 动作执行记录 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm space-y-4">
+<h3 class="text-sm font-bold text-on-surface">动作执行记录</h3>
+<div class="space-y-5">
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-700">ZW</div>
+<div class="flex-1 space-y-1">
+<p class="text-xs text-on-surface"><span class="font-bold">张伟</span> 执行了 <span class="text-primary font-medium">修改客户等级</span></p>
+<p class="text-[10px] text-slate-400">2026-03-18 14:20:05</p>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-[10px] font-bold text-purple-700">LY</div>
+<div class="flex-1 space-y-1">
+<p class="text-xs text-on-surface"><span class="font-bold">李悦</span> 执行了 <span class="text-primary font-medium">更新注册地址</span></p>
+<p class="text-[10px] text-slate-400">2026-03-17 09:12:44</p>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-700">SYS</div>
+<div class="flex-1 space-y-1">
+<p class="text-xs text-on-surface"><span class="font-bold">系统</span> 执行了 <span class="text-primary font-medium">自动全量同步</span></p>
+<p class="text-[10px] text-slate-400">2026-03-16 03:00:00</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Metadata -->
+<div class="space-y-6">
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm space-y-6">
+<h3 class="text-sm font-bold text-on-surface">元数据</h3>
+<!-- Progress Ring -->
+<div class="flex flex-col items-center gap-2">
+<div class="relative w-20 h-20">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-slate-100" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-width="6"></circle>
+<circle class="text-emerald-500" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" stroke-dasharray="213.6" stroke-dashoffset="4.2" stroke-linecap="round" stroke-width="6"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center text-sm font-bold text-emerald-600">98%</div>
+</div>
+<span class="text-xs text-slate-500">数据质量</span>
+</div>
+<div class="space-y-4">
+<div class="space-y-1">
+<p class="text-[10px] text-slate-400 uppercase">来源系统</p>
+<p class="text-xs font-medium text-on-surface">Oracle ERP</p>
+</div>
+<div class="space-y-1">
+<p class="text-[10px] text-slate-400 uppercase">同步方式</p>
+<p class="text-xs font-medium text-on-surface">全量同步</p>
+</div>
+<div class="space-y-1">
+<p class="text-[10px] text-slate-400 uppercase">同步频率</p>
+<p class="text-xs font-medium text-on-surface">每日 03:00</p>
+</div>
+<div class="space-y-1">
+<p class="text-[10px] text-slate-400 uppercase">创建人</p>
+<p class="text-xs font-medium text-on-surface">张伟</p>
+</div>
+<div class="space-y-1">
+<p class="text-[10px] text-slate-400 uppercase">命名空间</p>
+<p class="text-xs font-medium code-font text-on-surface">business_core</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>集成管理 - 企业本体管理系统</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#284678",
+                        "surface-tint": "#415e91",
+                        "tertiary-fixed": "#dae2ff",
+                        "background": "#f7f9fc",
+                        "on-tertiary-fixed-variant": "#00409f",
+                        "surface-dim": "#d8dadd",
+                        "on-secondary-container": "#4c587f",
+                        "on-tertiary-container": "#7ca2ff",
+                        "on-surface-variant": "#43474f",
+                        "primary-container": "#1a3a6b",
+                        "surface-container-low": "#f2f4f7",
+                        "surface-variant": "#e0e3e6",
+                        "inverse-primary": "#abc7ff",
+                        "primary-fixed": "#d7e2ff",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-secondary-fixed-variant": "#39456b",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f7f9fc",
+                        "on-surface": "#191c1e",
+                        "secondary-fixed-dim": "#b9c5f2",
+                        "tertiary-fixed-dim": "#b1c5ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001b3f",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#003586",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#c4d0fd",
+                        "inverse-on-surface": "#eff1f4",
+                        "surface-container-high": "#e6e8eb",
+                        "primary-fixed-dim": "#abc7ff",
+                        "tertiary": "#00215a",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface": "#f7f9fc",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c4c6d0",
+                        "secondary": "#515d84",
+                        "primary": "#002451",
+                        "on-tertiary-fixed": "#001847",
+                        "outline": "#747780",
+                        "surface-container": "#eceef1",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#0b1a3d",
+                        "on-background": "#191c1e"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "HarmonyOS Sans"],
+                        "body": ["Inter", "HarmonyOS Sans"],
+                        "label": ["Inter", "HarmonyOS Sans"],
+                        "code": ["JetBrains Mono"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', 'HarmonyOS Sans', sans-serif; }
+        .glass-effect { backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.8); }
+        .code-block { background-color: #1A1F2E; }
+        /* Custom scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<!-- Left Side Navigation -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] z-50 bg-[#0D1B3E] shadow-xl flex flex-col py-6">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 bg-[#2D6BE4] rounded flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-white text-xl">database</span>
+</div>
+<div>
+<h1 class="text-sm font-bold text-white leading-tight">企业本体管理系统</h1>
+<p class="text-[10px] text-white/50 tracking-tight">ENTERPRISE DATA ASSETS</p>
+</div>
+</div>
+<nav class="flex-1 sidebar-scroll overflow-y-auto pb-4">
+<!-- Dashboard Section -->
+<div class="mb-4">
+<a class="flex items-center gap-3 px-6 py-3 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p1_dashboard.html">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm">总览仪表盘</span>
+</a>
+</div>
+<!-- Group: 建模中心 -->
+<div class="mb-4">
+<div class="px-6 py-2 text-[10px] font-bold text-white/35 uppercase tracking-widest">建模中心</div>
+<ul class="mt-1">
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p2_object_types.html">
+<span class="material-symbols-outlined text-[20px]">category</span>
+<span class="text-sm">对象类型</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p3_relation_types.html">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">关联类型</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p4_interface_protocols.html">
+<span class="material-symbols-outlined text-[20px]">api</span>
+<span class="text-sm">接口协议</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Group: 数据运营 -->
+<div class="mb-4">
+<div class="px-6 py-2 text-[10px] font-bold text-white/35 uppercase tracking-widest">数据运营</div>
+<ul class="mt-1">
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p5_object_instances.html">
+<span class="material-symbols-outlined text-[20px]">database</span>
+<span class="text-sm">对象实例</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p6_object_collections.html">
+<span class="material-symbols-outlined text-[20px]">folder_shared</span>
+<span class="text-sm">对象集合</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Group: 动作中心 -->
+<div class="mb-4">
+<div class="px-6 py-2 text-[10px] font-bold text-white/35 uppercase tracking-widest">动作中心</div>
+<ul class="mt-1">
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p7_action_management.html">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+<span class="text-sm">动作管理</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Group: 分析与治理 -->
+<div class="mb-4">
+<div class="px-6 py-2 text-[10px] font-bold text-white/35 uppercase tracking-widest">分析与治理</div>
+<ul class="mt-1">
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p8_graph_exploration.html">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="text-sm">图谱探索</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p9_version_management.html">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm">版本管理</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p10_data_lineage.html">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">数据血缘</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Group: 系统管理 -->
+<div class="mb-4">
+<div class="px-6 py-2 text-[10px] font-bold text-white/35 uppercase tracking-widest">系统管理</div>
+<ul class="mt-1">
+<li>
+<a class="flex items-center gap-3 px-6 py-2.5 text-white/65 hover:text-white hover:bg-white/5 transition-all" href="p14_permission_management.html">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+<span class="text-sm">权限管理</span>
+</a>
+</li>
+<li>
+<!-- Active State for P15 集成管理 -->
+<a class="flex items-center gap-3 px-6 py-2.5 bg-[#2D6BE4]/25 text-white relative transition-all" href="p15_integration_management.html">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-[#2D6BE4]"></div>
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm font-bold">集成管理</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<div class="px-6 mt-auto pt-6 border-t border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-[10px] font-bold">Admin</div>
+<div class="overflow-hidden">
+<p class="text-xs text-white font-medium truncate">系统管理员</p>
+<p class="text-[10px] text-white/40 truncate">admin@eoms.com</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[240px] min-h-screen">
+<!-- Top Nav Bar -->
+<header class="h-[56px] bg-white border-b border-[#DEE2E6] flex justify-between items-center px-6 sticky top-0 z-40">
+<div class="flex items-center gap-2 text-sm">
+<span class="text-slate-400">系统管理</span>
+<span class="text-slate-300">/</span>
+<span class="font-medium text-[#1A3A6B]">集成管理</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-slate-50 rounded-full p-2 transition-colors relative">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+</button>
+<button class="hover:bg-slate-50 rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</button>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="p-6 space-y-6">
+<!-- Tab Navigation Header -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="flex border-b border-surface-container">
+<button class="px-8 py-4 text-sm font-bold text-primary border-b-2 border-primary transition-all">
+                    数据源管理
+                </button>
+<button class="px-8 py-4 text-sm font-medium text-slate-500 hover:text-primary transition-all">
+                    API访问管理
+                </button>
+</div>
+<!-- DataSource Content Start -->
+<div class="p-6 space-y-6">
+<!-- Status Summary Row -->
+<div class="grid grid-cols-4 gap-4">
+<div class="bg-surface-container-low p-5 rounded-xl flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-600">check_circle</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-emerald-600">6个</p>
+<p class="text-xs text-slate-500 font-medium">已连接</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-xl flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-600">sync</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-blue-600">2个</p>
+<p class="text-xs text-slate-500 font-medium">同步中</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-xl flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-red-600">error</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-red-600">1个</p>
+<p class="text-xs text-slate-500 font-medium">有异常</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-xl flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-600">pause_circle</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-slate-600">1个</p>
+<p class="text-xs text-slate-500 font-medium">已暂停</p>
+</div>
+</div>
+</div>
+<!-- Data Source Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- Card 1: Oracle -->
+<div class="bg-white border border-surface-container-high rounded-xl p-5 hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-red-50 text-red-700 rounded-lg flex items-center justify-center font-bold text-lg">O</div>
+<div>
+<h3 class="font-bold text-on-surface">Oracle ERP</h3>
+<p class="text-[10px] text-slate-400">关系数据库</p>
+</div>
+</div>
+<span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-1 rounded font-bold">同步正常</span>
+</div>
+<div class="space-y-1 mb-6">
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">最后同步</span>
+<span class="text-slate-400">03-20 03:12</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">已映射对象</span>
+<span class="font-medium text-on-surface">3个</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">日同步记录</span>
+<span class="font-medium text-on-surface">12,084</span>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-4 border-t border-surface-container">
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">测试连接</button>
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">配置</button>
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">暂停</button>
+</div>
+</div>
+<!-- Card 2: Salesforce -->
+<div class="bg-white border border-surface-container-high rounded-xl p-5 hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">cloud</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Salesforce CRM</h3>
+<p class="text-[10px] text-slate-400">云服务接口</p>
+</div>
+</div>
+<span class="bg-blue-50 text-blue-600 text-[10px] px-2 py-1 rounded font-bold animate-pulse">同步中...</span>
+</div>
+<div class="space-y-1 mb-6">
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">活跃同步</span>
+<span class="text-blue-500">正在处理队列</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">已映射对象</span>
+<span class="font-medium text-on-surface">5个</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">日同步记录</span>
+<span class="font-medium text-on-surface">45,210</span>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-4 border-t border-surface-container">
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">测试连接</button>
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">配置</button>
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">暂停</button>
+</div>
+</div>
+<!-- Card 3: CSV -->
+<div class="bg-white border border-surface-container-high rounded-xl p-5 hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">CSV手动上传</h3>
+<p class="text-[10px] text-slate-400">本地文件</p>
+</div>
+</div>
+<span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-1 rounded font-bold">手动触发</span>
+</div>
+<div class="space-y-1 mb-6">
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">上次上传</span>
+<span class="text-slate-400">03-15</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">数据量</span>
+<span class="font-medium text-on-surface">2,400行</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">校验状态</span>
+<span class="font-medium text-emerald-600">已通过</span>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-4 border-t border-surface-container">
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">重新上传</button>
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">下载模板</button>
+</div>
+</div>
+<!-- Card 4: Kafka -->
+<div class="bg-white border border-surface-container-high rounded-xl p-5 hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center font-bold text-lg">K</div>
+<div>
+<h3 class="font-bold text-on-surface">Kafka数据流</h3>
+<p class="text-[10px] text-slate-400">消息队列</p>
+</div>
+</div>
+<div class="flex gap-1">
+<span class="bg-blue-50 text-blue-600 text-[10px] px-2 py-1 rounded font-bold">同步中</span>
+<span class="bg-purple-50 text-purple-600 text-[10px] px-2 py-1 rounded font-bold">实时流</span>
+</div>
+</div>
+<div class="space-y-1 mb-6">
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">当前吞吐</span>
+<span class="text-on-surface">150 msg/s</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">已映射对象</span>
+<span class="font-medium text-on-surface">1个</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">累积记录</span>
+<span class="font-medium text-on-surface">1,024,567</span>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-4 border-t border-surface-container">
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">监控</button>
+<button class="text-xs font-bold text-blue-600 hover:text-blue-800">配置</button>
+</div>
+</div>
+<!-- Card 5: HR System (Error State) -->
+<div class="bg-white border border-red-400 rounded-xl p-5 shadow-sm">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">badge</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">HR系统</h3>
+<p class="text-[10px] text-slate-400">企业内部应用</p>
+</div>
+</div>
+<span class="bg-red-50 text-red-600 text-[10px] px-2 py-1 rounded font-bold">异常：连接超时</span>
+</div>
+<div class="space-y-1 mb-6">
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">最后尝试</span>
+<span class="text-red-500 font-medium">03-20 10:45</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">错误详情</span>
+<span class="text-on-surface">Timeout after 3000ms</span>
+</div>
+</div>
+<div class="flex items-center gap-3 pt-4 border-t border-red-100">
+<button class="text-xs font-bold text-red-600 hover:text-red-800">查看错误日志</button>
+<button class="text-xs font-medium text-slate-600 hover:text-primary">重试连接</button>
+</div>
+</div>
+<!-- Card 6: Add New -->
+<div class="border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-8 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-full border-2 border-slate-300 flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">add</span>
+</div>
+<p class="mt-3 text-sm font-bold text-slate-500 group-hover:text-primary transition-colors">+ 添加数据源</p>
+</div>
+</div>
+</div>
+<!-- DataSource Content End -->
+</div>
+<!-- API Management Section -->
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="text-lg font-heavy text-primary">API 访问管理预览</h2>
+</div>
+<!-- API Base Address Card -->
+<div class="bg-white p-5 rounded-xl border border-surface-container flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="text-xs text-slate-500 font-medium">API基础地址：</span>
+<code class="font-code text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">https://eoms.example.com/api/v1</code>
+</div>
+<button class="flex items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+<span class="text-xs">复制</span>
+</button>
+</div>
+<button class="text-sm font-bold text-blue-600 flex items-center gap-1 hover:underline">
+                    查看接口文档
+                    <span class="material-symbols-outlined text-sm">open_in_new</span>
+</button>
+</div>
+<!-- Tokens Table Card -->
+<div class="bg-white rounded-xl border border-surface-container overflow-hidden">
+<div class="px-6 py-4 border-b border-surface-container flex justify-between items-center">
+<h3 class="font-bold text-on-surface">访问令牌 (API Tokens)</h3>
+<button class="bg-primary-container text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">add</span>
+                        新建访问令牌
+                    </button>
+</div>
+<table class="w-full text-left text-sm">
+<thead>
+<tr class="bg-slate-50 text-slate-500 border-b border-surface-container">
+<th class="px-6 py-4 font-bold">令牌名称</th>
+<th class="px-6 py-4 font-bold">创建时间</th>
+<th class="px-6 py-4 font-bold">权限范围</th>
+<th class="px-6 py-4 font-bold">最后使用</th>
+<th class="px-6 py-4 font-bold">到期时间</th>
+<th class="px-6 py-4 font-bold">状态</th>
+<th class="px-6 py-4 font-bold text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4 font-medium text-on-surface">数据分析平台集成</td>
+<td class="px-6 py-4 text-slate-500">2026-01-10</td>
+<td class="px-6 py-4"><span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[10px] font-bold">只读</span></td>
+<td class="px-6 py-4 text-slate-500">2026-03-19</td>
+<td class="px-6 py-4 text-slate-500">2027-01-10</td>
+<td class="px-6 py-4">
+<div class="w-8 h-4 bg-emerald-500 rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</td>
+<td class="px-6 py-4 text-right space-x-3">
+<button class="text-blue-600 hover:underline font-bold">复制</button>
+<button class="text-red-500 hover:underline font-bold">撤销</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4 font-medium text-on-surface">自动化脚本</td>
+<td class="px-6 py-4 text-slate-500">2026-02-20</td>
+<td class="px-6 py-4"><span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[10px] font-bold">读写</span></td>
+<td class="px-6 py-4 text-slate-500">2026-03-18</td>
+<td class="px-6 py-4 text-slate-500">2026-08-20</td>
+<td class="px-6 py-4">
+<div class="w-8 h-4 bg-emerald-500 rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</td>
+<td class="px-6 py-4 text-right space-x-3">
+<button class="text-blue-600 hover:underline font-bold">复制</button>
+<button class="text-red-500 hover:underline font-bold">撤销</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4 font-medium text-on-surface">旧版系统</td>
+<td class="px-6 py-4 text-slate-500">2025-06-01</td>
+<td class="px-6 py-4"><span class="bg-slate-50 text-slate-400 px-2 py-0.5 rounded text-[10px] font-bold">只读</span></td>
+<td class="px-6 py-4 text-slate-500">2025-12-31</td>
+<td class="px-6 py-4 text-red-500 font-bold">2026-01-01 (已过期)</td>
+<td class="px-6 py-4">
+<span class="bg-red-50 text-red-600 px-2 py-0.5 rounded text-[10px] font-bold">已过期</span>
+</td>
+<td class="px-6 py-4 text-right space-x-3">
+<button class="text-red-500 hover:underline font-bold">删除</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Code Example Card -->
+<div class="bg-white rounded-xl border border-surface-container p-6">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-6">
+<h3 class="font-bold text-on-surface">接口调用示例</h3>
+<div class="flex bg-slate-100 rounded-lg p-1">
+<button class="px-3 py-1 text-xs font-bold bg-white shadow-sm rounded-md text-primary">Python</button>
+<button class="px-3 py-1 text-xs font-medium text-slate-500 hover:text-on-surface transition-colors">Java</button>
+<button class="px-3 py-1 text-xs font-medium text-slate-500 hover:text-on-surface transition-colors">cURL</button>
+</div>
+</div>
+<button class="text-xs border border-slate-200 px-3 py-1 rounded hover:bg-slate-50 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+                        复制代码
+                    </button>
+</div>
+<div class="code-block p-5 rounded-xl">
+<pre class="font-code text-xs leading-relaxed overflow-x-auto text-slate-300"><span class="text-slate-500"># 查询企业客户对象列表</span>
+<span class="text-purple-400">import</span> requests
+
+url = <span class="text-emerald-400">"https://eoms.example.com/api/v1/objects/enterprise_customer"</span>
+headers = {<span class="text-emerald-400">"Authorization"</span>: <span class="text-emerald-400">"Bearer {令牌}"</span>}
+params = {<span class="text-emerald-400">"limit"</span>: <span class="text-orange-400">20</span>, <span class="text-emerald-400">"page"</span>: <span class="text-orange-400">1</span>}
+
+response = requests.get(url, headers=headers, params=params)
+
+<span class="text-purple-400">if</span> response.status_code == <span class="text-orange-400">200</span>:
+    data = response.json()
+    <span class="text-slate-500"># 处理数据</span>
+                    </pre>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

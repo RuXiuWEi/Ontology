@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', 'HarmonyOS Sans', sans-serif; }
+        .headline-font { font-family: 'Manrope', 'HarmonyOS Sans', sans-serif; }
+        .code-font { font-family: 'JetBrains Mono', monospace; }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    
+      .active-nav { border-left: 3px solid #2D6BE4; background-color: rgba(45, 107, 228, 0.1); color: #FFFFFF !important; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#002451",
+                        "primary-container": "#1a3a6b",
+                        "tertiary-fixed": "#2d6be4",
+                        "surface": "#f7f9fc",
+                        "on-surface": "#191c1e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f4f7",
+                        "outline-variant": "#dee2e6",
+                        "on-primary-container": "#89a5dd",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] bg-[#0D1B3E] z-50 flex flex-col py-6 shadow-xl overflow-y-auto no-scrollbar">
+<!-- Logo Section -->
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-8 h-8 bg-tertiary-fixed flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<div>
+<h1 class="text-white font-bold text-sm leading-tight tracking-tight">企业本体管理系统</h1>
+<p class="text-white/40 text-[10px] uppercase tracking-wider">ENT ONTOLOGY MGMT</p>
+</div>
+</div>
+<!-- Navigation Groups -->
+<nav class="flex-1 space-y-6">
+<div>
+<a class="flex items-center gap-3 px-6 py-3 text-white/65 hover:text-white transition-all" href="SCREEN_20">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">总览概览</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">建模中心</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="SCREEN_38">
+<span class="material-symbols-outlined text-[20px]">category</span>
+<span class="text-sm">对象类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="SCREEN_21">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">关联类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">api</span>
+<span class="text-sm">接口协议</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">数据运营</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="SCREEN_6">
+<span class="material-symbols-outlined text-[20px]">database</span>
+<span class="text-sm">对象实例</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="SCREEN_24">
+<span class="material-symbols-outlined text-[20px]">folder_shared</span>
+<span class="text-sm">对象集合</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">动作中心</h3>
+<a class="active-nav flex items-center gap-3 px-6 py-3 text-white/65 hover:text-white transition-all" href="SCREEN_17">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">settings_input_component</span>
+<span class="text-sm font-medium">动作管理</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">分析与治理</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="SCREEN_13">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="text-sm">图谱探索</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="SCREEN_18">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm">版本管理</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="SCREEN_16">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">数据血缘</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">系统设置</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="SCREEN_22">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+<span class="text-sm">权限管理</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="SCREEN_26">
+<span class="material-symbols-outlined text-[20px]">integration_instructions</span>
+<span class="text-sm">集成管理</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[240px] flex-1 flex flex-col min-h-screen">
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 right-0 left-[240px] h-[56px] z-40 bg-white border-b border-[#DEE2E6] flex justify-between items-center px-6 w-auto font-['HarmonyOS_Sans'] text-sm font-medium">
+<div class="flex items-center gap-4">
+<nav class="flex items-center gap-2 text-slate-500">
+<span>动作中心</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-primary font-bold">动作管理</span>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<a class="text-slate-500 hover:text-[#1A3A6B]" href="SCREEN_20">首页</a>
+<a class="text-[#1A3A6B] font-bold border-b-2 border-[#1A3A6B] pb-4 translate-y-[8px]" href="#">工作台</a>
+</div>
+<div class="flex items-center gap-3">
+<button class="hover:bg-slate-50 rounded-full p-2 transition-colors cursor-pointer active:opacity-70">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+</button>
+<button class="hover:bg-slate-50 rounded-full p-2 transition-colors cursor-pointer active:opacity-70">
+<span class="material-symbols-outlined text-slate-600">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-slate-200 overflow-hidden ml-2">
+<img alt="用户头像" class="w-full h-full object-cover" data-alt="用户个人头像" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI1XhVQoAfnMeqVGL6cA5tMQh7SloQa0QHw_B-C61gFP1mMPmZCKKCM30LRplJsSGPZSMhqWwus2OpXj3JhmoarFZPyhJdnNK9-cInB4uKQsO1FNeU7DozCeEBIA0lVakQ7NnUGihPFIS5K0ira-aq9Fr4qFMIuRto_IXtQEEvrGZoKeVg5CD7hrcpldJZKPyJVDwA2EmF5Jk3Hd8Gtsd2L_qdVpf29-d8MmGC8PY7ZFj2ekNCbSQPxsidUCNpPK_5P1X5Ry_t1lY"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="mt-[56px] p-[24px] bg-[#F0F2F5] flex-1 space-y-4">
+<!-- Page Header Card -->
+<section class="bg-white px-6 py-5 rounded-xl flex justify-between items-center">
+<div class="flex items-center gap-3">
+<h2 class="text-2xl font-semibold text-primary-container headline-font">动作管理</h2>
+<span class="bg-slate-100 text-slate-500 text-xs px-2 py-0.5 rounded font-medium">23个</span>
+</div>
+<button class="bg-primary-container text-white px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">add</span>
+                新建动作
+            </button>
+</section>
+<!-- Filter Toolbar -->
+<section class="bg-white p-4 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="relative w-[240px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="w-full pl-9 pr-4 py-2 bg-surface border-none rounded-lg text-sm focus:ring-2 focus:ring-tertiary-fixed" placeholder="搜索动作名称" type="text"/>
+</div>
+<select class="bg-surface border-none rounded-lg text-sm px-4 py-2 pr-10 focus:ring-2 focus:ring-tertiary-fixed">
+<option>目标对象类型（全部）</option>
+<option>企业客户</option>
+<option>合同管理</option>
+</select>
+<select class="bg-surface border-none rounded-lg text-sm px-4 py-2 pr-10 focus:ring-2 focus:ring-tertiary-fixed">
+<option>动作类别（全部）</option>
+<option>创建</option>
+<option>修改</option>
+<option>删除</option>
+<option>批量操作</option>
+</select>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-sm text-slate-500">仅显示已启用</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</section>
+<!-- Action Card Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- Card 1 -->
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden hover:shadow-lg transition-all group relative">
+<div class="h-[6px] w-full bg-[#27AE60]"></div>
+<div class="p-4 pt-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-[#1A1F36] text-lg">创建企业客户</h3>
+<label class="relative inline-flex items-center cursor-pointer scale-90">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#27AE60]"></div>
+</label>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="code-font text-xs text-slate-400">ACT_001_CREATE</span>
+<span class="bg-green-50 text-[#27AE60] text-[10px] px-1.5 py-0.5 rounded font-bold">创建</span>
+</div>
+<div class="mb-3">
+<span class="bg-blue-50 text-tertiary-fixed text-xs px-2 py-1 rounded cursor-pointer hover:bg-blue-100">目标：企业客户</span>
+</div>
+<p class="text-slate-500 text-sm mb-4 line-clamp-2 min-h-[40px]">自动录入并验证企业基础信息，包括工商注册号、法人信息及主营业务范围的数据校验。</p>
+<div class="border-t border-slate-50 pt-3 mb-3">
+<div class="flex justify-between items-center text-sm mb-1">
+<span class="text-slate-400">已执行 8,392 次</span>
+<span class="text-[#27AE60] font-semibold">99.1% 成功</span>
+</div>
+<p class="text-[10px] text-slate-400">最后执行：2023-11-24 14:20</p>
+</div>
+<div class="flex gap-4">
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">配置</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">测试执行</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">执行日志</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden hover:shadow-lg transition-all group relative">
+<div class="h-[6px] w-full bg-[#2D6BE4]"></div>
+<div class="p-4 pt-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-[#1A1F36] text-lg">修改客户等级</h3>
+<label class="relative inline-flex items-center cursor-pointer scale-90">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#2D6BE4]"></div>
+</label>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="code-font text-xs text-slate-400">ACT_002_UPDATE</span>
+<span class="bg-blue-50 text-[#2D6BE4] text-[10px] px-1.5 py-0.5 rounded font-bold">修改</span>
+</div>
+<div class="mb-3">
+<span class="bg-blue-50 text-tertiary-fixed text-xs px-2 py-1 rounded cursor-pointer hover:bg-blue-100">目标：企业客户</span>
+</div>
+<p class="text-slate-500 text-sm mb-4 line-clamp-2 min-h-[40px]">根据客户年度交易额度自动触发等级变动，更新核心价值标签及对应的服务权限等级。</p>
+<div class="border-t border-slate-50 pt-3 mb-3">
+<div class="flex justify-between items-center text-sm mb-1">
+<span class="text-slate-400">已执行 12,847 次</span>
+<span class="text-[#2D6BE4] font-semibold">97.8% 成功</span>
+</div>
+<p class="text-[10px] text-slate-400">最后执行：2023-11-24 13:55</p>
+</div>
+<div class="flex gap-4">
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">配置</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">测试执行</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">执行日志</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden hover:shadow-lg transition-all group relative">
+<div class="h-[6px] w-full bg-[#2D6BE4]"></div>
+<div class="p-4 pt-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-[#1A1F36] text-lg">关联合同</h3>
+<label class="relative inline-flex items-center cursor-pointer scale-90">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#2D6BE4]"></div>
+</label>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="code-font text-xs text-slate-400">ACT_003_LINK</span>
+<span class="bg-blue-50 text-[#2D6BE4] text-[10px] px-1.5 py-0.5 rounded font-bold">修改</span>
+</div>
+<div class="mb-3">
+<span class="bg-blue-50 text-tertiary-fixed text-xs px-2 py-1 rounded cursor-pointer hover:bg-blue-100">目标：合同管理</span>
+</div>
+<p class="text-slate-500 text-sm mb-4 line-clamp-2 min-h-[40px]">在现有客户与新签署合同之间建立逻辑关联，触发下游财务系统的同步开账流程。</p>
+<div class="border-t border-slate-50 pt-3 mb-3">
+<div class="flex justify-between items-center text-sm mb-1">
+<span class="text-slate-400">已执行 3,291 次</span>
+<span class="text-[#2D6BE4] font-semibold">96.2% 成功</span>
+</div>
+<p class="text-[10px] text-slate-400">最后执行：2023-11-24 12:10</p>
+</div>
+<div class="flex gap-4">
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">配置</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">测试执行</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">执行日志</button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden hover:shadow-lg transition-all group relative">
+<div class="h-[6px] w-full bg-purple-500"></div>
+<div class="p-4 pt-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-[#1A1F36] text-lg">批量更新行业分类</h3>
+<label class="relative inline-flex items-center cursor-pointer scale-90">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+</label>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="code-font text-xs text-slate-400">ACT_004_BATCH</span>
+<span class="bg-purple-50 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-bold">批量</span>
+</div>
+<div class="mb-3">
+<span class="bg-blue-50 text-tertiary-fixed text-xs px-2 py-1 rounded cursor-pointer hover:bg-blue-100">目标：企业客户</span>
+</div>
+<p class="text-slate-500 text-sm mb-4 line-clamp-2 min-h-[40px]">根据国家统计局最新行业分类标准，对存量客户进行大批量的行业代码重映射与更新。</p>
+<div class="border-t border-slate-50 pt-3 mb-3">
+<div class="flex justify-between items-center text-sm mb-1">
+<span class="text-slate-400">已执行 45 次</span>
+<span class="text-purple-600 font-semibold">100% 成功</span>
+</div>
+<p class="text-[10px] text-slate-400">最后执行：2023-11-23 18:30</p>
+</div>
+<div class="flex gap-4">
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">配置</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">测试执行</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">执行日志</button>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden hover:shadow-lg transition-all group relative">
+<div class="h-[6px] w-full bg-[#2D6BE4]"></div>
+<div class="p-4 pt-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-[#1A1F36] text-lg">停用客户</h3>
+<label class="relative inline-flex items-center cursor-pointer scale-90">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#2D6BE4]"></div>
+</label>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="code-font text-xs text-slate-400">ACT_005_DISABLE</span>
+<span class="bg-blue-50 text-[#2D6BE4] text-[10px] px-1.5 py-0.5 rounded font-bold">修改</span>
+</div>
+<div class="mb-3">
+<span class="bg-blue-50 text-tertiary-fixed text-xs px-2 py-1 rounded cursor-pointer hover:bg-blue-100">目标：企业客户</span>
+</div>
+<p class="text-slate-500 text-sm mb-4 line-clamp-2 min-h-[40px]">将活跃客户状态标记为停用，并在不删除数据的前提下解除其在所有当前业务流程中的参与权。</p>
+<div class="border-t border-slate-50 pt-3 mb-3">
+<div class="flex justify-between items-center text-sm mb-1">
+<span class="text-slate-400">已执行 203 次</span>
+<span class="text-[#2D6BE4] font-semibold">99.5% 成功</span>
+</div>
+<p class="text-[10px] text-slate-400">最后执行：2023-11-20 09:45</p>
+</div>
+<div class="flex gap-4">
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">配置</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">测试执行</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">执行日志</button>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden hover:shadow-lg transition-all group relative">
+<div class="h-[6px] w-full bg-[#E74C3C]"></div>
+<div class="p-4 pt-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-[#1A1F36] text-lg">删除草稿合同</h3>
+<label class="relative inline-flex items-center cursor-pointer scale-90">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E74C3C]"></div>
+</label>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="code-font text-xs text-slate-400">ACT_006_DELETE</span>
+<span class="bg-red-50 text-[#E74C3C] text-[10px] px-1.5 py-0.5 rounded font-bold">删除</span>
+</div>
+<div class="mb-3">
+<span class="bg-blue-50 text-tertiary-fixed text-xs px-2 py-1 rounded cursor-pointer hover:bg-blue-100">目标：合同管理</span>
+</div>
+<p class="text-slate-500 text-sm mb-4 line-clamp-2 min-h-[40px]">物理删除系统中处于草稿状态且超过30天未更新的合同记录，以维护数据库查询性能。</p>
+<div class="border-t border-slate-50 pt-3 mb-3">
+<div class="flex justify-between items-center text-sm mb-1">
+<span class="text-slate-400">已执行 29 次</span>
+<span class="text-orange-500 font-semibold">89.7% 成功 (预警)</span>
+</div>
+<p class="text-[10px] text-slate-400">最后执行：2023-11-22 16:15</p>
+</div>
+<div class="flex gap-4">
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">配置</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">测试执行</button>
+<button class="text-tertiary-fixed text-sm font-medium hover:underline">执行日志</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Execution Log Table -->
+<section class="bg-white rounded-xl shadow-sm border border-outline-variant overflow-hidden">
+<div class="px-6 py-4 flex justify-between items-center border-b border-slate-50">
+<h3 class="text-base font-bold text-primary-container">最近执行记录</h3>
+<a class="text-tertiary-fixed text-sm font-medium flex items-center gap-1" href="#">
+                    查看全部
+                    <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm">
+<thead>
+<tr class="bg-slate-50 text-slate-500 font-medium">
+<th class="px-6 py-3">动作名称</th>
+<th class="px-6 py-3">执行人</th>
+<th class="px-6 py-3">执行时间</th>
+<th class="px-6 py-3">耗时</th>
+<th class="px-6 py-3">结果</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50">
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4 font-medium text-slate-700">创建企业客户</td>
+<td class="px-6 py-4 text-slate-600">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] text-blue-600 font-bold">李</div>
+<span>李明 (系统后台)</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 code-font text-xs">2023-11-24 14:20:33</td>
+<td class="px-6 py-4 text-slate-500">1.2s</td>
+<td class="px-6 py-4">
+<span class="bg-green-50 text-[#27AE60] text-xs px-2 py-1 rounded-md font-bold">成功</span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4 font-medium text-slate-700">修改客户等级</td>
+<td class="px-6 py-4 text-slate-600">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-[10px] text-purple-600 font-bold">王</div>
+<span>王晓敏 (业务部)</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 code-font text-xs">2023-11-24 13:55:12</td>
+<td class="px-6 py-4 text-slate-500">0.8s</td>
+<td class="px-6 py-4">
+<span class="bg-green-50 text-[#27AE60] text-xs px-2 py-1 rounded-md font-bold">成功</span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4 font-medium text-slate-700">删除草稿合同</td>
+<td class="px-6 py-4 text-slate-600">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] text-slate-600 font-bold">S</div>
+<span>System Auto</span>
+</div>
+</td>
+<td class="px-6 py-4 text-slate-500 code-font text-xs">2023-11-24 12:45:00</td>
+<td class="px-6 py-4 text-slate-500">2.4s</td>
+<td class="px-6 py-4">
+<span class="bg-red-50 text-[#E74C3C] text-xs px-2 py-1 rounded-md font-bold">失败</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+</body></html>

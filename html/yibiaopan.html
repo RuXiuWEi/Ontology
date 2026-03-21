@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>企业本体管理系统 - 总览仪表盘</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#284678",
+              "surface-tint": "#415e91",
+              "tertiary-fixed": "#dae2ff",
+              "background": "#f7f9fc",
+              "on-tertiary-fixed-variant": "#00409f",
+              "surface-dim": "#d8dadd",
+              "on-secondary-container": "#4c587f",
+              "on-tertiary-container": "#7ca2ff",
+              "on-surface-variant": "#43474f",
+              "primary-container": "#1a3a6b",
+              "surface-container-low": "#f2f4f7",
+              "surface-variant": "#e0e3e6",
+              "inverse-primary": "#abc7ff",
+              "primary-fixed": "#d7e2ff",
+              "secondary-fixed": "#dbe1ff",
+              "on-secondary-fixed-variant": "#39456b",
+              "error": "#ba1a1a",
+              "surface-bright": "#f7f9fc",
+              "on-surface": "#191c1e",
+              "secondary-fixed-dim": "#b9c5f2",
+              "tertiary-fixed-dim": "#b1c5ff",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed": "#001b3f",
+              "error-container": "#ffdad6",
+              "tertiary-container": "#003586",
+              "on-error": "#ffffff",
+              "secondary-container": "#c4d0fd",
+              "inverse-on-surface": "#eff1f4",
+              "surface-container-high": "#e6e8eb",
+              "primary-fixed-dim": "#abc7ff",
+              "tertiary": "#00215a",
+              "on-primary-container": "#89a5dd",
+              "inverse-surface": "#2d3133",
+              "on-tertiary": "#ffffff",
+              "surface-container-highest": "#e0e3e6",
+              "surface": "#f7f9fc",
+              "on-secondary": "#ffffff",
+              "on-primary": "#ffffff",
+              "outline-variant": "#c4c6d0",
+              "secondary": "#515d84",
+              "primary": "#002451",
+              "on-tertiary-fixed": "#001847",
+              "outline": "#747780",
+              "surface-container": "#eceef1",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed": "#0b1a3d",
+              "on-background": "#191c1e"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "HarmonyOS Sans", "sans-serif"],
+              "body": ["Inter", "HarmonyOS Sans", "sans-serif"],
+              "label": ["Inter", "HarmonyOS Sans", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      body { font-family: 'Inter', 'HarmonyOS Sans', sans-serif; }
+      .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+      .active-nav { border-left: 3px solid #2D6BE4; background-color: rgba(45, 107, 228, 0.1); color: #FFFFFF !important; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] bg-[#0D1B3E] z-50 flex flex-col py-6 shadow-xl overflow-y-auto no-scrollbar">
+<!-- Logo Section -->
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-8 h-8 bg-tertiary-fixed flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<div>
+<h1 class="text-white font-bold text-sm leading-tight tracking-tight">企业本体管理系统</h1>
+<p class="text-white/40 text-[10px] uppercase tracking-wider">ENT ONTOLOGY MGMT</p>
+</div>
+</div>
+<!-- Navigation Groups -->
+<nav class="flex-1 space-y-6">
+<div>
+<a class="active-nav flex items-center gap-3 px-6 py-3 text-white/65 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_20}}">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-sm font-medium">总览概览</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">建模中心</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_38}}">
+<span class="material-symbols-outlined text-[20px]">category</span>
+<span class="text-sm">对象类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_21}}">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">关联类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_26}}">
+<span class="material-symbols-outlined text-[20px]">api</span>
+<span class="text-sm">接口协议</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">数据运营</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_6}}">
+<span class="material-symbols-outlined text-[20px]">database</span>
+<span class="text-sm">对象实例</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_24}}">
+<span class="material-symbols-outlined text-[20px]">folder_shared</span>
+<span class="text-sm">对象集合</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">动作中心</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_17}}">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+<span class="text-sm">动作管理</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">分析与治理</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_13}}">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="text-sm">图谱探索</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_18}}">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm">版本管理</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_16}}">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">数据血缘</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">系统设置</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_22}}">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+<span class="text-sm">权限管理</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Top Bar -->
+<header class="fixed top-0 right-0 left-[240px] h-[56px] bg-surface-container-lowest z-40 flex justify-between items-center px-6 border-b border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="text-primary-container font-bold text-lg cursor-pointer" onclick="window.location.href='{{DATA:SCREEN:SCREEN_20}}'">企业本体管理系统</span>
+<span class="text-outline-variant">/</span>
+<span class="text-primary-container font-medium text-sm">总览仪表盘</span>
+</div>
+<div class="flex items-center gap-5">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors relative">
+<span class="material-symbols-outlined text-outline">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+</button>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-outline">settings</span>
+</button>
+<div class="flex items-center gap-3 border-l border-outline-variant/30 pl-5 ml-2">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-sm font-bold">张</div>
+<div class="hidden lg:block">
+<p class="text-xs font-bold text-on-surface leading-none">张建国</p>
+<p class="text-[10px] text-outline mt-1 uppercase">超级管理员</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="fixed top-[56px] right-0 left-[240px] bottom-0 bg-[#F0F2F5] overflow-y-auto p-6 custom-scrollbar">
+<!-- Dashboard Header -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-2xl font-semibold text-primary-container">总览仪表盘</h2>
+<p class="text-sm text-outline mt-1">欢迎回来，以下是当前系统的运行数据汇总。</p>
+</div>
+<div class="text-right">
+<span class="text-sm text-outline font-medium">2026年3月20日 星期五</span>
+</div>
+</div>
+<!-- KPI Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-transparent hover:border-primary-container/10 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">category</span>
+</div>
+</div>
+<p class="text-xs font-medium text-outline">对象类型总数</p>
+<div class="flex items-baseline gap-2 mt-1">
+<h3 class="text-3xl font-bold text-on-surface">47</h3>
+<span class="text-xs text-[#27AE60] font-bold flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_upward</span> 3
+                    </span>
+</div>
+<p class="text-[10px] text-outline mt-2">较上月增长</p>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-transparent hover:border-primary-container/10 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">database</span>
+</div>
+</div>
+<p class="text-xs font-medium text-outline">对象实例总量</p>
+<div class="flex items-baseline gap-2 mt-1">
+<h3 class="text-3xl font-bold text-on-surface">1,284,920</h3>
+</div>
+<p class="text-[10px] text-blue-500 mt-2 font-medium flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                    持续同步中
+                </p>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-transparent hover:border-primary-container/10 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-orange-50 text-orange-600 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+</div>
+<p class="text-xs font-medium text-outline">已发布动作</p>
+<div class="flex items-baseline gap-2 mt-1">
+<h3 class="text-3xl font-bold text-on-surface">23</h3>
+<span class="text-xs text-[#27AE60] font-bold flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_upward</span> 2
+                    </span>
+</div>
+<p class="text-[10px] text-outline mt-2">本周新增</p>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-transparent hover:border-primary-container/10 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+</div>
+<p class="text-xs font-medium text-outline">数据质量评分</p>
+<div class="flex items-baseline gap-2 mt-1">
+<h3 class="text-3xl font-bold text-on-surface">94.2%</h3>
+<span class="text-xs text-[#27AE60] font-bold flex items-center">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+</span>
+</div>
+<p class="text-[10px] text-outline mt-2">整体合规率</p>
+</div>
+</div>
+<!-- Charts Row -->
+<div class="grid grid-cols-10 gap-6 mb-6">
+<!-- Donut Chart Card -->
+<div class="col-span-10 lg:col-span-4 bg-surface-container-lowest rounded-xl p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-bold text-primary-container">本体对象分布</h3>
+<button class="text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined">more_horiz</span></button>
+</div>
+<div class="flex items-center gap-8 h-64">
+<div class="relative w-40 h-40">
+<!-- Simulated Donut Chart using SVG -->
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#E6E8EB" stroke-width="3.5"></circle>
+<circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#1A3A6B" stroke-dasharray="35, 100" stroke-width="3.5"></circle>
+<circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#2D6BE4" stroke-dasharray="25, 100" stroke-dashoffset="-35" stroke-width="3.5"></circle>
+<circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#7CA2FF" stroke-dasharray="15, 100" stroke-dashoffset="-60" stroke-width="3.5"></circle>
+<circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#FFAB00" stroke-dasharray="10, 100" stroke-dashoffset="-75" stroke-width="3.5"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-2xl font-bold text-on-surface">47</span>
+<span class="text-[10px] text-outline">总类别</span>
+</div>
+</div>
+<div class="flex-1 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-sm bg-[#1A3A6B]"></span>
+<span class="text-xs text-on-surface">企业客户</span>
+</div>
+<span class="text-xs font-bold text-outline">45.2w</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-sm bg-[#2D6BE4]"></span>
+<span class="text-xs text-on-surface">合同资产</span>
+</div>
+<span class="text-xs font-bold text-outline">32.1w</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-sm bg-[#7CA2FF]"></span>
+<span class="text-xs text-on-surface">产品目录</span>
+</div>
+<span class="text-xs font-bold text-outline">28.5w</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-sm bg-[#FFAB00]"></span>
+<span class="text-xs text-on-surface">员工信息</span>
+</div>
+<span class="text-xs font-bold text-outline">12.4w</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-sm bg-[#E0E3E6]"></span>
+<span class="text-xs text-on-surface">其他</span>
+</div>
+<span class="text-xs font-bold text-outline">10.2w</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Radar Chart Card -->
+<div class="col-span-10 lg:col-span-3 bg-surface-container-lowest rounded-xl p-6">
+<h3 class="font-bold text-primary-container mb-6">数据质量雷达图</h3>
+<div class="flex items-center justify-center h-64 relative">
+<!-- Placeholder for Radar Chart -->
+<div class="w-48 h-48 border border-outline-variant rounded-full flex items-center justify-center opacity-20">
+<div class="w-32 h-32 border border-outline-variant rounded-full"></div>
+<div class="w-16 h-16 border border-outline-variant rounded-full"></div>
+</div>
+<svg class="absolute w-48 h-48 overflow-visible" viewbox="0 0 100 100">
+<polygon fill="none" points="50,5 95,40 80,95 20,95 5,40" stroke="#DEE2E6" stroke-width="0.5"></polygon>
+<polygon fill="rgba(45, 107, 228, 0.2)" points="50,15 88,42 75,85 28,82 12,45" stroke="#2D6BE4" stroke-width="2"></polygon>
+<text class="text-[8px] fill-outline font-medium" text-anchor="middle" x="50" y="-5">完整性 97%</text>
+<text class="text-[8px] fill-outline font-medium" text-anchor="start" x="105" y="40">唯一性 99%</text>
+<text class="text-[8px] fill-outline font-medium" text-anchor="middle" x="85" y="105">一致性 95%</text>
+<text class="text-[8px] fill-outline font-medium" text-anchor="middle" x="15" y="105">时效性 92%</text>
+<text class="text-[8px] fill-outline font-medium" text-anchor="end" x="-5" y="40">合规性 88%</text>
+</svg>
+</div>
+</div>
+<!-- Activity List Card -->
+<div class="col-span-10 lg:col-span-3 bg-surface-container-lowest rounded-xl p-6 flex flex-col">
+<h3 class="font-bold text-primary-container mb-6">最近操作记录</h3>
+<div class="flex-1 space-y-6">
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+<span class="text-xs font-bold text-blue-600">李</span>
+</div>
+<div>
+<p class="text-xs text-on-surface">李华 修改了 <span class="font-bold">企业客户</span> 类型定义</p>
+<span class="text-[10px] text-outline">10 分钟前</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+<span class="text-xs font-bold text-orange-600">王</span>
+</div>
+<div>
+<p class="text-xs text-on-surface">王小明 导入了 <span class="font-bold">2,400条</span> 合同实例</p>
+<span class="text-[10px] text-outline">45 分钟前</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+<span class="text-xs font-bold text-emerald-600">赵</span>
+</div>
+<div>
+<p class="text-xs text-on-surface">赵志 删除了 <span class="font-bold">临时测试</span> 集合</p>
+<span class="text-[10px] text-outline">1 小时前</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+<span class="text-xs font-bold text-purple-600">陈</span>
+</div>
+<div>
+<p class="text-xs text-on-surface">陈美美 创建了 <span class="font-bold">员工-部门</span> 关联</p>
+<span class="text-[10px] text-outline">3 小时前</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent" onclick="window.location.href='{{DATA:SCREEN:SCREEN_6}}'">查看全部</button>
+</div>
+</div>
+<!-- Lower Row -->
+<div class="grid grid-cols-1 lg:grid-cols-10 gap-6">
+<!-- Pending Reviews -->
+<div class="lg:col-span-6 bg-surface-container-lowest rounded-xl p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-bold text-primary-container">待审核变更</h3>
+<span class="bg-error-container text-on-error-container text-[10px] px-2 py-0.5 rounded font-bold">4个待处理</span>
+</div>
+<div class="space-y-4">
+<div class="group flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer" onclick="window.location.href='{{DATA:SCREEN:SCREEN_18}}'">
+<div class="flex items-center gap-4">
+<span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded font-bold shrink-0">待审核</span>
+<div>
+<h4 class="text-sm font-semibold text-on-surface">供应链本体结构优化提案</h4>
+<p class="text-xs text-outline mt-1">提交人：林思远 · 2026-03-19 14:20</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">chevron_right</span>
+</div>
+<div class="group flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer" onclick="window.location.href='{{DATA:SCREEN:SCREEN_18}}'">
+<div class="flex items-center gap-4">
+<span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded font-bold shrink-0">待审核</span>
+<div>
+<h4 class="text-sm font-semibold text-on-surface">新增“海外事业部”组织对象</h4>
+<p class="text-xs text-outline mt-1">提交人：王建宏 · 2026-03-19 16:45</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">chevron_right</span>
+</div>
+<div class="group flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer" onclick="window.location.href='{{DATA:SCREEN:SCREEN_18}}'">
+<div class="flex items-center gap-4">
+<span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded font-bold shrink-0">待审核</span>
+<div>
+<h4 class="text-sm font-semibold text-on-surface">财务结算关联逻辑修正</h4>
+<p class="text-xs text-outline mt-1">提交人：刘芳芳 · 2026-03-20 09:12</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">chevron_right</span>
+</div>
+</div>
+<div class="mt-6 flex justify-end">
+<button class="px-4 py-2 bg-primary-container text-white text-xs font-bold rounded-lg hover:bg-primary transition-all" onclick="window.location.href='{{DATA:SCREEN:SCREEN_18}}'">前往审核中心</button>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl p-6">
+<h3 class="font-bold text-primary-container mb-6">快捷操作</h3>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex flex-col items-center justify-center p-4 border border-outline-variant/30 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all group" onclick="window.location.href='{{DATA:SCREEN:SCREEN_38}}'">
+<span class="material-symbols-outlined text-blue-600 mb-2 group-hover:scale-110 transition-transform">add_circle</span>
+<span class="text-xs font-medium text-on-surface">新建对象类型</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline-variant/30 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all group" onclick="window.location.href='{{DATA:SCREEN:SCREEN_21}}'">
+<span class="material-symbols-outlined text-purple-600 mb-2 group-hover:scale-110 transition-transform">share_reviews</span>
+<span class="text-xs font-medium text-on-surface">新建关联类型</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline-variant/30 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all group" onclick="window.location.href='{{DATA:SCREEN:SCREEN_6}}'">
+<span class="material-symbols-outlined text-emerald-600 mb-2 group-hover:scale-110 transition-transform">upload_file</span>
+<span class="text-xs font-medium text-on-surface">导入数据</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline-variant/30 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all group" onclick="window.location.href='{{DATA:SCREEN:SCREEN_24}}'">
+<span class="material-symbols-outlined text-orange-600 mb-2 group-hover:scale-110 transition-transform">create_new_folder</span>
+<span class="text-xs font-medium text-on-surface">创建集合</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline-variant/30 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all group" onclick="window.location.href='{{DATA:SCREEN:SCREEN_17}}'">
+<span class="material-symbols-outlined text-indigo-600 mb-2 group-hover:scale-110 transition-transform">tune</span>
+<span class="text-xs font-medium text-on-surface">配置动作</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 border border-outline-variant/30 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all group" onclick="window.location.href='{{DATA:SCREEN:SCREEN_13}}'">
+<span class="material-symbols-outlined text-pink-600 mb-2 group-hover:scale-110 transition-transform">account_tree</span>
+<span class="text-xs font-medium text-on-surface">查看图谱</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Spacer -->
+<div class="h-10"></div>
+</main>
+</body></html>

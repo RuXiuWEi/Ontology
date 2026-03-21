@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#002451",
+                        "primary-container": "#1a3a6b",
+                        "tertiary-fixed": "#2d6be4",
+                        "surface": "#f7f9fc",
+                        "on-surface": "#191c1e",
+                        "on-surface-variant": "#43474f",
+                        "outline-variant": "#dee2e6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f4f7",
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "HarmonyOS Sans"],
+                        "body": ["Inter", "HarmonyOS Sans"],
+                        "code": ["JetBrains Mono"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', 'HarmonyOS Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-nav { border-left: 3px solid #2D6BE4; background-color: rgba(45, 107, 228, 0.1); color: #FFFFFF !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-[#F0F2F5] text-on-surface antialiased min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] bg-[#0D1B3E] z-50 flex flex-col py-6 shadow-xl overflow-y-auto no-scrollbar">
+<!-- Logo Section -->
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-8 h-8 bg-tertiary-fixed flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<div>
+<h1 class="text-white font-bold text-sm leading-tight tracking-tight">企业本体管理系统</h1>
+<p class="text-white/40 text-[10px] uppercase tracking-wider">ENT ONTOLOGY MGMT</p>
+</div>
+</div>
+<!-- Navigation Groups -->
+<nav class="flex-1 space-y-6">
+<div>
+<a class="flex items-center gap-3 px-6 py-3 text-white/65 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">总览概览</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">建模中心</h3>
+<a class="active-nav flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_14}}">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">category</span>
+<span class="text-sm">对象类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">关联类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">api</span>
+<span class="text-sm">接口协议</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">数据运营</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">database</span>
+<span class="text-sm">对象实例</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">folder_shared</span>
+<span class="text-sm">对象集合</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">动作中心</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+<span class="text-sm">动作管理</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">分析与治理</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="text-sm">图谱探索</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm">版本管理</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">数据血缘</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">系统设置</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+<span class="text-sm">系统设置</span>
+</a>
+</div>
+</nav>
+<div class="px-6 mt-auto pt-6 border-t border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-sm font-bold">张</div>
+<div class="hidden lg:block">
+<p class="text-xs font-bold text-white leading-none">张建国</p>
+<p class="text-[10px] text-white/40 mt-1 uppercase">超级管理员</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 right-0 left-[240px] h-[56px] z-40 bg-white border-b border-[#DEE2E6] flex justify-between items-center px-6">
+<div class="flex items-center gap-3 text-sm text-slate-500">
+<a class="hover:text-primary-container" href="#">建模中心</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<a class="hover:text-primary-container" href="{{DATA:SCREEN:SCREEN_14}}">对象类型</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-primary-container font-semibold">新建对象类型</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-slate-50 rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+</button>
+<button class="hover:bg-slate-50 rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined text-slate-600">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+<div class="flex items-center gap-2 cursor-pointer active:opacity-70">
+<img alt="用户头像" class="w-8 h-8 rounded-full border border-slate-200" data-alt="User avatar placeholder" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDo9Z3Fqj6nKmoTGEiLJECfv6n1_a--xfzTSEsuZoMj9QBY9EHUQKPQjPdAeUvsgsgagf5bsu_js9vAzBYeuEU57TcQlW4lqJZZc1IE93Jd5msFvKKTQan8lCX-aL-bsvei0TizCPxmIbE2z-9jGhWlmhOuRC0W_Q0XI4XD6xJmvRzg9m0oGnQZAQmd6XjVGvSVHYA-BOCE6gP8pzXc6IhbwahaPq_mlvKqshn1zu152fb3ChX06LGCyR6bMLQQ513-69WomUna-A8"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pl-[240px] pt-[56px] min-h-screen">
+<div class="p-6 space-y-6 max-w-5xl mx-auto">
+<!-- Step Progress Card -->
+<section class="bg-white rounded-xl shadow-sm px-8 py-5">
+<div class="flex items-center justify-between relative">
+<!-- Step 1: Active -->
+<div class="flex flex-col items-center gap-2 z-10 relative">
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed text-white flex items-center justify-center font-bold text-sm">1</div>
+<span class="text-sm font-semibold text-tertiary-fixed">基本信息</span>
+</div>
+<!-- Line 1: Active -->
+<div class="flex-1 h-[2px] bg-tertiary-fixed mb-6 mx-2"></div>
+<!-- Step 2: Inactive -->
+<div class="flex flex-col items-center gap-2 z-10 relative">
+<div class="w-8 h-8 rounded-full border-2 border-[#DEE2E6] bg-white text-[#DEE2E6] flex items-center justify-center font-bold text-sm">2</div>
+<span class="text-sm text-slate-400">属性定义</span>
+</div>
+<!-- Line 2: Inactive (Dashed) -->
+<div class="flex-1 h-0 border-t-2 border-dashed border-[#DEE2E6] mb-6 mx-2"></div>
+<!-- Step 3: Inactive -->
+<div class="flex flex-col items-center gap-2 z-10 relative">
+<div class="w-8 h-8 rounded-full border-2 border-[#DEE2E6] bg-white text-[#DEE2E6] flex items-center justify-center font-bold text-sm">3</div>
+<span class="text-sm text-slate-400">来源映射</span>
+</div>
+<!-- Line 3: Inactive (Dashed) -->
+<div class="flex-1 h-0 border-t-2 border-dashed border-[#DEE2E6] mb-6 mx-2"></div>
+<!-- Step 4: Inactive -->
+<div class="flex flex-col items-center gap-2 z-10 relative">
+<div class="w-8 h-8 rounded-full border-2 border-[#DEE2E6] bg-white text-[#DEE2E6] flex items-center justify-center font-bold text-sm">4</div>
+<span class="text-sm text-slate-400">确认发布</span>
+</div>
+</div>
+</section>
+<!-- Form Main Card -->
+<section class="bg-white rounded-xl shadow-sm overflow-hidden max-w-[760px] mx-auto">
+<div class="p-6 border-b border-[#F0F2F5]">
+<h1 class="text-[18px] font-bold text-[#1A1F36]">填写基本信息</h1>
+<p class="text-sm text-slate-500 mt-1">定义对象类型的名称、标识符和基础配置</p>
+</div>
+<div class="p-8">
+<form class="space-y-6">
+<!-- Name Field -->
+<div class="flex gap-4 items-start">
+<label class="w-[120px] text-sm font-semibold text-[#1A1F36] pt-2">对象类型名称 <span class="text-red-500">*</span></label>
+<div class="flex-1">
+<input class="w-full h-9 px-3 rounded-lg border border-[#DEE2E6] focus:border-tertiary-fixed focus:ring-2 focus:ring-tertiary-fixed/20 outline-none transition-all text-sm" placeholder="请输入中文名称，如：企业客户" type="text"/>
+</div>
+</div>
+<!-- Identifier Field -->
+<div class="flex gap-4 items-start">
+<label class="w-[120px] text-sm font-semibold text-[#1A1F36] pt-2">英文标识符 <span class="text-red-500">*</span></label>
+<div class="flex-1 space-y-2">
+<div class="relative">
+<input class="w-full h-9 px-3 font-code rounded-lg border border-[#DEE2E6] focus:border-tertiary-fixed focus:ring-2 focus:ring-tertiary-fixed/20 outline-none transition-all text-sm pr-32 bg-slate-50" placeholder="enterprise_customer" type="text"/>
+<span class="absolute right-3 top-2 text-[12px] text-slate-400">自动生成，可修改</span>
+</div>
+<p class="text-[12px] text-slate-500">只允许小写字母、数字和下划线</p>
+</div>
+</div>
+<!-- Namespace -->
+<div class="flex gap-4 items-start">
+<label class="w-[120px] text-sm font-semibold text-[#1A1F36] pt-2">命名空间</label>
+<div class="flex-1">
+<div class="relative group">
+<select class="w-full h-9 pl-3 pr-10 appearance-none rounded-lg border border-[#DEE2E6] focus:border-tertiary-fixed focus:ring-2 focus:ring-tertiary-fixed/20 outline-none transition-all text-sm bg-white">
+<option>business_core（默认）</option>
+<option>finance_shared</option>
+<option>hr_management</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1.5 text-slate-400 pointer-events-none group-hover:text-slate-600">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Description -->
+<div class="flex gap-4 items-start">
+<label class="w-[120px] text-sm font-semibold text-[#1A1F36] pt-2">描述说明</label>
+<div class="flex-1">
+<textarea class="w-full px-3 py-2 rounded-lg border border-[#DEE2E6] focus:border-tertiary-fixed focus:ring-2 focus:ring-tertiary-fixed/20 outline-none transition-all text-sm resize-none" placeholder="请描述该对象类型代表的业务实体和使用场景" rows="4"></textarea>
+</div>
+</div>
+<!-- Icon Color -->
+<div class="flex gap-4 items-start">
+<label class="w-[120px] text-sm font-semibold text-[#1A1F36] pt-2">图标颜色</label>
+<div class="flex-1">
+<div class="flex flex-wrap gap-3 py-2">
+<button class="w-6 h-6 rounded-full bg-red-500 hover:scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-orange-500 hover:scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-yellow-400 hover:scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-green-500 hover:scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-teal-500 hover:scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-cyan-500 hover:scale-110 transition-transform" type="button"></button>
+<!-- Selected State -->
+<button class="w-6 h-6 rounded-full bg-tertiary-fixed ring-2 ring-offset-2 ring-tertiary-fixed scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-indigo-500 hover:scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-purple-500 hover:scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-pink-500 hover:scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-rose-500 hover:scale-110 transition-transform" type="button"></button>
+<button class="w-6 h-6 rounded-full bg-slate-500 hover:scale-110 transition-transform" type="button"></button>
+</div>
+</div>
+</div>
+<!-- Data Level -->
+<div class="flex gap-4 items-start">
+<label class="w-[120px] text-sm font-semibold text-[#1A1F36] pt-1">数据密级</label>
+<div class="flex-1 flex gap-6">
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="w-4 h-4 text-tertiary-fixed focus:ring-tertiary-fixed border-slate-300" name="data_level" type="radio"/>
+<span class="text-sm text-slate-600 group-hover:text-primary">公开</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input checked="" class="w-4 h-4 text-tertiary-fixed focus:ring-tertiary-fixed border-slate-300" name="data_level" type="radio"/>
+<span class="text-sm text-primary font-medium">内部</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="w-4 h-4 text-tertiary-fixed focus:ring-tertiary-fixed border-slate-300" name="data_level" type="radio"/>
+<span class="text-sm text-slate-600 group-hover:text-primary">机密</span>
+</label>
+</div>
+</div>
+</form>
+</div>
+<!-- Footer Actions -->
+<div class="mt-4 border-t border-[#F0F2F5] p-6 flex items-center justify-between">
+<a class="text-slate-500 hover:text-red-500 transition-colors text-sm font-medium" href="{{DATA:SCREEN:SCREEN_14}}">取消</a>
+<div class="flex gap-3">
+<button class="px-5 h-9 rounded-lg border border-tertiary-fixed text-tertiary-fixed text-sm font-medium hover:bg-tertiary-fixed hover:text-white transition-all">保存草稿</button>
+<button class="px-6 h-9 rounded-lg bg-primary-container text-white text-sm font-semibold hover:bg-primary transition-all flex items-center gap-2 shadow-lg shadow-primary-container/20" onclick="window.location.href='{{DATA:SCREEN:SCREEN_14}}'">
+                        下一步：属性定义
+                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Visual Polish: Ghost background element for depth -->
+<div class="fixed top-0 right-0 w-[40%] h-full bg-gradient-to-l from-white/30 to-transparent pointer-events-none -z-10"></div>
+</body></html>

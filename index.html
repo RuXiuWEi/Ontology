@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>华曦 · 企业本体管理平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400..700,0..1,0&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            headline: ['Manrope', 'Inter', 'system-ui', 'sans-serif'],
+            body: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: Inter, 'HarmonyOS Sans', system-ui, sans-serif; }
+    .font-headline { font-family: Manrope, Inter, system-ui, sans-serif; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .active-nav {
+      border-left: 3px solid #3b82f6;
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.14) 0%, transparent 100%);
+      color: #fff !important;
+    }
+    .app-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    .app-scroll::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.45);
+      border-radius: 8px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    .app-scroll::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.55); background-clip: padding-box; }
+    #app-view-root { min-height: 240px; }
+    @keyframes ont-fade-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .ont-fade { animation: ont-fade-in 0.35s ease-out both; }
+    .nav-shell {
+      background: linear-gradient(180deg, #0a1628 0%, #0d1b3e 40%, #0c1833 100%);
+      box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
+    }
+  </style>
+</head>
+<body class="bg-[#eef1f6] text-slate-900 antialiased overflow-hidden">
+  <aside class="nav-shell fixed left-0 top-0 bottom-0 w-[244px] z-50 flex flex-col py-6 overflow-y-auto app-scroll">
+    <div class="px-5 mb-9 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#dbeafe] to-[#93c5fd] flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/20">
+        <span class="material-symbols-outlined text-[#0f2847] text-[26px]" style="font-variation-settings: 'FILL' 1;">dataset</span>
+      </div>
+      <div>
+        <h1 class="text-white font-bold text-[15px] leading-tight font-headline tracking-tight">企业本体管理系统</h1>
+        <p class="text-white/35 text-[10px] uppercase tracking-[0.12em] mt-1">Ontology Console</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 flex flex-col gap-5 text-[13px]">
+      <div>
+        <a href="#/dashboard" data-route="/dashboard" class="app-nav-link flex items-center gap-3 px-5 py-3 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">dashboard</span>
+          <span class="font-medium">总览</span>
+        </a>
+      </div>
+      <div class="space-y-0.5">
+        <h3 class="px-5 text-[10px] font-bold text-white/25 uppercase tracking-[0.15em] mb-2">建模</h3>
+        <a href="#/object-types" data-route="/object-types" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">category</span>
+          <span>对象类型</span>
+        </a>
+        <a href="#/link-types" data-route="/link-types" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">account_tree</span>
+          <span>关联类型</span>
+        </a>
+        <a href="#/integration" data-route="/integration" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">api</span>
+          <span>集成</span>
+        </a>
+      </div>
+      <div class="space-y-0.5">
+        <h3 class="px-5 text-[10px] font-bold text-white/25 uppercase tracking-[0.15em] mb-2">数据</h3>
+        <a href="#/instances" data-route="/instances" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">database</span>
+          <span>对象实例</span>
+        </a>
+        <a href="#/sets" data-route="/sets" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">folder_shared</span>
+          <span>对象集合</span>
+        </a>
+      </div>
+      <div class="space-y-0.5">
+        <h3 class="px-5 text-[10px] font-bold text-white/25 uppercase tracking-[0.15em] mb-2">动作</h3>
+        <a href="#/actions" data-route="/actions" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">settings_input_component</span>
+          <span>动作</span>
+        </a>
+      </div>
+      <div class="space-y-0.5">
+        <h3 class="px-5 text-[10px] font-bold text-white/25 uppercase tracking-[0.15em] mb-2">治理</h3>
+        <a href="#/graph" data-route="/graph" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">hub</span>
+          <span>图谱</span>
+        </a>
+        <a href="#/versions" data-route="/versions" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">history</span>
+          <span>版本</span>
+        </a>
+        <a href="#/lineage" data-route="/lineage" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">timeline</span>
+          <span>数据血缘</span>
+        </a>
+      </div>
+      <div class="space-y-0.5">
+        <h3 class="px-5 text-[10px] font-bold text-white/25 uppercase tracking-[0.15em] mb-2">系统</h3>
+        <a href="#/rbac" data-route="/rbac" class="app-nav-link flex items-center gap-3 px-5 py-2.5 text-white/60 hover:bg-white/[0.06] hover:text-white rounded-r-lg transition-colors duration-200">
+          <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+          <span>权限</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="px-5 pt-6 mt-auto border-t border-white/[0.06]">
+      <p class="text-[11px] text-white/30 leading-relaxed">环境 · <span class="text-white/50">生产</span></p>
+      <p class="text-[10px] text-white/25 mt-1 font-mono truncate" id="ont-env-tenant"></p>
+    </div>
+  </aside>
+
+  <header class="fixed top-0 left-[244px] right-0 h-[56px] bg-white/90 backdrop-blur-md z-40 flex items-center justify-between px-6 border-b border-slate-200/90 shadow-sm shadow-slate-900/[0.03]">
+    <div class="flex items-center gap-2 text-sm min-w-0">
+      <span class="font-bold text-[#0f2847] font-headline truncate">华曦 · 企业本体管理平台</span>
+      <span class="text-slate-300 shrink-0">/</span>
+      <span id="app-breadcrumb" class="text-slate-600 font-semibold truncate">总览</span>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+      <button type="button" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500 relative transition-colors" aria-label="通知">
+        <span class="material-symbols-outlined text-[24px]">notifications</span>
+        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+      </button>
+      <div class="flex items-center gap-2.5 pl-3 sm:pl-4 border-l border-slate-200">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1a3a6b] to-[#0f2847] text-white text-sm font-bold flex items-center justify-center shadow-md">张</div>
+        <div class="hidden sm:block min-w-0">
+          <p class="text-xs font-bold text-slate-800 leading-tight truncate">张建国</p>
+          <p class="text-[10px] text-slate-500 font-medium">平台管理员</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="fixed top-14 left-[244px] right-0 bottom-0 overflow-y-auto p-6 md:p-8 app-scroll">
+    <div id="app-view-root"></div>
+  </main>
+
+  <script src="demo/mock-data.js"></script>
+  <script src="demo/demo-app.js"></script>
+  <script>
+    (function () {
+      var bc = document.getElementById('app-breadcrumb');
+      var tenantEl = document.getElementById('ont-env-tenant');
+      window.addEventListener('approute', function (e) {
+        var d = e.detail || {};
+        if (bc && d.title) bc.textContent = d.title;
+      });
+      window.addEventListener('DOMContentLoaded', function () {
+        if (tenantEl && window.ONT_DATA && window.ONT_DATA.meta) {
+          tenantEl.textContent = window.ONT_DATA.meta.tenant;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

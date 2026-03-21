@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>对象类型详情 - 企业客户</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#284678",
+                        "surface-tint": "#415e91",
+                        "tertiary-fixed": "#dae2ff",
+                        "background": "#f7f9fc",
+                        "on-tertiary-fixed-variant": "#00409f",
+                        "surface-dim": "#d8dadd",
+                        "on-secondary-container": "#4c587f",
+                        "on-tertiary-container": "#7ca2ff",
+                        "on-surface-variant": "#43474f",
+                        "primary-container": "#1a3a6b",
+                        "surface-container-low": "#f2f4f7",
+                        "surface-variant": "#e0e3e6",
+                        "inverse-primary": "#abc7ff",
+                        "primary-fixed": "#d7e2ff",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-secondary-fixed-variant": "#39456b",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f7f9fc",
+                        "on-surface": "#191c1e",
+                        "secondary-fixed-dim": "#b9c5f2",
+                        "tertiary-fixed-dim": "#b1c5ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001b3f",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#003586",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#c4d0fd",
+                        "inverse-on-surface": "#eff1f4",
+                        "surface-container-high": "#e6e8eb",
+                        "primary-fixed-dim": "#abc7ff",
+                        "tertiary": "#00215a",
+                        "on-primary-container": "#89a5dd",
+                        "inverse-surface": "#2d3133",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface": "#f7f9fc",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c4c6d0",
+                        "secondary": "#515d84",
+                        "primary": "#002451",
+                        "on-tertiary-fixed": "#001847",
+                        "outline": "#747780",
+                        "surface-container": "#eceef1",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#0b1a3d",
+                        "on-background": "#191c1e"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "HarmonyOS Sans"],
+                        "body": ["Inter", "HarmonyOS Sans"],
+                        "label": ["Inter", "HarmonyOS Sans"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', 'HarmonyOS Sans', sans-serif; background-color: #f7f9fc; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .active-nav { border-left: 3px solid #2D6BE4; background-color: rgba(45, 107, 228, 0.1); color: #FFFFFF !important; }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] bg-[#0D1B3E] z-50 flex flex-col py-6 shadow-xl overflow-y-auto no-scrollbar">
+<!-- Logo Section -->
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-8 h-8 bg-tertiary-fixed flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<div>
+<h1 class="text-white font-bold text-sm leading-tight tracking-tight">企业本体管理系统</h1>
+<p class="text-white/40 text-[10px] uppercase tracking-wider">ENT ONTOLOGY MGMT</p>
+</div>
+</div>
+<!-- Navigation Groups -->
+<nav class="flex-1 space-y-6">
+<div>
+<a class="flex items-center gap-3 px-6 py-3 text-white/65 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">总览概览</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">建模中心</h3>
+<a class="active-nav flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="{{DATA:SCREEN:SCREEN_14}}">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">category</span>
+<span class="text-sm font-medium">对象类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">关联类型</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">api</span>
+<span class="text-sm">接口协议</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">数据运营</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">database</span>
+<span class="text-sm">对象实例</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">folder_shared</span>
+<span class="text-sm">对象集合</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">动作中心</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+<span class="text-sm">动作管理</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">分析与治理</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="text-sm">图谱探索</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm">版本管理</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="text-sm">数据血缘</span>
+</a>
+</div>
+<div class="space-y-1">
+<h3 class="px-6 text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">系统设置</h3>
+<a class="flex items-center gap-3 px-6 py-2 text-white/65 hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+<span class="text-sm">系统设置</span>
+</a>
+</div>
+</nav>
+<div class="mt-auto px-6 pt-6 border-t border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-sm font-bold">张</div>
+<div class="flex flex-col">
+<p class="text-xs font-bold text-white leading-none">张建国</p>
+<p class="text-[10px] text-white/40 mt-1 uppercase">超级管理员</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 right-0 left-[240px] h-[56px] z-40 bg-white border-b border-[#DEE2E6] flex justify-between items-center px-6 w-full">
+<div class="flex items-center gap-2 text-sm font-medium text-slate-500">
+<span>建模中心</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<a class="hover:text-[#1A3A6B] transition-colors" href="{{DATA:SCREEN:SCREEN_14}}">对象类型</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-[#1A3A6B] font-bold">企业客户</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-6 px-4">
+<a class="text-slate-500 hover:text-[#1A3A6B] transition-colors" href="#">首页</a>
+<a class="text-[#1A3A6B] font-bold border-b-2 border-[#1A3A6B] pb-[18px]" href="#">工作台</a>
+</div>
+<div class="flex items-center gap-2">
+<button class="hover:bg-slate-50 rounded-full p-2 transition-colors active:opacity-70">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+</button>
+<button class="hover:bg-slate-50 rounded-full p-2 transition-colors active:opacity-70">
+<span class="material-symbols-outlined text-slate-600">settings</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[240px] mt-[56px] p-6 min-h-screen">
+<!-- Header Card -->
+<section class="bg-white rounded-xl shadow-sm p-5 px-6 mb-4">
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-2">
+<nav class="text-xs text-slate-400 flex items-center gap-1">
+<span>建模中心</span> / <a class="hover:underline" href="{{DATA:SCREEN:SCREEN_14}}">对象类型</a> / <span>企业客户</span>
+</nav>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-[#2D6BE4] rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-[22px] font-bold text-[#1A3A6B]">企业客户</h1>
+<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[11px] font-semibold rounded border border-emerald-100">已发布</span>
+<span class="text-xs text-slate-400 ml-2">命名空间：business_core</span>
+</div>
+<div class="mt-1">
+<code class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] font-mono rounded">enterprise_customer</code>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 bg-[#1A3A6B] text-white text-sm font-medium rounded-lg hover:bg-primary transition-colors">保存更改</button>
+<button class="px-4 py-2 border border-[#DEE2E6] text-[#1A3A6B] text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors">编辑</button>
+<button class="px-4 py-2 text-[#2D6BE4] text-sm font-medium hover:underline">克隆</button>
+<button class="px-3 py-2 text-slate-500 text-sm font-medium flex items-center gap-1">更多操作 <span class="material-symbols-outlined text-xs">arrow_drop_down</span></button>
+</div>
+</div>
+</section>
+<!-- Tab Navigation -->
+<nav class="bg-white rounded-xl shadow-sm h-10 flex items-center px-6 mb-4">
+<div class="flex gap-8 h-full">
+<a class="h-full flex items-center text-sm text-slate-500 hover:text-primary transition-colors" href="#">基本信息</a>
+<a class="h-full flex items-center text-sm text-[#2D6BE4] font-semibold border-b-2 border-[#2D6BE4]" href="#">属性定义</a>
+<a class="h-full flex items-center text-sm text-slate-500 hover:text-primary transition-colors" href="#">来源映射</a>
+<a class="h-full flex items-center text-sm text-slate-500 hover:text-primary transition-colors" href="#">关联关系</a>
+<a class="h-full flex items-center text-sm text-slate-500 hover:text-primary transition-colors" href="#">版本历史</a>
+</div>
+</nav>
+<!-- Two Column Layout -->
+<div class="grid grid-cols-10 gap-4">
+<!-- Left Column (70%) -->
+<div class="col-span-7 flex flex-col gap-4">
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+<div class="p-4 flex justify-between items-center border-b border-slate-50">
+<h2 class="text-base font-bold text-[#1A3A6B]">属性定义</h2>
+<div class="flex items-center gap-3">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1.5 text-slate-400 text-sm">search</span>
+<input class="pl-8 pr-3 py-1.5 bg-slate-50 border-none text-xs rounded-lg w-[180px] focus:ring-1 focus:ring-blue-400" placeholder="搜索属性..." type="text"/>
+</div>
+<button class="flex items-center gap-1 px-3 py-1.5 border border-[#2D6BE4] text-[#2D6BE4] text-xs font-semibold rounded-lg hover:bg-blue-50 transition-colors">
+<span class="material-symbols-outlined text-xs">add</span>
+                            添加属性
+                        </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#F8FAFC] text-[13px] font-semibold text-slate-600 border-b border-slate-100">
+<th class="px-6 py-4">属性名称</th>
+<th class="px-6 py-4">标识符</th>
+<th class="px-4 py-4">数据类型</th>
+<th class="px-4 py-4">必填</th>
+<th class="px-4 py-4">默认值</th>
+<th class="px-6 py-4">描述</th>
+<th class="px-6 py-4 text-right">操作</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="h-[52px] border-b border-slate-50 hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-6 font-medium text-slate-900">客户ID</td>
+<td class="px-6 font-mono text-xs text-slate-500">customer_id</td>
+<td class="px-4"><span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[11px] rounded">字符串</span></td>
+<td class="px-4 text-emerald-500"><span class="material-symbols-outlined text-sm font-bold">check</span></td>
+<td class="px-4 text-slate-400">—</td>
+<td class="px-6 text-slate-500 text-xs">全局唯一标识</td>
+<td class="px-6 text-right space-x-3">
+<button class="text-blue-600 hover:underline">编辑</button>
+<button class="text-red-400 hover:text-red-600">删除</button>
+</td>
+</tr>
+<tr class="h-[52px] border-b border-slate-50 hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-6 font-medium text-slate-900">客户名称</td>
+<td class="px-6 font-mono text-xs text-slate-500">customer_name</td>
+<td class="px-4"><span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[11px] rounded">字符串</span></td>
+<td class="px-4 text-emerald-500"><span class="material-symbols-outlined text-sm font-bold">check</span></td>
+<td class="px-4 text-slate-400">—</td>
+<td class="px-6 text-slate-500 text-xs">法定注册全称</td>
+<td class="px-6 text-right space-x-3">
+<button class="text-blue-600 hover:underline">编辑</button>
+<button class="text-red-400 hover:text-red-600">删除</button>
+</td>
+</tr>
+<tr class="h-[52px] border-b border-slate-50 hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-6 font-medium text-slate-900">行业分类</td>
+<td class="px-6 font-mono text-xs text-slate-500">industry_code</td>
+<td class="px-4"><span class="px-2 py-0.5 bg-purple-50 text-purple-600 text-[11px] rounded">枚举</span></td>
+<td class="px-4 text-slate-300">否</td>
+<td class="px-4 text-slate-400">—</td>
+<td class="px-6 text-slate-500 text-xs">参考国标分类</td>
+<td class="px-6 text-right space-x-3">
+<button class="text-blue-600 hover:underline">编辑</button>
+<button class="text-red-400 hover:text-red-600">删除</button>
+</td>
+</tr>
+<tr class="h-[52px] border-b border-slate-50 hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-6 font-medium text-slate-900">注册资本</td>
+<td class="px-6 font-mono text-xs text-slate-500">registered_capital</td>
+<td class="px-4"><span class="px-2 py-0.5 bg-orange-50 text-orange-600 text-[11px] rounded">数字</span></td>
+<td class="px-4 text-slate-300">否</td>
+<td class="px-4 text-slate-600 font-mono">0</td>
+<td class="px-6 text-slate-500 text-xs">单位：万元人民币</td>
+<td class="px-6 text-right space-x-3">
+<button class="text-blue-600 hover:underline">编辑</button>
+<button class="text-red-400 hover:text-red-600">删除</button>
+</td>
+</tr>
+<tr class="h-[52px] border-b border-slate-50 hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-6 font-medium text-slate-900">成立日期</td>
+<td class="px-6 font-mono text-xs text-slate-500">founded_date</td>
+<td class="px-4"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[11px] rounded">日期</span></td>
+<td class="px-4 text-slate-300">否</td>
+<td class="px-4 text-slate-400">—</td>
+<td class="px-6 text-slate-500 text-xs">—</td>
+<td class="px-6 text-right space-x-3">
+<button class="text-blue-600 hover:underline">编辑</button>
+<button class="text-red-400 hover:text-red-600">删除</button>
+</td>
+</tr>
+<tr class="h-[52px] border-b border-slate-50 hover:bg-[#EEF4FF] transition-colors group">
+<td class="px-6 font-medium text-slate-900">联系电话</td>
+<td class="px-6 font-mono text-xs text-slate-500">contact_phone</td>
+<td class="px-4"><span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[11px] rounded">字符串</span></td>
+<td class="px-4 text-slate-300">否</td>
+<td class="px-4 text-slate-400">—</td>
+<td class="px-6 text-slate-500 text-xs">主要联系电话</td>
+<td class="px-6 text-right space-x-3">
+<button class="text-blue-600 hover:underline">编辑</button>
+<button class="text-red-400 hover:text-red-600">删除</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column (30%) -->
+<div class="col-span-3 flex flex-col gap-4">
+<!-- Info Card -->
+<div class="bg-white rounded-xl shadow-sm p-5">
+<h3 class="text-sm font-bold text-[#1A3A6B] mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">info</span>
+                    对象信息
+                </h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-xs text-slate-400">创建人</span>
+<span class="text-xs font-medium text-slate-700">张伟</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs text-slate-400">创建时间</span>
+<span class="text-xs font-medium text-slate-700 font-mono">2026-01-15</span>
+</div>
+<div class="flex justify-between items-start">
+<span class="text-xs text-slate-400">最后修改</span>
+<div class="text-right">
+<div class="text-xs font-medium text-slate-700">李明</div>
+<div class="text-[10px] text-slate-400 font-mono">2026-03-18</div>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs text-slate-400">实例数量</span>
+<span class="text-xs font-bold text-[#2D6BE4] font-mono">12,847</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs text-slate-400">来源数据集</span>
+<span class="text-xs font-medium text-slate-700">2个</span>
+</div>
+</div>
+</div>
+<!-- Relationships Card -->
+<div class="bg-white rounded-xl shadow-sm p-5">
+<h3 class="text-sm font-bold text-[#1A3A6B] mb-4 flex justify-between items-center">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">schema</span>
+                        直接关联（4个）
+                    </span>
+</h3>
+<div class="space-y-3">
+<a class="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm group-hover:text-blue-500">arrow_right_alt</span>
+<span class="text-xs text-blue-600 font-medium">拥有合同</span>
+</div>
+<span class="text-[10px] text-slate-400 font-mono">1:N</span>
+</a>
+<a class="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm group-hover:text-blue-500">arrow_right_alt</span>
+<span class="text-xs text-blue-600 font-medium">属于行业</span>
+</div>
+<span class="text-[10px] text-slate-400 font-mono">N:1</span>
+</a>
+<a class="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm rotate-180 group-hover:text-blue-500">arrow_right_alt</span>
+<span class="text-xs text-blue-600 font-medium">被员工服务</span>
+</div>
+<span class="text-[10px] text-slate-400 font-mono">N:M</span>
+</a>
+<a class="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-sm group-hover:text-blue-500">arrow_right_alt</span>
+<span class="text-xs text-blue-600 font-medium">采购产品</span>
+</div>
+<span class="text-[10px] text-slate-400 font-mono">M:N</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
