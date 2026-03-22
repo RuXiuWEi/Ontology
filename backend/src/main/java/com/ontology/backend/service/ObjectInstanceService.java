@@ -4,6 +4,7 @@ import com.ontology.backend.domain.ObjectInstance;
 import com.ontology.backend.domain.ObjectType;
 import com.ontology.backend.repository.ObjectInstanceRepository;
 import com.ontology.backend.repository.ObjectTypeRepository;
+import com.ontology.backend.action.application.ActionConstraintService;
 import com.ontology.backend.relation.application.RelationConstraintService;
 import com.ontology.backend.web.BusinessException;
 import com.ontology.backend.web.dto.ObjectInstanceRequest;
@@ -25,17 +26,20 @@ public class ObjectInstanceService {
     private final ObjectInstanceRepository instanceRepository;
     private final ObjectTypeRepository typeRepository;
     private final RelationConstraintService relationConstraintService;
+    private final ActionConstraintService actionConstraintService;
     private final AuditLogService auditLogService;
 
     public ObjectInstanceService(
             ObjectInstanceRepository instanceRepository,
             ObjectTypeRepository typeRepository,
             RelationConstraintService relationConstraintService,
+            ActionConstraintService actionConstraintService,
             AuditLogService auditLogService
     ) {
         this.instanceRepository = instanceRepository;
         this.typeRepository = typeRepository;
         this.relationConstraintService = relationConstraintService;
+        this.actionConstraintService = actionConstraintService;
         this.auditLogService = auditLogService;
     }
 
@@ -101,6 +105,9 @@ public class ObjectInstanceService {
                 .orElseThrow(() -> new BusinessException(40402, "对象实例不存在"));
         if (relationConstraintService.hasRelationsForObjectInstance(id)) {
             throw new BusinessException(40931, "对象实例已被关系引用，禁止删除");
+        }
+        if (actionConstraintService.hasActionExecutionsForObjectInstance(id)) {
+            throw new BusinessException(40932, "对象实例已被动作执行引用，禁止删除");
         }
         instanceRepository.deleteById(id);
         auditLogService.log(

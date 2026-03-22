@@ -276,6 +276,83 @@ class RegressionIntegrationTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void actionModuleShouldExecuteRetryAndRestrictDelete() throws Exception {
+        long customerTypeId = createObjectType("T_ACT_CUSTOMER", "动作客户");
+        long customerInstanceId = createObjectInstance(customerTypeId, "动作客户A");
+
+        long actionTypeId = createActionType(
+                "ACT_SYNC_TAG",
+                "同步打标",
+                customerTypeId,
+                "SYNC_MOCK"
+        );
+
+        MvcResult execResult = mockMvc.perform(post("/api/action-executions")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "actionTypeId": %d,
+                                  "targetInstanceId": %d,
+                                  "payload": {"tag":"vip"}
+                                }
+                                """.formatted(actionTypeId, customerInstanceId)))
+                .andExpect(status().isOk())
+                .andReturn();
+        long executionId = responseData(execResult).get("id").asLong();
+
+        MvcResult listResult = mockMvc.perform(get("/api/action-executions")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("actionTypeId", String.valueOf(actionTypeId)))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode content = responseData(listResult).get("content");
+        assertThat(content.isArray()).isTrue();
+        assertThat(content.size()).isGreaterThanOrEqualTo(1);
+
+        mockMvc.perform(post("/api/action-executions/{id}/retry", executionId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(delete("/api/object-types/{id}", customerTypeId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(delete("/api/instances/{id}", customerInstanceId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(delete("/api/action-types/{id}", actionTypeId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void actionModuleShouldRejectTargetTypeMismatch() throws Exception {
+        long customerTypeId = createObjectType("T_ACT_SOURCE", "动作源类型");
+        long projectTypeId = createObjectType("T_ACT_TARGET", "动作目标类型");
+        long customerInstanceId = createObjectInstance(customerTypeId, "客户实例");
+
+        long actionTypeId = createActionType(
+                "ACT_VALIDATE_TYPE",
+                "校验目标类型",
+                projectTypeId,
+                "SYNC_MOCK"
+        );
+
+        mockMvc.perform(post("/api/action-executions")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "actionTypeId": %d,
+                                  "targetInstanceId": %d
+                                }
+                                """.formatted(actionTypeId, customerInstanceId)))
+                .andExpect(status().isBadRequest());
+    }
+
     private String loginAndGetToken(String username, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -349,6 +426,31 @@ class RegressionIntegrationTests {
                                   "description":"关系测试类型"
                                 }
                                 """.formatted(code, name, sourceTypeId, targetTypeId, cardinality, direction)))
+                .andExpect(status().isOk())
+                .andReturn();
+        return responseData(result).get("id").asLong();
+    }
+
+    private long createActionType(
+            String code,
+            String name,
+            long targetTypeId,
+            String executorType
+    ) throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/action-types")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "code":"%s",
+                                  "name":"%s",
+                                  "targetTypeId": %d,
+                                  "executorType":"%s",
+                                  "enabled": true,
+                                  "parameterSchema":"{\\"type\\":\\"object\\"}",
+                                  "description":"动作测试类型"
+                                }
+                                """.formatted(code, name, targetTypeId, executorType)))
                 .andExpect(status().isOk())
                 .andReturn();
         return responseData(result).get("id").asLong();
