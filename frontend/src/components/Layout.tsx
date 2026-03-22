@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { getMe } from '../api/auth'
 import { useAuth } from '../auth/useAuth'
+import adminAvatar from '../assets/admin-avatar.svg'
+import systemLogo from '../assets/system-logo.svg'
 import './Layout.css'
 
 type NavItem = {
@@ -113,9 +115,11 @@ export function Layout() {
     <div className="app-shell">
       <aside className="side-nav">
         <div className="brand">
-          <div className="brand-logo">MD</div>
+          <div className="brand-logo">
+            <img src={systemLogo} alt="企业本体管理系统 Logo" />
+          </div>
           <div className="brand-text">
-            <strong>米多 · 企业本体管理平台</strong>
+            <strong>企业本体管理系统</strong>
             <span>Ontology Console</span>
           </div>
         </div>
@@ -145,12 +149,14 @@ export function Layout() {
       <div className="workspace">
         <header className="top-bar">
           <div className="top-bar-title">
-            <span className="product-name">米多 · 企业本体管理平台</span>
+            <span className="product-name">企业本体管理系统</span>
             <span className="slash">/</span>
             <span>{breadcrumb}</span>
           </div>
           <div className="top-bar-user">
-            <div className="avatar">{username.slice(0, 1).toUpperCase()}</div>
+            <div className="avatar">
+              <img src={adminAvatar} alt="管理员头像" />
+            </div>
             <div className="user-info">
               <strong>{username}</strong>
               <span>{roleLabel}</span>

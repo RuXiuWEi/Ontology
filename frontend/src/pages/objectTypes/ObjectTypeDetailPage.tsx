@@ -135,12 +135,12 @@ export function ObjectTypeDetailPage() {
         <Link className="btn-link" to="/object-types">
           返回列表
         </Link>
-        <Link className="btn-primary" to={`/object-types/${item.id}/edit`}>
+        <Link className="btn btn-primary" to={`/object-types/${item.id}/edit`}>
           编辑
         </Link>
         <button
           type="button"
-          className="btn-danger"
+          className="btn btn-danger"
           onClick={handleDelete}
           disabled={deleting}
         >

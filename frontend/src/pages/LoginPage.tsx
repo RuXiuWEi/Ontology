@@ -49,7 +49,7 @@ export function LoginPage() {
     <div className="login-page">
       <div className="login-hero">
         <p className="login-kicker">数字策展引擎</p>
-        <h1>米多 · 企业本体管理平台</h1>
+        <h1>企业本体管理系统</h1>
         <p className="login-intro">
           以高一致性与高可追溯的数据治理体验，支撑建模、实例管理与权限协同。
         </p>

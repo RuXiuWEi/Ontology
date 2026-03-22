@@ -178,7 +178,7 @@ export function InstanceFormPage({ mode }: InstanceFormPageProps) {
               />
             </label>
             <div className="full-width form-actions">
-              <button type="submit" className="btn-primary" disabled={saving}>
+              <button type="submit" className="btn btn-primary" disabled={saving}>
                 {saving ? '保存中…' : '保存'}
               </button>
             </div>

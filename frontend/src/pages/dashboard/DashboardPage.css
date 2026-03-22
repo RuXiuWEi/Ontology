@@ -56,9 +56,10 @@
   margin: 0;
   padding: var(--space-2);
   border-radius: var(--radius-md);
-  background: #12213a;
-  color: #dce7ff;
+  background: linear-gradient(160deg, #f8fbff 0%, #eff5ff 100%);
+  color: #27476f;
   min-width: 320px;
+  box-shadow: inset 0 0 0 1px rgb(45 107 228 / 16%);
 }
 
 .json-node {
@@ -69,21 +70,21 @@
   width: 100%;
   border: none;
   border-radius: var(--radius-sm);
-  background: rgb(0 0 0 / 18%);
-  color: #e7eeff;
+  background: rgb(45 107 228 / 10%);
+  color: #27476f;
   padding: 0.35rem 0.55rem;
   display: flex;
   justify-content: space-between;
   gap: var(--space-2);
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgb(220 231 255 / 16%);
+  box-shadow: inset 0 0 0 1px rgb(45 107 228 / 18%);
 }
 
 .json-children {
   margin-top: var(--space-1);
   margin-left: var(--space-3);
   padding-left: var(--space-2);
-  background: rgb(220 231 255 / 6%);
+  background: rgb(45 107 228 / 7%);
   border-radius: var(--radius-sm);
 }
 
@@ -95,32 +96,32 @@
 }
 
 .json-key {
-  color: #9bc4ff;
+  color: #2d6be4;
   font-family: var(--font-code);
 }
 
 .json-toggle-hint {
-  color: rgb(220 231 255 / 70%);
+  color: rgb(39 71 111 / 74%);
   font-size: 0.75rem;
 }
 
 .json-value {
-  color: #dce7ff;
+  color: #27476f;
   font-family: var(--font-code);
 }
 
 .json-value-string {
-  color: #ffc5be;
+  color: #c05042;
   font-family: var(--font-code);
 }
 
 .json-empty {
-  color: rgb(220 231 255 / 64%);
+  color: rgb(39 71 111 / 62%);
 }
 
 .json-view-light {
-  background: #12213a;
-  color: #dce7ff;
+  background: linear-gradient(160deg, #f8fbff 0%, #eff5ff 100%);
+  color: #27476f;
 }
 
 @media (max-width: 1200px) {
