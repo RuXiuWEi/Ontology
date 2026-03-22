@@ -200,8 +200,7 @@ class RegressionIntegrationTests {
                                 {
                                   "relationTypeId": %d,
                                   "sourceInstanceId": %d,
-                                  "targetInstanceId": %d,
-                                  "attributes": {"phase":"P1"}
+                                  "targetInstanceId": %d
                                 }
                                 """.formatted(relationTypeId, customerAId, projectAId)))
                 .andExpect(status().isOk())
@@ -320,8 +319,7 @@ class RegressionIntegrationTests {
                         .content("""
                                 {
                                   "typeId": %d,
-                                  "name":"%s",
-                                  "attributes":{"from":"relation-test"}
+                                  "name":"%s"
                                 }
                                 """.formatted(typeId, name)))
                 .andExpect(status().isOk())
