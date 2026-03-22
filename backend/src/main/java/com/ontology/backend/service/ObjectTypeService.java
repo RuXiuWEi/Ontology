@@ -1,6 +1,7 @@
 package com.ontology.backend.service;
 
 import com.ontology.backend.domain.ObjectType;
+import com.ontology.backend.relation.application.RelationConstraintService;
 import com.ontology.backend.repository.ObjectTypeRepository;
 import com.ontology.backend.web.BusinessException;
 import com.ontology.backend.web.dto.ObjectTypeRequest;
@@ -20,10 +21,16 @@ public class ObjectTypeService {
 
     private final ObjectTypeRepository repository;
     private final AuditLogService auditLogService;
+    private final RelationConstraintService relationConstraintService;
 
-    public ObjectTypeService(ObjectTypeRepository repository, AuditLogService auditLogService) {
+    public ObjectTypeService(
+            ObjectTypeRepository repository,
+            AuditLogService auditLogService,
+            RelationConstraintService relationConstraintService
+    ) {
         this.repository = repository;
         this.auditLogService = auditLogService;
+        this.relationConstraintService = relationConstraintService;
     }
 
     @Transactional(readOnly = true)
@@ -86,6 +93,9 @@ public class ObjectTypeService {
         ObjectType entity = repository.findById(id).orElse(null);
         if (entity == null) {
             throw new BusinessException(40401, "对象类型不存在");
+        }
+        if (relationConstraintService.hasRelationsForObjectType(id)) {
+            throw new BusinessException(40911, "对象类型已被关系模块引用，禁止删除");
         }
         repository.deleteById(id);
         auditLogService.log(

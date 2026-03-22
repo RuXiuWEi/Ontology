@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -174,6 +175,108 @@ class RegressionIntegrationTests {
         assertThat(auditContent.size()).isGreaterThan(0);
     }
 
+    @Test
+    void relationModuleShouldEnforceCardinalityAndRestrictDelete() throws Exception {
+        long customerTypeId = createObjectType("T_REL_CUSTOMER", "客户");
+        long projectTypeId = createObjectType("T_REL_PROJECT", "项目");
+
+        long relationTypeId = createRelationType(
+                "REL_CUSTOMER_PROJECT",
+                "客户-项目",
+                customerTypeId,
+                projectTypeId,
+                "ONE_TO_ONE",
+                "DIRECTED"
+        );
+
+        long customerAId = createObjectInstance(customerTypeId, "客户A");
+        long projectAId = createObjectInstance(projectTypeId, "项目A");
+        long projectBId = createObjectInstance(projectTypeId, "项目B");
+
+        MvcResult createEdgeResult = mockMvc.perform(post("/api/relations")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "relationTypeId": %d,
+                                  "sourceInstanceId": %d,
+                                  "targetInstanceId": %d,
+                                  "attributes": {"phase":"P1"}
+                                }
+                                """.formatted(relationTypeId, customerAId, projectAId)))
+                .andExpect(status().isOk())
+                .andReturn();
+        long edgeId = responseData(createEdgeResult).get("id").asLong();
+
+        mockMvc.perform(post("/api/relations")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "relationTypeId": %d,
+                                  "sourceInstanceId": %d,
+                                  "targetInstanceId": %d
+                                }
+                                """.formatted(relationTypeId, customerAId, projectBId)))
+                .andExpect(status().isConflict());
+
+        MvcResult neighborsResult = mockMvc.perform(get("/api/relations/neighbors")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("instanceId", String.valueOf(customerAId)))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode neighbors = responseData(neighborsResult);
+        assertThat(neighbors.isArray()).isTrue();
+        assertThat(neighbors.size()).isGreaterThanOrEqualTo(1);
+
+        mockMvc.perform(delete("/api/instances/{id}", customerAId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(delete("/api/relation-types/{id}", relationTypeId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(delete("/api/relations/{id}", edgeId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete("/api/relation-types/{id}", relationTypeId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void relationModuleShouldRejectTypeMismatch() throws Exception {
+        long sourceTypeId = createObjectType("T_REL_SOURCE", "源类型");
+        long targetTypeId = createObjectType("T_REL_TARGET", "目标类型");
+        long wrongTypeId = createObjectType("T_REL_WRONG", "错误类型");
+
+        long relationTypeId = createRelationType(
+                "REL_SOURCE_TARGET",
+                "源-目标",
+                sourceTypeId,
+                targetTypeId,
+                "MANY_TO_MANY",
+                "DIRECTED"
+        );
+
+        long wrongInstanceId = createObjectInstance(wrongTypeId, "错误实例");
+        long targetInstanceId = createObjectInstance(targetTypeId, "目标实例");
+
+        mockMvc.perform(post("/api/relations")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "relationTypeId": %d,
+                                  "sourceInstanceId": %d,
+                                  "targetInstanceId": %d
+                                }
+                                """.formatted(relationTypeId, wrongInstanceId, targetInstanceId)))
+                .andExpect(status().isBadRequest());
+    }
+
     private String loginAndGetToken(String username, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -192,5 +295,64 @@ class RegressionIntegrationTests {
     private JsonNode responseData(MvcResult result) throws Exception {
         JsonNode root = objectMapper.readTree(result.getResponse().getContentAsString());
         return root.get("data");
+    }
+
+    private long createObjectType(String code, String name) throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/object-types")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "code":"%s",
+                                  "name":"%s",
+                                  "description":"关系测试对象类型"
+                                }
+                                """.formatted(code, name)))
+                .andExpect(status().isOk())
+                .andReturn();
+        return responseData(result).get("id").asLong();
+    }
+
+    private long createObjectInstance(long typeId, String name) throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/instances")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "typeId": %d,
+                                  "name":"%s",
+                                  "attributes":{"from":"relation-test"}
+                                }
+                                """.formatted(typeId, name)))
+                .andExpect(status().isOk())
+                .andReturn();
+        return responseData(result).get("id").asLong();
+    }
+
+    private long createRelationType(
+            String code,
+            String name,
+            long sourceTypeId,
+            long targetTypeId,
+            String cardinality,
+            String direction
+    ) throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/relation-types")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "code":"%s",
+                                  "name":"%s",
+                                  "sourceTypeId": %d,
+                                  "targetTypeId": %d,
+                                  "cardinality":"%s",
+                                  "direction":"%s",
+                                  "description":"关系测试类型"
+                                }
+                                """.formatted(code, name, sourceTypeId, targetTypeId, cardinality, direction)))
+                .andExpect(status().isOk())
+                .andReturn();
+        return responseData(result).get("id").asLong();
     }
 }
