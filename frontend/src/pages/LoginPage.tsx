@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type CSSProperties, type FormEvent } from 'react'
 import { useLocation, useNavigate, Navigate } from 'react-router-dom'
+import systemLogo from '../assets/system-logo.svg'
 import { useAuth } from '../auth/useAuth'
 import './LoginPage.css'
 
@@ -19,6 +20,16 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const wireframes = useMemo(
+    () =>
+      Array.from({ length: 6 }, (_, index) => ({
+        index,
+        size: `${62 + index * 14}vmin`,
+        rotate: `${index * 14 - 12}deg`,
+        duration: `${34 + index * 8}s`,
+      })),
+    [],
+  )
 
   if (token) {
     return <Navigate to="/dashboard" replace />
@@ -47,31 +58,34 @@ export function LoginPage() {
 
   return (
     <div className="login-page">
-      <div className="login-hero">
-        <p className="login-kicker">数字策展引擎</p>
-        <h1>米多 · 企业本体管理平台</h1>
-        <p className="login-intro">
-          以高一致性与高可追溯的数据治理体验，支撑建模、实例管理与权限协同。
-        </p>
-        <div className="login-hero-metrics">
-          <article>
-            <strong>100%</strong>
-            <span>流程标准化</span>
-          </article>
-          <article>
-            <strong>7x24</strong>
-            <span>治理在线</span>
-          </article>
-          <article>
-            <strong>可审计</strong>
-            <span>全链路留痕</span>
-          </article>
-        </div>
+      <div className="login-wires" aria-hidden="true">
+        {wireframes.map((wire) => (
+          <span
+            key={String(wire.index)}
+            className="wire-ring"
+            style={
+              {
+                '--wire-size': wire.size,
+                '--wire-rotate': wire.rotate,
+                '--wire-duration': wire.duration,
+              } as CSSProperties
+            }
+          />
+        ))}
       </div>
 
       <form className="login-card" onSubmit={handleSubmit}>
-        <h2>账号登录</h2>
-        <p className="login-subtitle">请输入企业账号信息以继续。</p>
+        <div className="login-brand">
+          <div className="login-brand-logo">
+            <img src={systemLogo} alt="企业本体管理系统 Logo" />
+          </div>
+          <div className="login-brand-text">
+            <h1>企业本体管理系统</h1>
+            <p>统一建模与治理控制台</p>
+          </div>
+        </div>
+        <p className="login-title">账号登录</p>
+        <p className="login-subtitle">请输入账号与密码后继续。</p>
         {error ? <p className="login-error">{error}</p> : null}
         <label className="login-field">
           <span>用户名</span>
@@ -95,8 +109,9 @@ export function LoginPage() {
           />
         </label>
         <button type="submit" className="login-primary" disabled={loading}>
-          {loading ? '登录中…' : '进入平台'}
+          {loading ? '登录中…' : '登录'}
         </button>
+        <p className="login-footer">登录即表示你同意平台安全访问策略</p>
       </form>
     </div>
   )

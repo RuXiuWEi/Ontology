@@ -8,16 +8,16 @@
     'JetBrains Mono', 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono',
     monospace;
 
-  --color-primary: #002451;
-  --color-primary-container: #1a3a6b;
-  --color-tertiary-fixed: #2d6be4;
-  --color-surface: #f7f9fc;
+  --color-primary: #2e6fda;
+  --color-primary-container: #1f4f9e;
+  --color-tertiary-fixed: #5d9bff;
+  --color-surface: #f6f9ff;
   --color-on-surface: #191c1e;
   --color-surface-lowest: #ffffff;
-  --color-surface-low: #edf2fa;
-  --color-surface-high: #e5ecf7;
-  --color-surface-highest: rgb(255 255 255 / 84%);
-  --color-outline-ghost: rgb(26 58 107 / 15%);
+  --color-surface-low: #eef4ff;
+  --color-surface-high: #e4edff;
+  --color-surface-highest: rgb(255 255 255 / 92%);
+  --color-outline-ghost: rgb(31 79 158 / 15%);
   --color-danger: #e74c3c;
 
   --radius-xs: 4px;
@@ -35,9 +35,9 @@
   --space-7: 2rem;
   --space-8: 4.5rem;
 
-  --shadow-layer: 0 14px 34px rgb(26 58 107 / 8%);
-  --shadow-layer-hover: 0 20px 44px rgb(26 58 107 / 12%);
-  --shadow-focus: 0 0 0 2px rgb(45 107 228 / 24%);
+  --shadow-layer: 0 12px 28px rgb(31 79 158 / 8%);
+  --shadow-layer-hover: 0 16px 36px rgb(31 79 158 / 12%);
+  --shadow-focus: 0 0 0 2px rgb(93 155 255 / 30%);
 
   color: var(--color-on-surface);
   background: var(--color-surface);
