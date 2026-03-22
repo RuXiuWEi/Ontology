@@ -113,9 +113,9 @@ export function Layout() {
     <div className="app-shell">
       <aside className="side-nav">
         <div className="brand">
-          <div className="brand-logo">ON</div>
+          <div className="brand-logo">MD</div>
           <div className="brand-text">
-            <strong>企业本体管理系统</strong>
+            <strong>米多 · 企业本体管理平台</strong>
             <span>Ontology Console</span>
           </div>
         </div>
@@ -145,7 +145,7 @@ export function Layout() {
       <div className="workspace">
         <header className="top-bar">
           <div className="top-bar-title">
-            <span className="product-name">华曦 · 企业本体管理平台</span>
+            <span className="product-name">米多 · 企业本体管理平台</span>
             <span className="slash">/</span>
             <span>{breadcrumb}</span>
           </div>

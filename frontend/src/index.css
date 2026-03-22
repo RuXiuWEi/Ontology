@@ -1,20 +1,65 @@
 :root {
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-ui:
+    'HarmonyOS Sans', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui,
+    sans-serif;
+  --font-display:
+    'Manrope', 'HarmonyOS Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-code:
+    'JetBrains Mono', 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono',
+    monospace;
+
+  --color-primary: #002451;
+  --color-primary-container: #1a3a6b;
+  --color-tertiary-fixed: #2d6be4;
+  --color-surface: #f7f9fc;
+  --color-on-surface: #191c1e;
+  --color-surface-lowest: #ffffff;
+  --color-surface-low: #edf2fa;
+  --color-surface-high: #e5ecf7;
+  --color-surface-highest: rgb(255 255 255 / 84%);
+  --color-outline-ghost: rgb(26 58 107 / 15%);
+  --color-danger: #e74c3c;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --space-1: 0.375rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+  --space-8: 4.5rem;
+
+  --shadow-layer: 0 14px 34px rgb(26 58 107 / 8%);
+  --shadow-layer-hover: 0 20px 44px rgb(26 58 107 / 12%);
+  --shadow-focus: 0 0 0 2px rgb(45 107 228 / 24%);
+
+  color: var(--color-on-surface);
+  background: var(--color-surface);
+  font-family: var(--font-ui);
   line-height: 1.5;
-  color: #1e293b;
-  background: #fff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  min-height: 100vh;
+  background: var(--color-surface);
+  color: var(--color-on-surface);
 }
 
 #root {
@@ -22,8 +67,20 @@ body {
 }
 
 h1,
-h2 {
-  font-weight: 600;
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
 }
 
 button,
