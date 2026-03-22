@@ -286,8 +286,18 @@ export function DashboardPage() {
                 <XAxis dataKey="day" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Line type="monotone" dataKey="新增数量" stroke="#0f2847" strokeWidth={2} />
-                <Line type="monotone" dataKey="审计事件" stroke="#7c3aed" strokeWidth={2} />
+                <Line
+                  type="monotone"
+                  dataKey="新增数量"
+                  stroke="#1a3a6b"
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="审计事件"
+                  stroke="#2d6be4"
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
