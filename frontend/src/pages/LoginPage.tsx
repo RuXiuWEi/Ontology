@@ -84,8 +84,6 @@ export function LoginPage() {
             <p>统一建模与治理控制台</p>
           </div>
         </div>
-        <p className="login-title">账号登录</p>
-        <p className="login-subtitle">请输入账号与密码后继续。</p>
         {error ? <p className="login-error">{error}</p> : null}
         <label className="login-field">
           <span>用户名</span>
