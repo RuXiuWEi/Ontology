@@ -3,7 +3,7 @@ CREATE TABLE model_versions (
     model_code VARCHAR(64) NOT NULL,
     version_no INTEGER NOT NULL DEFAULT 0,
     title VARCHAR(255) NOT NULL,
-    content JSONB NOT NULL,
+    content TEXT NOT NULL,
     status VARCHAR(32) NOT NULL,
     change_log TEXT,
     created_by VARCHAR(64),

@@ -17,15 +17,10 @@ public interface ModelVersionRepository extends JpaRepository<ModelVersion, Long
             ModelVersionStatus status
     );
 
-    Optional<ModelVersion> findFirstByModelCodeAndStatusInOrderByVersionNoDesc(
-            String modelCode,
-            java.util.Collection<ModelVersionStatus> statuses
-    );
-
-    Optional<ModelVersion> findByModelCodeAndVersionNoAndStatusIn(
+    Optional<ModelVersion> findByModelCodeAndVersionNoAndStatus(
             String modelCode,
             int versionNo,
-            java.util.Collection<ModelVersionStatus> statuses
+            ModelVersionStatus status
     );
 
     Page<ModelVersion> findAllByModelCodeOrderByVersionNoDescCreatedAtDesc(String modelCode, Pageable pageable);

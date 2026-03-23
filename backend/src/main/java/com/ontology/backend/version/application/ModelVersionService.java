@@ -10,6 +10,9 @@ import com.ontology.backend.version.web.dto.ModelVersionResponse;
 import com.ontology.backend.version.web.dto.ModelVersionRollbackRequest;
 import com.ontology.backend.web.BusinessException;
 import com.ontology.backend.web.dto.PageResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -19,23 +22,24 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class ModelVersionService {
 
     private final ModelVersionRepository modelVersionRepository;
     private final AuditLogService auditLogService;
+    private final ObjectMapper objectMapper;
 
     public ModelVersionService(
             ModelVersionRepository modelVersionRepository,
-            AuditLogService auditLogService
+            AuditLogService auditLogService,
+            ObjectMapper objectMapper
     ) {
         this.modelVersionRepository = modelVersionRepository;
         this.auditLogService = auditLogService;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
@@ -89,7 +93,7 @@ public class ModelVersionService {
         }
 
         draft.setTitle(request.title().trim());
-        draft.setContent(request.content());
+        draft.setContent(toContentJson(request.content()));
         draft.setChangeLog(request.changeLog());
         draft.setUpdatedAt(Instant.now());
         ModelVersion saved = modelVersionRepository.save(draft);
@@ -113,13 +117,15 @@ public class ModelVersionService {
                     modelVersionRepository.save(published);
                 });
 
-        int nextVersionNo = modelVersionRepository
-                .findFirstByModelCodeAndStatusInOrderByVersionNoDesc(
-                        draft.getModelCode(),
-                        EnumSet.of(ModelVersionStatus.PUBLISHED, ModelVersionStatus.ARCHIVED)
-                )
-                .map(v -> v.getVersionNo() + 1)
-                .orElse(1);
+        int latestPublished = modelVersionRepository
+                .findFirstByModelCodeAndStatusOrderByVersionNoDesc(draft.getModelCode(), ModelVersionStatus.PUBLISHED)
+                .map(ModelVersion::getVersionNo)
+                .orElse(0);
+        int latestArchived = modelVersionRepository
+                .findFirstByModelCodeAndStatusOrderByVersionNoDesc(draft.getModelCode(), ModelVersionStatus.ARCHIVED)
+                .map(ModelVersion::getVersionNo)
+                .orElse(0);
+        int nextVersionNo = Math.max(latestPublished, latestArchived) + 1;
 
         draft.setStatus(ModelVersionStatus.PUBLISHED);
         draft.setVersionNo(nextVersionNo);
@@ -142,17 +148,20 @@ public class ModelVersionService {
         }
 
         String modelCode = request.modelCode().trim();
-        ModelVersion target = modelVersionRepository.findByModelCodeAndVersionNoAndStatusIn(
-                        modelCode,
-                        request.targetVersionNo(),
-                        EnumSet.of(ModelVersionStatus.PUBLISHED, ModelVersionStatus.ARCHIVED)
-                )
-                .orElseThrow(() -> new BusinessException(40462, "目标回滚版本不存在"));
+        ModelVersion target = modelVersionRepository.findByModelCodeAndVersionNoAndStatus(
+                modelCode,
+                request.targetVersionNo(),
+                ModelVersionStatus.PUBLISHED
+        ).orElseGet(() -> modelVersionRepository.findByModelCodeAndVersionNoAndStatus(
+                modelCode,
+                request.targetVersionNo(),
+                ModelVersionStatus.ARCHIVED
+        ).orElseThrow(() -> new BusinessException(40462, "目标回滚版本不存在")));
 
         ModelVersionDraftUpsertRequest draftRequest = new ModelVersionDraftUpsertRequest(
                 modelCode,
                 target.getTitle(),
-                target.getContent(),
+                parseContentJson(target.getContent()),
                 StringUtils.hasText(request.changeLog()) ? request.changeLog().trim() : "回滚到版本 v" + request.targetVersionNo()
         );
         ModelVersionResponse draft = saveDraft(draftRequest);
@@ -200,7 +209,7 @@ public class ModelVersionService {
                 version.getModelCode(),
                 version.getVersionNo(),
                 version.getTitle(),
-                version.getContent(),
+                parseContentJson(version.getContent()),
                 version.getStatus().name(),
                 version.getChangeLog(),
                 version.getCreatedBy(),
@@ -209,5 +218,22 @@ public class ModelVersionService {
                 version.getCreatedAt(),
                 version.getUpdatedAt()
         );
+    }
+
+    private String toContentJson(Map<String, Object> content) {
+        try {
+            return objectMapper.writeValueAsString(content);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(40063, "content 序列化失败");
+        }
+    }
+
+    private Map<String, Object> parseContentJson(String contentJson) {
+        try {
+            return objectMapper.readValue(contentJson, new TypeReference<>() {
+            });
+        } catch (Exception e) {
+            throw new BusinessException(50060, "content 反序列化失败");
+        }
     }
 }

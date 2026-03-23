@@ -8,11 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 import java.time.Instant;
-import java.util.Map;
 
 @Entity
 @Table(name = "model_versions")
@@ -31,9 +27,8 @@ public class ModelVersion {
     @Column(nullable = false)
     private String title;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(nullable = false, columnDefinition = "jsonb")
-    private Map<String, Object> content;
+    @Column(nullable = false, columnDefinition = "text")
+    private String content;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
@@ -89,11 +84,11 @@ public class ModelVersion {
         this.title = title;
     }
 
-    public Map<String, Object> getContent() {
+    public String getContent() {
         return content;
     }
 
-    public void setContent(Map<String, Object> content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
