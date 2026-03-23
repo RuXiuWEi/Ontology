@@ -7,15 +7,9 @@ import {
   saveModelDraft,
 } from '../../api/modelVersions'
 import type { ModelVersionDto } from '../../api/types'
+import { getErrorMessage } from '../../utils/error'
+import { parseJsonObjectInput } from '../../utils/json'
 import '../PageShell.css'
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
-}
 
 const PAGE_SIZE = 10
 
@@ -70,7 +64,7 @@ export function VersionsPage() {
         setDraftId(null)
       }
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setLoading(false)
     }
@@ -86,24 +80,32 @@ export function VersionsPage() {
       setError('标题不能为空')
       return
     }
+    const parsedContent = parseJsonObjectInput(
+      contentText,
+      '模型内容不能为空，请输入 JSON 对象',
+      '模型内容格式不正确，请输入合法 JSON 对象',
+    )
+    if (!parsedContent.ok) {
+      setError(parsedContent.message)
+      return
+    }
+    if (Object.keys(parsedContent.value).length === 0) {
+      setError('模型内容不能为空对象，请至少填写一个字段')
+      return
+    }
     setSaving(true)
     try {
-      const parsed = JSON.parse(contentText)
-      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-        setError('content 必须是 JSON 对象')
-        return
-      }
       const saved = await saveModelDraft({
         modelCode: modelCode.trim(),
         title: title.trim(),
-        content: parsed as Record<string, unknown>,
+        content: parsedContent.value,
         changeLog: changeLog.trim() || undefined,
       })
       setDraftId(saved.id)
       setSuccess(`草稿已保存（ID=${saved.id}）`)
       await loadData()
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setSaving(false)
     }
@@ -119,6 +121,19 @@ export function VersionsPage() {
       setError('发布说明不能为空')
       return
     }
+    const parsedContent = parseJsonObjectInput(
+      contentText,
+      '发布前请先填写模型内容',
+      '发布前请先修正模型内容 JSON 格式',
+    )
+    if (!parsedContent.ok) {
+      setError(parsedContent.message)
+      return
+    }
+    if (Object.keys(parsedContent.value).length === 0) {
+      setError('发布前请先补充模型内容，空对象不允许发布')
+      return
+    }
     setSaving(true)
     try {
       const published = await publishModelDraft(draftId, changeLog.trim())
@@ -126,7 +141,7 @@ export function VersionsPage() {
       setSuccess(`发布成功：v${published.versionNo}`)
       await loadData()
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setSaving(false)
     }
@@ -157,7 +172,7 @@ export function VersionsPage() {
       setSuccess(`已生成回滚草稿（目标版本 v${targetVersionNo}）`)
       await loadData()
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setSaving(false)
     }
@@ -180,6 +195,9 @@ export function VersionsPage() {
 
       {error ? <p className="status error">{error}</p> : null}
       {success ? <p className="status">{success}</p> : null}
+      <p className="hint-text">
+        使用建议：保存/发布前先确认“模型内容”为 JSON 对象且非空；发布说明用于后续追溯与审计。
+      </p>
 
       <div className="panel">
         <h2 className="panel-title">草稿编辑与发布</h2>

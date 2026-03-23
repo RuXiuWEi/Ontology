@@ -16,15 +16,9 @@ import type {
   ObjectTypeDto,
   PageResponse,
 } from '../../api/types'
+import { getErrorMessage } from '../../utils/error'
+import { parseJsonObjectInput } from '../../utils/json'
 import '../PageShell.css'
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
-}
 
 const PAGE_SIZE = 10
 
@@ -141,12 +135,37 @@ export function ActionsPage() {
 
   async function handleCreateActionType(event: FormEvent) {
     event.preventDefault()
+    const code = form.code.trim()
+    const name = form.name.trim()
+    if (!code) {
+      setError('请先填写动作编码')
+      return
+    }
+    if (!name) {
+      setError('请先填写动作名称')
+      return
+    }
+    if (!form.targetTypeId) {
+      setError('请先选择目标对象类型')
+      return
+    }
+    if (form.parameterSchema.trim()) {
+      const parsedSchema = parseJsonObjectInput(
+        form.parameterSchema,
+        '参数 Schema 不能为空',
+        '参数 Schema 必须是合法 JSON 对象',
+      )
+      if (!parsedSchema.ok) {
+        setError(parsedSchema.message)
+        return
+      }
+    }
     setSubmitting(true)
     setError(null)
     try {
       await createActionType({
-        code: form.code.trim(),
-        name: form.name.trim(),
+        code,
+        name,
         targetTypeId: Number(form.targetTypeId),
         executorType: form.executorType.trim(),
         parameterSchema: form.parameterSchema.trim() || undefined,
@@ -162,7 +181,7 @@ export function ActionsPage() {
       setTypesPageIndex(0)
       await refreshActionTypes(0)
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setSubmitting(false)
     }
@@ -170,17 +189,29 @@ export function ActionsPage() {
 
   async function handleExecuteAction(event: FormEvent) {
     event.preventDefault()
+    if (!execActionTypeId) {
+      setError('请先选择动作类型')
+      return
+    }
+    if (!execTargetInstanceId) {
+      setError('请先选择目标实例')
+      return
+    }
     setSubmitting(true)
     setError(null)
     try {
       let payload: Record<string, unknown> | undefined
       if (execPayloadText.trim()) {
-        const parsed = JSON.parse(execPayloadText)
-        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-          setError('执行参数必须是 JSON 对象')
+        const parsedPayload = parseJsonObjectInput(
+          execPayloadText,
+          '执行参数不能为空',
+          '执行参数必须是合法 JSON 对象',
+        )
+        if (!parsedPayload.ok) {
+          setError(parsedPayload.message)
           return
         }
-        payload = parsed as Record<string, unknown>
+        payload = parsedPayload.value
       }
       await executeAction({
         actionTypeId: Number(execActionTypeId),
@@ -190,7 +221,7 @@ export function ActionsPage() {
       setExecPageIndex(0)
       await refreshExecutions(0, queryActionTypeId ? Number(queryActionTypeId) : undefined)
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setSubmitting(false)
     }
@@ -203,7 +234,7 @@ export function ActionsPage() {
       await retryActionExecution(executionId)
       await refreshExecutions(execPageIndex, queryActionTypeId ? Number(queryActionTypeId) : undefined)
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setRetryingId(null)
     }
@@ -222,7 +253,7 @@ export function ActionsPage() {
         await refreshActionTypes(typesPageIndex)
       }
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setDeletingId(null)
     }
@@ -248,6 +279,11 @@ export function ActionsPage() {
 
       <div className="panel">
         <h2 className="panel-title">新建动作类型</h2>
+        <p className="hint-text" style={{ marginBottom: '0.5rem' }}>
+          提示：参数 Schema 推荐填写 JSON 对象，例如
+          {' '}
+          {'{"type":"object","required":["tag"],"properties":{"tag":{"type":"string"}}}'}
+        </p>
         <form className="form-grid" onSubmit={handleCreateActionType}>
           <label className="field">
             <span>编码</span>
@@ -420,6 +456,9 @@ export function ActionsPage() {
 
       <div className="panel">
         <h2 className="panel-title">触发动作执行</h2>
+        <p className="hint-text" style={{ marginBottom: '0.5rem' }}>
+          提示：执行参数需为 JSON 对象，并尽量与动作 Schema 保持一致。
+        </p>
         <form className="form-grid" onSubmit={handleExecuteAction}>
           <label className="field">
             <span>动作类型</span>

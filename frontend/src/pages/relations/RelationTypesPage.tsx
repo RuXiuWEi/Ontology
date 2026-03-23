@@ -18,6 +18,8 @@ import type {
   RelationNeighborDto,
   RelationTypeDto,
 } from '../../api/types'
+import { getErrorMessage } from '../../utils/error'
+import { parseJsonObjectInput } from '../../utils/json'
 import '../PageShell.css'
 
 type RelationTypeForm = {
@@ -40,14 +42,6 @@ const EMPTY_FORM: RelationTypeForm = {
   cardinality: 'ONE_TO_ONE',
   direction: 'DIRECTED',
   description: '',
-}
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
 }
 
 function prettyCardinality(value: RelationCardinality): string {
@@ -128,7 +122,7 @@ export function RelationTypesPage() {
         }))
       }
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setLoading(false)
     }
@@ -169,6 +163,16 @@ export function RelationTypesPage() {
     setSaving(true)
     setError(null)
     try {
+      if (!form.code.trim()) {
+        setError('请输入关系类型编码')
+        setSaving(false)
+        return
+      }
+      if (!form.name.trim()) {
+        setError('请输入关系类型名称')
+        setSaving(false)
+        return
+      }
       const payload = {
         code: form.code.trim(),
         name: form.name.trim(),
@@ -186,7 +190,7 @@ export function RelationTypesPage() {
       resetForm()
       await loadRelationTypes()
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setSaving(false)
     }
@@ -203,7 +207,7 @@ export function RelationTypesPage() {
         await loadRelationTypes()
       }
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     }
   }
 
@@ -217,13 +221,17 @@ export function RelationTypesPage() {
     try {
       let parsedAttributes: Record<string, unknown> | undefined
       if (edgeAttributes.trim()) {
-        const parsed = JSON.parse(edgeAttributes)
-        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-          setError('属性必须是 JSON 对象')
+        const parsed = parseJsonObjectInput(
+          edgeAttributes,
+          '关系属性不能为空',
+          '关系属性必须是合法 JSON 对象',
+        )
+        if (!parsed.ok) {
+          setError(parsed.message)
           setEdgeBusy(false)
           return
         }
-        parsedAttributes = parsed as Record<string, unknown>
+        parsedAttributes = parsed.value
       }
       await createRelationEdge({
         relationTypeId: Number(edgeRelationTypeId),
@@ -237,7 +245,7 @@ export function RelationTypesPage() {
         setNeighbors(data)
       }
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setEdgeBusy(false)
     }
@@ -254,7 +262,7 @@ export function RelationTypesPage() {
       const data = await listRelationNeighbors(Number(neighborInstanceId))
       setNeighbors(data)
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setEdgeBusy(false)
     }
@@ -273,7 +281,7 @@ export function RelationTypesPage() {
         setNeighbors((prev) => prev.filter((item) => item.edgeId !== edgeId))
       }
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(getErrorMessage(e))
     } finally {
       setEdgeBusy(false)
     }
@@ -289,6 +297,9 @@ export function RelationTypesPage() {
       </header>
 
       {error ? <p className="error-text">{error}</p> : null}
+      <p className="status">
+        操作指引：先维护关系类型，再创建关系边。无向关系中 A-B 与 B-A 视为同一条关系。
+      </p>
 
       <div className="panel">
         <h2 className="panel-title">关联类型维护</h2>
