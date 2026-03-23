@@ -7,9 +7,12 @@
   --login-text: #1f3560;
   --login-muted: rgb(31 53 96 / 66%);
   --login-grid-color: rgb(77 132 226 / 10%);
-  --login-line-strong: rgb(77 132 226 / 28%);
-  --login-line-secondary: rgb(77 132 226 / 18%);
-  --login-line-bridge: rgb(93 155 255 / 16%);
+  --login-line-strong: rgb(61 120 220 / 34%);
+  --login-line-secondary: rgb(77 132 226 / 23%);
+  --login-line-bridge: rgb(93 155 255 / 22%);
+  --login-edge-label-border: rgb(56 115 220 / 11%);
+  --login-entity-border: rgb(56 115 220 / 14%);
+  --login-entity-shadow: rgb(31 73 140 / 12%);
 
   position: relative;
   isolation: isolate;
@@ -56,7 +59,7 @@
   inset: -6%;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.96;
+  opacity: 1;
   animation: graph-drift 18s ease-in-out infinite;
 }
 
@@ -78,22 +81,86 @@
 
 .graph-line--strong {
   stroke: var(--login-line-strong);
-  stroke-width: 1.8;
+  stroke-width: 1.85;
 }
 
 .graph-line--secondary {
   stroke: var(--login-line-secondary);
-  stroke-width: 1.25;
-  stroke-dasharray: 2 9;
+  stroke-width: 1.35;
+  stroke-dasharray: 4 10;
 }
 
 .graph-line--bridge {
   stroke: var(--login-line-bridge);
-  stroke-width: 1.35;
-  stroke-dasharray: 3 12;
+  stroke-width: 1.45;
+  stroke-dasharray: 5 12;
   animation:
     graph-line-breathe 10s ease-in-out infinite,
     graph-line-flow 24s linear infinite;
+}
+
+.graph-line--directed {
+  stroke-linecap: round;
+}
+
+.graph-lines--signal {
+  opacity: 0.92;
+}
+
+.graph-line--signal {
+  stroke: rgb(142 216 255 / 76%);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-dasharray: 12 220;
+  filter: drop-shadow(0 0 6px rgb(142 216 255 / 30%));
+  animation: graph-signal-travel 9s linear infinite;
+}
+
+.graph-line--signal-two {
+  animation-delay: 1.4s;
+}
+
+.graph-line--signal-three {
+  animation-delay: 3.1s;
+}
+
+.graph-line--signal-four {
+  animation-delay: 0.8s;
+}
+
+.graph-line--signal-five {
+  animation-delay: 4.2s;
+}
+
+.graph-edge-label rect {
+  fill: rgb(255 255 255 / 78%);
+  stroke: var(--login-edge-label-border);
+  stroke-width: 1;
+  filter: drop-shadow(0 10px 20px rgb(38 88 162 / 8%));
+}
+
+.graph-edge-label text {
+  fill: rgb(47 88 160 / 88%);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.graph-edge-label {
+  opacity: 0.9;
+}
+
+.graph-edge-label > rect,
+.graph-edge-label > text {
+  animation: graph-edge-label-float 10s ease-in-out infinite var(--predicate-delay);
+  transform-origin: center;
+}
+
+.graph-edge-label--secondary rect {
+  fill: rgb(248 251 255 / 70%);
+}
+
+.graph-edge-label--secondary text {
+  fill: rgb(54 91 151 / 72%);
 }
 
 .graph-node-pulses {
@@ -145,41 +212,130 @@
   fill: rgb(93 155 255 / 46%);
 }
 
-.graph-badge {
+.graph-entity {
   position: absolute;
-  left: var(--badge-x);
-  top: var(--badge-y);
+  left: var(--entity-x);
+  top: var(--entity-y);
+  z-index: 2;
+  width: min(17rem, 20vw);
+  min-width: 11.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
   transform: translate(-50%, -50%);
-  padding: 0.38rem 0.78rem;
-  border-radius: 999px;
-  font-size: 0.74rem;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  color: var(--login-text);
-  white-space: nowrap;
+  padding: 0.72rem 0.82rem;
+  border-radius: 18px;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 84%) 0%, rgb(246 250 255 / 72%) 100%);
+    linear-gradient(180deg, rgb(255 255 255 / 86%) 0%, rgb(244 249 255 / 74%) 100%);
   box-shadow:
-    0 10px 26px rgb(38 88 162 / 10%),
-    inset 0 0 0 1px rgb(56 115 220 / 12%);
-  backdrop-filter: blur(8px);
-  animation: graph-badge-float 11s ease-in-out infinite var(--badge-delay);
+    0 16px 40px rgb(38 88 162 / 10%),
+    inset 0 0 0 1px var(--login-entity-border);
+  backdrop-filter: blur(12px);
+  animation: graph-entity-float 14s ease-in-out infinite var(--entity-delay);
 }
 
-.graph-badge--primary {
-  color: #26539a;
+.graph-entity::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgb(255 255 255 / 18%) 0%, transparent 40%);
+  pointer-events: none;
 }
 
-.graph-badge--secondary {
+.graph-entity::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  opacity: 0.58;
+  pointer-events: none;
+}
+
+.graph-entity--core {
+  box-shadow:
+    0 20px 48px rgb(38 88 162 / 14%),
+    inset 0 0 0 1px rgb(47 115 223 / 18%);
+}
+
+.graph-entity--core::after {
+  border: 1px solid rgb(47 115 223 / 18%);
+}
+
+.graph-entity--class::after {
+  border: 1px solid rgb(76 132 226 / 18%);
+}
+
+.graph-entity--property::after {
+  border: 1px solid rgb(98 167 255 / 16%);
+}
+
+.graph-entity--relation::after {
+  border: 1px solid rgb(93 155 255 / 22%);
+}
+
+.graph-entity--rule::after {
+  border: 1px solid rgb(110 177 255 / 20%);
+}
+
+.graph-entity--instance::after {
+  border: 1px solid rgb(82 146 230 / 18%);
+}
+
+.graph-entity-kind {
+  position: relative;
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.36rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: rgb(39 82 149 / 74%);
+}
+
+.graph-entity-kind::before {
+  content: '';
+  width: 0.36rem;
+  height: 0.36rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #8ed8ff 0%, #5d9bff 78%, #2f73df 100%);
+  box-shadow: 0 0 10px rgb(93 155 255 / 28%);
+  animation: graph-beacon 4.8s ease-in-out infinite;
+}
+
+.graph-entity-title {
+  position: relative;
+  font-size: 0.96rem;
+  line-height: 1.25;
+  color: var(--login-text);
+}
+
+.graph-entity-summary {
+  position: relative;
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: rgb(31 53 96 / 70%);
+}
+
+.graph-entity-tags {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+}
+
+.graph-entity-tag {
+  padding: 0.18rem 0.42rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
   color: rgb(31 53 96 / 72%);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 76%) 0%, rgb(245 249 255 / 62%) 100%);
+  background: rgb(93 155 255 / 8%);
 }
 
 .login-card {
   width: min(100%, 476px);
   position: relative;
-  z-index: 2;
+  z-index: 3;
   padding: clamp(1.4rem, 2.7vw, 2.25rem);
   border-radius: 24px;
   background:
@@ -322,6 +478,34 @@
   }
 }
 
+@keyframes graph-signal-travel {
+  from {
+    stroke-dashoffset: 0;
+    opacity: 0.12;
+  }
+
+  20%,
+  75% {
+    opacity: 0.95;
+  }
+
+  to {
+    stroke-dashoffset: -260;
+    opacity: 0.12;
+  }
+}
+
+@keyframes graph-edge-label-float {
+  0%,
+  100% {
+    opacity: 0.76;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
 @keyframes graph-node-pulse {
   0%,
   100% {
@@ -348,14 +532,27 @@
   }
 }
 
-@keyframes graph-badge-float {
+@keyframes graph-entity-float {
   0%,
   100% {
     transform: translate(-50%, -50%);
   }
 
   50% {
-    transform: translate(-50%, calc(-50% - 6px));
+    transform: translate(-50%, calc(-50% - 7px));
+  }
+}
+
+@keyframes graph-beacon {
+  0%,
+  100% {
+    opacity: 0.46;
+    transform: scale(0.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
   }
 }
 
@@ -382,6 +579,13 @@
   }
 }
 
+@media (max-width: 1100px) {
+  .graph-entity {
+    width: min(15rem, 23vw);
+    min-width: 10rem;
+  }
+}
+
 @media (max-width: 900px) {
   .login-page {
     padding: 1rem;
@@ -389,14 +593,18 @@
 
   .login-graph {
     inset: -12% -18%;
-    opacity: 0.88;
+    opacity: 0.9;
   }
 
   .login-card {
     width: min(100%, 560px);
   }
 
-  .graph-badge:nth-of-type(2n) {
+  .graph-entity:nth-of-type(3),
+  .graph-entity:nth-of-type(5),
+  .graph-edge-label:nth-of-type(4),
+  .graph-edge-label:nth-of-type(6),
+  .graph-edge-label:nth-of-type(7) {
     display: none;
   }
 }
@@ -413,10 +621,17 @@
 
   .login-graph {
     inset: -18% -28%;
-    opacity: 0.8;
+    opacity: 0.82;
   }
 
-  .graph-badge:nth-of-type(n + 3) {
+  .graph-entity {
+    min-width: 9.2rem;
+    width: min(11rem, 38vw);
+    padding: 0.58rem 0.64rem;
+  }
+
+  .graph-entity:nth-of-type(n + 4),
+  .graph-edge-label:nth-of-type(n + 4) {
     display: none;
   }
 
@@ -434,7 +649,9 @@
   .graph-line,
   .graph-node-pulse,
   .graph-node-ring,
-  .graph-badge {
+  .graph-edge-label,
+  .graph-entity,
+  .graph-entity-kind::before {
     animation: none;
   }
 
