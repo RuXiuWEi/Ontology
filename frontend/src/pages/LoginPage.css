@@ -130,14 +130,8 @@
   color: var(--login-muted);
 }
 
-.login-error {
+.login-error-wrap {
   margin: 0;
-  font-size: 0.85rem;
-  color: #b42318;
-  background: rgb(253 242 240 / 76%);
-  border-radius: var(--radius-sm);
-  padding: 0.42rem 0.58rem;
-  box-shadow: inset 0 0 0 1px rgb(217 45 32 / 16%);
 }
 
 .login-field {

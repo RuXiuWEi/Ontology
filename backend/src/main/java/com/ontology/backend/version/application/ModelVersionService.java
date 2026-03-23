@@ -109,6 +109,7 @@ public class ModelVersionService {
         if (draft.getStatus() != ModelVersionStatus.DRAFT) {
             throw new BusinessException(40960, "仅草稿状态可发布");
         }
+        validateDraftBeforePublish(draft);
 
         modelVersionRepository.findByModelCodeAndStatus(draft.getModelCode(), ModelVersionStatus.PUBLISHED)
                 .ifPresent(published -> {
@@ -234,6 +235,29 @@ public class ModelVersionService {
             });
         } catch (Exception e) {
             throw new BusinessException(50060, "content 反序列化失败");
+        }
+    }
+
+    private void validateDraftBeforePublish(ModelVersion draft) {
+        if (!StringUtils.hasText(draft.getModelCode())) {
+            throw new BusinessException(40064, "草稿模型编码非法，禁止发布");
+        }
+        if (!StringUtils.hasText(draft.getTitle())) {
+            throw new BusinessException(40065, "草稿标题不能为空，禁止发布");
+        }
+        if (!StringUtils.hasText(draft.getContent())) {
+            throw new BusinessException(40066, "草稿内容不能为空，禁止发布");
+        }
+        try {
+            Map<String, Object> content = objectMapper.readValue(draft.getContent(), new TypeReference<>() {
+            });
+            if (content == null || content.isEmpty()) {
+                throw new BusinessException(40066, "草稿内容不能为空对象，禁止发布");
+            }
+        } catch (BusinessException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new BusinessException(40067, "草稿内容格式非法，禁止发布");
         }
     }
 }

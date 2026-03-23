@@ -4,6 +4,7 @@ import com.ontology.backend.domain.ObjectInstance;
 import com.ontology.backend.domain.ObjectType;
 import com.ontology.backend.relation.domain.RelationCardinality;
 import com.ontology.backend.relation.domain.RelationEdge;
+import com.ontology.backend.relation.domain.RelationDirection;
 import com.ontology.backend.relation.domain.RelationType;
 import com.ontology.backend.relation.infra.RelationEdgeRepository;
 import com.ontology.backend.relation.infra.RelationTypeRepository;
@@ -17,10 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class RelationEdgeService {
@@ -79,14 +80,11 @@ public class RelationEdgeService {
         if (!objectInstanceRepository.existsById(instanceId)) {
             throw new BusinessException(40402, "对象实例不存在");
         }
-        List<RelationNeighborResponse> results = new ArrayList<>();
-        for (RelationEdge edge : relationEdgeRepository.findAllBySourceInstance_IdOrderByIdDesc(instanceId)) {
-            results.add(toNeighbor(edge));
-        }
-        for (RelationEdge edge : relationEdgeRepository.findAllByTargetInstance_IdOrderByIdDesc(instanceId)) {
-            results.add(toNeighbor(edge));
-        }
-        return results;
+        return relationEdgeRepository
+                .findAllBySourceInstance_IdOrTargetInstance_IdOrderByIdDesc(instanceId, instanceId)
+                .stream()
+                .map(this::toNeighbor)
+                .collect(Collectors.toList());
     }
 
     private void validateInstanceType(RelationType relationType, ObjectInstance sourceInstance, ObjectInstance targetInstance) {
@@ -101,7 +99,11 @@ public class RelationEdgeService {
     }
 
     private void validateCardinality(RelationType relationType, Long sourceInstanceId, Long targetInstanceId) {
-        if (relationEdgeRepository.existsByRelationType_IdAndSourceInstance_IdAndTargetInstance_Id(
+        if (relationType.getDirection() == RelationDirection.UNDIRECTED) {
+            if (relationEdgeRepository.existsUndirectedPair(relationType.getId(), sourceInstanceId, targetInstanceId)) {
+                throw new BusinessException(40921, "关系已存在");
+            }
+        } else if (relationEdgeRepository.existsByRelationType_IdAndSourceInstance_IdAndTargetInstance_Id(
                 relationType.getId(),
                 sourceInstanceId,
                 targetInstanceId
@@ -110,21 +112,29 @@ public class RelationEdgeService {
         }
         RelationCardinality cardinality = relationType.getCardinality();
         if (cardinality == RelationCardinality.ONE_TO_ONE) {
-            if (relationEdgeRepository.existsByRelationType_IdAndSourceInstance_Id(relationType.getId(), sourceInstanceId)) {
+            if (relationEdgeRepository.existsByRelationTypeAndEitherEndpoint(relationType.getId(), sourceInstanceId)) {
                 throw new BusinessException(40922, "基数约束冲突：源对象已存在关联");
             }
-            if (relationEdgeRepository.existsByRelationType_IdAndTargetInstance_Id(relationType.getId(), targetInstanceId)) {
+            if (relationEdgeRepository.existsByRelationTypeAndEitherEndpoint(relationType.getId(), targetInstanceId)) {
                 throw new BusinessException(40923, "基数约束冲突：目标对象已存在关联");
             }
             return;
         }
-        if (cardinality == RelationCardinality.ONE_TO_MANY
-                && relationEdgeRepository.existsByRelationType_IdAndTargetInstance_Id(relationType.getId(), targetInstanceId)) {
-            throw new BusinessException(40923, "基数约束冲突：目标对象已存在关联");
+        if (cardinality == RelationCardinality.ONE_TO_MANY) {
+            boolean conflict = relationType.getDirection() == RelationDirection.UNDIRECTED
+                    ? relationEdgeRepository.existsByRelationTypeAndEitherEndpoint(relationType.getId(), targetInstanceId)
+                    : relationEdgeRepository.existsByRelationType_IdAndTargetInstance_Id(relationType.getId(), targetInstanceId);
+            if (conflict) {
+                throw new BusinessException(40923, "基数约束冲突：目标对象已存在关联");
+            }
         }
-        if (cardinality == RelationCardinality.MANY_TO_ONE
-                && relationEdgeRepository.existsByRelationType_IdAndSourceInstance_Id(relationType.getId(), sourceInstanceId)) {
-            throw new BusinessException(40922, "基数约束冲突：源对象已存在关联");
+        if (cardinality == RelationCardinality.MANY_TO_ONE) {
+            boolean conflict = relationType.getDirection() == RelationDirection.UNDIRECTED
+                    ? relationEdgeRepository.existsByRelationTypeAndEitherEndpoint(relationType.getId(), sourceInstanceId)
+                    : relationEdgeRepository.existsByRelationType_IdAndSourceInstance_Id(relationType.getId(), sourceInstanceId);
+            if (conflict) {
+                throw new BusinessException(40922, "基数约束冲突：源对象已存在关联");
+            }
         }
     }
 

@@ -374,6 +374,11 @@ input[type='checkbox'] {
   font-size: 0.86rem;
 }
 
+.status.info {
+  color: #215c9a;
+  font-size: 0.86rem;
+}
+
 .pagination {
   display: flex;
   flex-wrap: wrap;

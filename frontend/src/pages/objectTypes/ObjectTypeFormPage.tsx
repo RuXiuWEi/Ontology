@@ -1,18 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import * as api from '../../api/objectTypes'
+import { ErrorAlert } from '../../components/ErrorAlert'
+import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
 
 type ObjectTypeFormPageProps = {
   mode: 'create' | 'edit'
-}
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
 }
 
 export function ObjectTypeFormPage({ mode }: ObjectTypeFormPageProps) {
@@ -26,7 +20,7 @@ export function ObjectTypeFormPage({ mode }: ObjectTypeFormPageProps) {
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(isEdit)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppErrorInfo | null>(null)
 
   useEffect(() => {
     if (!isEdit || Number.isNaN(id)) return
@@ -42,7 +36,7 @@ export function ObjectTypeFormPage({ mode }: ObjectTypeFormPageProps) {
         setName(row.name)
         setDescription(row.description ?? '')
       } catch (e: unknown) {
-        if (!cancelled) setError(errMessage(e))
+        if (!cancelled) setError(toAppErrorInfo(e))
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -60,7 +54,7 @@ export function ObjectTypeFormPage({ mode }: ObjectTypeFormPageProps) {
     try {
       if (isEdit) {
         if (Number.isNaN(id)) {
-          setError('无效的对象类型ID')
+          setError(toAppErrorInfo('无效的对象类型ID'))
           return
         }
         await api.updateObjectType(id, { code, name, description })
@@ -70,7 +64,7 @@ export function ObjectTypeFormPage({ mode }: ObjectTypeFormPageProps) {
         navigate(`/object-types/${created.id}`)
       }
     } catch (err: unknown) {
-      setError(errMessage(err))
+      setError(toAppErrorInfo(err))
     } finally {
       setSaving(false)
     }
@@ -85,7 +79,7 @@ export function ObjectTypeFormPage({ mode }: ObjectTypeFormPageProps) {
 
       <div className="panel form-panel">
         {loading ? <p>加载中…</p> : null}
-        {error ? <p className="crud-error">{error}</p> : null}
+        <ErrorAlert error={error} />
 
         {!loading ? (
           <form className="entity-form" onSubmit={handleSubmit}>

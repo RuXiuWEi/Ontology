@@ -26,17 +26,20 @@ public class ActionTypeService {
     private final ObjectTypeRepository objectTypeRepository;
     private final AuditLogService auditLogService;
     private final ActionConstraintService actionConstraintService;
+    private final ActionParameterSchemaValidator actionParameterSchemaValidator;
 
     public ActionTypeService(
             ActionTypeRepository actionTypeRepository,
             ObjectTypeRepository objectTypeRepository,
             AuditLogService auditLogService,
-            ActionConstraintService actionConstraintService
+            ActionConstraintService actionConstraintService,
+            ActionParameterSchemaValidator actionParameterSchemaValidator
     ) {
         this.actionTypeRepository = actionTypeRepository;
         this.objectTypeRepository = objectTypeRepository;
         this.auditLogService = auditLogService;
         this.actionConstraintService = actionConstraintService;
+        this.actionParameterSchemaValidator = actionParameterSchemaValidator;
     }
 
     @Transactional(readOnly = true)
@@ -67,7 +70,7 @@ public class ActionTypeService {
         actionType.setTargetType(targetType);
         actionType.setExecutorType(parseExecutorType(request.executorType()));
         actionType.setDescription(request.description());
-        actionType.setParameterSchema(request.parameterSchema());
+        actionType.setParameterSchema(actionParameterSchemaValidator.normalizeAndValidateSchema(request.parameterSchema()));
         actionType.setEnabled(request.enabled() == null || request.enabled());
         actionType.setCreatedAt(Instant.now());
         actionType.setUpdatedAt(Instant.now());
@@ -94,7 +97,7 @@ public class ActionTypeService {
         actionType.setTargetType(targetType);
         actionType.setExecutorType(parseExecutorType(request.executorType()));
         actionType.setDescription(request.description());
-        actionType.setParameterSchema(request.parameterSchema());
+        actionType.setParameterSchema(actionParameterSchemaValidator.normalizeAndValidateSchema(request.parameterSchema()));
         actionType.setEnabled(request.enabled() == null || request.enabled());
         actionType.setUpdatedAt(Instant.now());
 

@@ -1,1 +1,9 @@
 /* 全局样式见 index.css；此处保留文件供后续扩展 */
+
+.route-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: rgb(25 28 30 / 72%);
+  font-size: 0.95rem;
+}
