@@ -277,6 +277,46 @@ class RegressionIntegrationTests {
     }
 
     @Test
+    void undirectedRelationShouldRejectReverseDuplicate() throws Exception {
+        long personTypeId = createObjectType("T_REL_PERSON", "人员");
+        long relationTypeId = createRelationType(
+                "REL_PEER",
+                "同级关系",
+                personTypeId,
+                personTypeId,
+                "MANY_TO_MANY",
+                "UNDIRECTED"
+        );
+
+        long personAId = createObjectInstance(personTypeId, "人员A");
+        long personBId = createObjectInstance(personTypeId, "人员B");
+
+        mockMvc.perform(post("/api/relations")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "relationTypeId": %d,
+                                  "sourceInstanceId": %d,
+                                  "targetInstanceId": %d
+                                }
+                                """.formatted(relationTypeId, personAId, personBId)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/relations")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "relationTypeId": %d,
+                                  "sourceInstanceId": %d,
+                                  "targetInstanceId": %d
+                                }
+                                """.formatted(relationTypeId, personBId, personAId)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void actionModuleShouldExecuteRetryAndRestrictDelete() throws Exception {
         long customerTypeId = createObjectType("T_ACT_CUSTOMER", "动作客户");
         long customerInstanceId = createObjectInstance(customerTypeId, "动作客户A");
