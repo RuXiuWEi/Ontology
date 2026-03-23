@@ -34,13 +34,13 @@ const NAV_SECTIONS: Array<{ title: string; items: NavItem[] }> = [
   },
   {
     title: '动作',
-    items: [{ to: '/actions', label: '动作' }],
+    items: [{ to: '/actions', label: '动作管理' }],
   },
   {
     title: '治理',
     items: [
       { to: '/graph', label: '图谱' },
-      { to: '/versions', label: '版本' },
+      { to: '/versions', label: '版本治理' },
       { to: '/lineage', label: '数据血缘' },
     ],
   },
@@ -60,13 +60,13 @@ function resolveBreadcrumb(pathname: string): string {
   if (pathname === '/instances/new') return '新建对象实例'
   if (/^\/instances\/[^/]+\/edit$/.test(pathname)) return '编辑对象实例'
   if (/^\/instances\/[^/]+$/.test(pathname)) return '对象实例详情'
+  if (pathname === '/link-types') return '关联类型'
+  if (pathname === '/actions') return '动作管理'
+  if (pathname === '/versions') return '版本治理'
 
   const map: Record<string, string> = {
-    '/link-types': '关联类型',
     '/sets': '对象集合',
-    '/actions': '动作',
     '/graph': '图谱',
-    '/versions': '版本',
     '/lineage': '数据血缘',
     '/rbac': '权限',
     '/integration': '集成',

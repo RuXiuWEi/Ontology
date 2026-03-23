@@ -83,3 +83,111 @@ export type UserSummaryDto = {
 
 export type RbacRoleDto = RoleDto
 export type RbacUserDto = UserSummaryDto
+
+export type RelationCardinality =
+  | 'ONE_TO_ONE'
+  | 'ONE_TO_MANY'
+  | 'MANY_TO_ONE'
+  | 'MANY_TO_MANY'
+
+export type RelationDirection = 'DIRECTED' | 'UNDIRECTED'
+
+export type RelationTypeDto = {
+  id: number
+  code: string
+  name: string
+  sourceTypeId: number
+  sourceTypeCode: string
+  targetTypeId: number
+  targetTypeCode: string
+  cardinality: RelationCardinality
+  direction: RelationDirection
+  description?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type RelationEdgeDto = {
+  id: number
+  relationTypeId: number
+  relationTypeCode: string
+  sourceInstanceId: number
+  sourceInstanceName: string
+  targetInstanceId: number
+  targetInstanceName: string
+  attributes?: Record<string, unknown> | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type RelationNeighborDto = {
+  edgeId: number
+  relationTypeId: number
+  relationTypeCode: string
+  relationTypeName: string
+  sourceInstanceId: number
+  sourceInstanceName: string
+  sourceTypeId: number
+  sourceTypeCode: string
+  targetInstanceId: number
+  targetInstanceName: string
+  targetTypeId: number
+  targetTypeCode: string
+  attributes?: Record<string, unknown> | null
+  createdAt: string
+}
+
+export type ActionTypeDto = {
+  id: number
+  code: string
+  name: string
+  targetTypeId: number
+  targetTypeCode: string
+  executorType: string
+  parameterSchema?: string | null
+  preconditionExpression?: string | null
+  description?: string | null
+  enabled: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export type ActionExecutionStatus =
+  | 'PENDING'
+  | 'RUNNING'
+  | 'SUCCEEDED'
+  | 'FAILED'
+
+export type ActionExecutionDto = {
+  id: number
+  actionTypeId: number
+  actionTypeCode: string
+  actionTypeName: string
+  targetInstanceId: number
+  targetInstanceName: string
+  status: ActionExecutionStatus
+  inputPayload?: Record<string, unknown> | null
+  resultPayload?: Record<string, unknown> | null
+  errorMessage?: string | null
+  startedAt?: string | null
+  completedAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type ModelVersionStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
+
+export type ModelVersionDto = {
+  id: number
+  modelCode: string
+  versionNo: number
+  title: string
+  content: Record<string, unknown>
+  status: ModelVersionStatus
+  changeLog?: string | null
+  createdBy?: string | null
+  publishedBy?: string | null
+  publishedAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
