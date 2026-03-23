@@ -568,6 +568,35 @@ class RegressionIntegrationTests {
         assertThat(auditContent.size()).isGreaterThanOrEqualTo(1);
     }
 
+    @Test
+    void modelVersionPublishShouldRejectEmptyContentDraft() throws Exception {
+        String modelCode = "M_GOV_EMPTY_CONTENT";
+        MvcResult draftResult = mockMvc.perform(put("/api/model-versions/draft")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "modelCode":"%s",
+                                  "title":"空内容草稿",
+                                  "content":{},
+                                  "changeLog":"初始化空内容"
+                                }
+                                """.formatted(modelCode)))
+                .andExpect(status().isOk())
+                .andReturn();
+        long draftId = responseData(draftResult).get("id").asLong();
+
+        mockMvc.perform(post("/api/model-versions/{id}/publish", draftId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "changeLog":"尝试发布空内容草稿"
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
     private String loginAndGetToken(String username, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
