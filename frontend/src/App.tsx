@@ -11,7 +11,10 @@ import { InstanceListPage } from './pages/instances/InstanceListPage'
 import { ObjectTypeDetailPage } from './pages/objectTypes/ObjectTypeDetailPage'
 import { ObjectTypeFormPage } from './pages/objectTypes/ObjectTypeFormPage'
 import { ObjectTypeListPage } from './pages/objectTypes/ObjectTypeListPage'
+import { RelationTypesPage } from './pages/relations/RelationTypesPage'
 import { RbacPage } from './pages/rbac/RbacPage'
+import { ActionsPage } from './pages/actions/ActionsPage'
+import { VersionsPage } from './pages/versions/VersionsPage'
 import './App.css'
 
 export default function App() {
@@ -32,7 +35,7 @@ export default function App() {
               </Route>
               <Route
                 path="link-types"
-                element={<PlaceholderPage title="关联类型" subtitle="关联类型模块将在后续批次接入。" />}
+                element={<RelationTypesPage />}
               />
               <Route path="instances">
                 <Route index element={<InstanceListPage />} />
@@ -46,7 +49,7 @@ export default function App() {
               />
               <Route
                 path="actions"
-                element={<PlaceholderPage title="动作" subtitle="动作模块将在后续批次接入。" />}
+                element={<ActionsPage />}
               />
               <Route
                 path="graph"
@@ -54,7 +57,7 @@ export default function App() {
               />
               <Route
                 path="versions"
-                element={<PlaceholderPage title="版本" subtitle="版本模块将在后续批次接入。" />}
+                element={<VersionsPage />}
               />
               <Route
                 path="lineage"

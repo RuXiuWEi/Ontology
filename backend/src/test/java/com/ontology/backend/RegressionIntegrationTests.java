@@ -353,6 +353,124 @@ class RegressionIntegrationTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void modelVersionGovernanceShouldCompleteDraftPublishRollbackLoop() throws Exception {
+        String modelCode = "M_GOV_RULE_ENGINE";
+        MvcResult draftV1Result = mockMvc.perform(put("/api/model-versions/draft")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "modelCode":"%s",
+                                  "title":"规则引擎v1草稿",
+                                  "content":{"nodes":[{"id":"n1","name":"开始"}],"meta":{"owner":"ops"}},
+                                  "changeLog":"首次建模"
+                                }
+                                """.formatted(modelCode)))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode draftV1 = responseData(draftV1Result);
+        long draftV1Id = draftV1.get("id").asLong();
+        assertThat(draftV1.get("status").asText()).isEqualTo("DRAFT");
+        assertThat(draftV1.get("versionNo").asInt()).isEqualTo(0);
+
+        MvcResult publishV1Result = mockMvc.perform(post("/api/model-versions/{id}/publish", draftV1Id)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "changeLog":"发布v1"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode publishedV1 = responseData(publishV1Result);
+        assertThat(publishedV1.get("status").asText()).isEqualTo("PUBLISHED");
+        assertThat(publishedV1.get("versionNo").asInt()).isEqualTo(1);
+
+        MvcResult draftV2Result = mockMvc.perform(put("/api/model-versions/draft")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "modelCode":"%s",
+                                  "title":"规则引擎v2草稿",
+                                  "content":{"nodes":[{"id":"n1","name":"开始"},{"id":"n2","name":"打标"}]},
+                                  "changeLog":"新增打标节点"
+                                }
+                                """.formatted(modelCode)))
+                .andExpect(status().isOk())
+                .andReturn();
+        long draftV2Id = responseData(draftV2Result).get("id").asLong();
+
+        MvcResult publishV2Result = mockMvc.perform(post("/api/model-versions/{id}/publish", draftV2Id)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "changeLog":"发布v2"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode publishedV2 = responseData(publishV2Result);
+        assertThat(publishedV2.get("status").asText()).isEqualTo("PUBLISHED");
+        assertThat(publishedV2.get("versionNo").asInt()).isEqualTo(2);
+
+        MvcResult archivedListResult = mockMvc.perform(get("/api/model-versions")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("modelCode", modelCode)
+                        .param("status", "ARCHIVED"))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode archivedContent = responseData(archivedListResult).get("content");
+        assertThat(archivedContent.isArray()).isTrue();
+        assertThat(archivedContent.size()).isGreaterThanOrEqualTo(1);
+        assertThat(archivedContent.toString()).contains("\"versionNo\":1");
+
+        MvcResult rollbackDraftResult = mockMvc.perform(post("/api/model-versions/rollback")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "modelCode":"%s",
+                                  "targetVersionNo":1,
+                                  "changeLog":"回滚到v1"
+                                }
+                                """.formatted(modelCode)))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode rollbackDraft = responseData(rollbackDraftResult);
+        long rollbackDraftId = rollbackDraft.get("id").asLong();
+        assertThat(rollbackDraft.get("status").asText()).isEqualTo("DRAFT");
+        assertThat(rollbackDraft.get("title").asText()).isEqualTo("规则引擎v1草稿");
+
+        MvcResult publishRollbackResult = mockMvc.perform(post("/api/model-versions/{id}/publish", rollbackDraftId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "changeLog":"回滚发布"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode publishedRollback = responseData(publishRollbackResult);
+        assertThat(publishedRollback.get("versionNo").asInt()).isEqualTo(3);
+        assertThat(publishedRollback.get("status").asText()).isEqualTo("PUBLISHED");
+
+        MvcResult auditResult = mockMvc.perform(get("/api/audit-logs")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("resource", "MODEL_VERSION")
+                        .param("preset", "LAST_30_DAYS")
+                        .param("size", "50"))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode auditContent = responseData(auditResult).get("content");
+        assertThat(auditContent.isArray()).isTrue();
+        assertThat(auditContent.size()).isGreaterThanOrEqualTo(1);
+    }
+
     private String loginAndGetToken(String username, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
