@@ -1,21 +1,26 @@
 .login-page {
   --login-accent: #5d9bff;
   --login-accent-strong: #2f73df;
+  --login-accent-soft: #8ed8ff;
   --login-bg-start: #f8fbff;
   --login-bg-end: #edf4ff;
   --login-text: #1f3560;
   --login-muted: rgb(31 53 96 / 66%);
-  --wire-color: rgb(77 132 226 / 24%);
+  --login-grid-color: rgb(77 132 226 / 10%);
+  --login-line-strong: rgb(77 132 226 / 28%);
+  --login-line-secondary: rgb(77 132 226 / 18%);
+  --login-line-bridge: rgb(93 155 255 / 16%);
 
   position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: grid;
   place-items: center;
   overflow: hidden;
   padding: clamp(1rem, 2.6vw, 2.5rem);
   background:
-    radial-gradient(660px 360px at 14% 10%, rgb(93 155 255 / 26%) 0%, transparent 72%),
-    radial-gradient(980px 460px at 86% 90%, rgb(93 155 255 / 16%) 0%, transparent 72%),
+    radial-gradient(720px 420px at 14% 10%, rgb(93 155 255 / 24%) 0%, transparent 72%),
+    radial-gradient(980px 520px at 86% 90%, rgb(142 216 255 / 18%) 0%, transparent 72%),
     linear-gradient(160deg, var(--login-bg-start) 0%, var(--login-bg-end) 55%, #fbfdff 100%);
 }
 
@@ -28,54 +33,147 @@
 }
 
 .login-page::before {
-  opacity: 0.3;
+  z-index: 0;
+  opacity: 0.38;
   background:
-    linear-gradient(rgb(77 132 226 / 12%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(77 132 226 / 10%) 1px, transparent 1px);
-  background-size: 36px 36px;
-  mask-image: radial-gradient(circle at center, black 32%, transparent 92%);
+    linear-gradient(var(--login-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--login-grid-color) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black 28%, transparent 88%);
 }
 
 .login-page::after {
-  inset: 12% 20%;
+  z-index: 0;
+  inset: 18% 18%;
   border-radius: 999px;
-  background: radial-gradient(circle, rgb(93 155 255 / 18%) 0%, transparent 70%);
-  filter: blur(22px);
+  background:
+    radial-gradient(circle at center, rgb(93 155 255 / 15%) 0%, rgb(93 155 255 / 6%) 42%, transparent 74%);
+  filter: blur(28px);
 }
 
-.login-wires {
+.login-graph {
   position: absolute;
-  inset: -8%;
+  inset: -6%;
+  z-index: 1;
   pointer-events: none;
-  opacity: 0.78;
+  opacity: 0.96;
+  animation: graph-drift 18s ease-in-out infinite;
 }
 
-.wire-ring {
+.login-graph-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.graph-lines {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.graph-line {
+  animation: graph-line-breathe 9s ease-in-out infinite;
+}
+
+.graph-line--strong {
+  stroke: var(--login-line-strong);
+  stroke-width: 1.8;
+}
+
+.graph-line--secondary {
+  stroke: var(--login-line-secondary);
+  stroke-width: 1.25;
+  stroke-dasharray: 2 9;
+}
+
+.graph-line--bridge {
+  stroke: var(--login-line-bridge);
+  stroke-width: 1.35;
+  stroke-dasharray: 3 12;
+  animation:
+    graph-line-breathe 10s ease-in-out infinite,
+    graph-line-flow 24s linear infinite;
+}
+
+.graph-node-pulses {
+  fill: rgb(93 155 255 / 9%);
+}
+
+.graph-node-pulse {
+  opacity: 0.54;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: graph-node-pulse 6.4s ease-in-out infinite;
+}
+
+.graph-node-pulse--two {
+  animation-delay: 1.2s;
+}
+
+.graph-node-pulse--three {
+  animation-delay: 2.4s;
+}
+
+.graph-node-pulse--four {
+  animation-delay: 3.2s;
+}
+
+.graph-rings {
+  fill: none;
+  stroke: rgb(93 155 255 / 22%);
+}
+
+.graph-node-ring {
+  stroke-width: 1.1;
+  opacity: 0.76;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: graph-ring-breathe 7.4s ease-in-out infinite;
+}
+
+.graph-node {
+  fill: #4d87e2;
+  filter: drop-shadow(0 0 10px rgb(93 155 255 / 18%));
+}
+
+.graph-node--core {
+  fill: var(--login-accent-strong);
+}
+
+.graph-node--soft {
+  fill: rgb(93 155 255 / 46%);
+}
+
+.graph-badge {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: var(--wire-size);
-  height: var(--wire-size);
-  transform: translate(-50%, -50%) rotate(var(--wire-rotate));
-  transform-origin: center center;
-  border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%;
-  border: 1px solid var(--wire-color);
+  left: var(--badge-x);
+  top: var(--badge-y);
+  transform: translate(-50%, -50%);
+  padding: 0.38rem 0.78rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: var(--login-text);
+  white-space: nowrap;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 84%) 0%, rgb(246 250 255 / 72%) 100%);
   box-shadow:
-    0 0 0 1px rgb(106 156 255 / 8%),
-    0 0 32px rgb(93 155 255 / 10%);
-  animation: wire-spin var(--wire-duration) linear infinite, wire-pulse 10s ease-in-out infinite;
+    0 10px 26px rgb(38 88 162 / 10%),
+    inset 0 0 0 1px rgb(56 115 220 / 12%);
+  backdrop-filter: blur(8px);
+  animation: graph-badge-float 11s ease-in-out infinite var(--badge-delay);
 }
 
-.wire-ring::before {
-  content: '';
-  position: absolute;
-  inset: clamp(1rem, 2vw, 1.6rem);
-  border-radius: 48% 52% 54% 46% / 52% 48% 46% 54%;
-  border: 1px solid rgb(62 115 219 / 22%);
+.graph-badge--primary {
+  color: #26539a;
 }
 
-.wire-ring:nth-child(2n) {
-  animation-direction: reverse;
+.graph-badge--secondary {
+  color: rgb(31 53 96 / 72%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 76%) 0%, rgb(245 249 255 / 62%) 100%);
 }
 
 .login-card {
@@ -85,7 +183,7 @@
   padding: clamp(1.4rem, 2.7vw, 2.25rem);
   border-radius: 24px;
   background:
-    linear-gradient(165deg, rgb(255 255 255 / 88%) 0%, rgb(245 250 255 / 82%) 100%);
+    linear-gradient(165deg, rgb(255 255 255 / 90%) 0%, rgb(245 250 255 / 84%) 100%);
   backdrop-filter: blur(14px);
   box-shadow:
     0 30px 72px rgb(37 84 156 / 20%),
@@ -203,24 +301,72 @@
   text-align: center;
 }
 
-@keyframes wire-spin {
-  from {
-    transform: translate(-50%, -50%) rotate(var(--wire-rotate));
-  }
-
-  to {
-    transform: translate(-50%, -50%) rotate(calc(var(--wire-rotate) + 360deg));
-  }
-}
-
-@keyframes wire-pulse {
+@keyframes graph-line-breathe {
   0%,
   100% {
-    opacity: 0.58;
+    opacity: 0.62;
   }
 
   50% {
-    opacity: 0.92;
+    opacity: 0.98;
+  }
+}
+
+@keyframes graph-line-flow {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: -120;
+  }
+}
+
+@keyframes graph-node-pulse {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: scale(0.88);
+  }
+
+  50% {
+    opacity: 0.74;
+    transform: scale(1.16);
+  }
+}
+
+@keyframes graph-ring-breathe {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 0.84;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes graph-badge-float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+
+  50% {
+    transform: translate(-50%, calc(-50% - 6px));
+  }
+}
+
+@keyframes graph-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, -0.8%, 0);
   }
 }
 
@@ -241,23 +387,37 @@
     padding: 1rem;
   }
 
+  .login-graph {
+    inset: -12% -18%;
+    opacity: 0.88;
+  }
+
   .login-card {
     width: min(100%, 560px);
   }
 
-  .wire-ring:nth-child(n + 5) {
+  .graph-badge:nth-of-type(2n) {
     display: none;
   }
 }
 
 @media (max-width: 640px) {
-  .wire-ring:nth-child(n + 4) {
-    display: none;
+  .login-page::before {
+    background-size: 28px 28px;
   }
 
   .login-card {
     border-radius: 18px;
     padding: 1.1rem;
+  }
+
+  .login-graph {
+    inset: -18% -28%;
+    opacity: 0.8;
+  }
+
+  .graph-badge:nth-of-type(n + 3) {
+    display: none;
   }
 
   .login-brand-text h1 {
@@ -270,7 +430,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wire-ring {
+  .login-graph,
+  .graph-line,
+  .graph-node-pulse,
+  .graph-node-ring,
+  .graph-badge {
     animation: none;
   }
 
