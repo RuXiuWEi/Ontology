@@ -394,6 +394,63 @@ class RegressionIntegrationTests {
     }
 
     @Test
+    void actionTypeShouldRejectInvalidParameterSchema() throws Exception {
+        long customerTypeId = createObjectType("T_ACT_SCHEMA_TYPE", "动作Schema类型");
+
+        mockMvc.perform(post("/api/action-types")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "code":"ACT_INVALID_SCHEMA",
+                                  "name":"非法Schema动作",
+                                  "targetTypeId": %d,
+                                  "executorType":"SYNC_MOCK",
+                                  "enabled": true,
+                                  "parameterSchema":"not-json",
+                                  "description":"动作测试类型"
+                                }
+                                """.formatted(customerTypeId)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void actionExecutionShouldRejectPayloadNotMatchingSchema() throws Exception {
+        long customerTypeId = createObjectType("T_ACT_SCHEMA_EXEC", "动作执行Schema类型");
+        long customerInstanceId = createObjectInstance(customerTypeId, "动作执行实例");
+
+        MvcResult actionTypeResult = mockMvc.perform(post("/api/action-types")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "code":"ACT_SCHEMA_ENFORCE",
+                                  "name":"Schema约束动作",
+                                  "targetTypeId": %d,
+                                  "executorType":"SYNC_MOCK",
+                                  "enabled": true,
+                                  "parameterSchema":"{\\"type\\":\\"object\\",\\"required\\":[\\"tag\\"],\\"properties\\":{\\"tag\\":{\\"type\\":\\"string\\"},\\"score\\":{\\"type\\":\\"integer\\"}}}",
+                                  "description":"动作测试类型"
+                                }
+                                """.formatted(customerTypeId)))
+                .andExpect(status().isOk())
+                .andReturn();
+        long actionTypeId = responseData(actionTypeResult).get("id").asLong();
+
+        mockMvc.perform(post("/api/action-executions")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "actionTypeId": %d,
+                                  "targetInstanceId": %d,
+                                  "payload": {"score":"high"}
+                                }
+                                """.formatted(actionTypeId, customerInstanceId)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void modelVersionGovernanceShouldCompleteDraftPublishRollbackLoop() throws Exception {
         String modelCode = "M_GOV_RULE_ENGINE";
         MvcResult draftV1Result = mockMvc.perform(put("/api/model-versions/draft")

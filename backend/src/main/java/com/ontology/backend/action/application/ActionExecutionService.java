@@ -32,19 +32,22 @@ public class ActionExecutionService {
     private final ObjectInstanceRepository objectInstanceRepository;
     private final AuditLogService auditLogService;
     private final ObjectMapper objectMapper;
+    private final ActionParameterSchemaValidator actionParameterSchemaValidator;
 
     public ActionExecutionService(
             ActionExecutionRepository actionExecutionRepository,
             ActionTypeRepository actionTypeRepository,
             ObjectInstanceRepository objectInstanceRepository,
             AuditLogService auditLogService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            ActionParameterSchemaValidator actionParameterSchemaValidator
     ) {
         this.actionExecutionRepository = actionExecutionRepository;
         this.actionTypeRepository = actionTypeRepository;
         this.objectInstanceRepository = objectInstanceRepository;
         this.auditLogService = auditLogService;
         this.objectMapper = objectMapper;
+        this.actionParameterSchemaValidator = actionParameterSchemaValidator;
     }
 
     @Transactional(readOnly = true)
@@ -76,6 +79,7 @@ public class ActionExecutionService {
         if (!actionType.getTargetType().getId().equals(instance.getType().getId())) {
             throw new BusinessException(40040, "动作目标实例类型不匹配");
         }
+        actionParameterSchemaValidator.validatePayload(actionType.getParameterSchema(), request.payload());
 
         ActionExecution execution = new ActionExecution();
         execution.setActionType(actionType);
