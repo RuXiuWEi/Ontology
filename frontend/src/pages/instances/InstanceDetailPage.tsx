@@ -2,16 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getInstance } from '../../api/instances'
 import { listObjectTypes } from '../../api/objectTypes'
+import { ErrorAlert } from '../../components/ErrorAlert'
 import type { ObjectInstanceDto, ObjectTypeDto } from '../../api/types'
+import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
-}
 
 export function InstanceDetailPage() {
   const params = useParams<{ id: string }>()
@@ -19,11 +13,11 @@ export function InstanceDetailPage() {
   const [item, setItem] = useState<ObjectInstanceDto | null>(null)
   const [types, setTypes] = useState<ObjectTypeDto[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppErrorInfo | null>(null)
 
   useEffect(() => {
     if (!Number.isFinite(id)) {
-      setError('实例ID无效')
+      setError(toAppErrorInfo('实例ID无效'))
       setLoading(false)
       return
     }
@@ -40,7 +34,7 @@ export function InstanceDetailPage() {
         setItem(instance)
         setTypes(typeList)
       } catch (e: unknown) {
-        if (!cancelled) setError(errMessage(e))
+        if (!cancelled) setError(toAppErrorInfo(e))
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -75,7 +69,7 @@ export function InstanceDetailPage() {
         </div>
       </header>
 
-      {error ? <p className="error-text">{error}</p> : null}
+      <ErrorAlert error={error} />
       {loading ? <p>加载中…</p> : null}
 
       {!loading && item ? (

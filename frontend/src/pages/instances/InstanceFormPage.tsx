@@ -3,18 +3,13 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { createInstance, getInstance, updateInstance } from '../../api/instances'
 import { listObjectTypes } from '../../api/objectTypes'
 import type { ObjectTypeDto } from '../../api/types'
+import { ErrorAlert } from '../../components/ErrorAlert'
+import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
+import { parseJsonObjectInput } from '../../utils/json'
 import '../PageShell.css'
 
 type InstanceFormPageProps = {
   mode: 'create' | 'edit'
-}
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
 }
 
 export function InstanceFormPage({ mode }: InstanceFormPageProps) {
@@ -29,7 +24,7 @@ export function InstanceFormPage({ mode }: InstanceFormPageProps) {
 
   const [loading, setLoading] = useState(mode === 'edit')
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppErrorInfo | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -40,7 +35,7 @@ export function InstanceFormPage({ mode }: InstanceFormPageProps) {
         setTypes(list)
         setTypeId((prev) => prev || (list[0] ? String(list[0].id) : ''))
       } catch (e: unknown) {
-        if (!cancelled) setError(errMessage(e))
+        if (!cancelled) setError(toAppErrorInfo(e))
       }
     })()
     return () => {
@@ -66,7 +61,7 @@ export function InstanceFormPage({ mode }: InstanceFormPageProps) {
           item.attributes ? JSON.stringify(item.attributes, null, 2) : '',
         )
       } catch (e: unknown) {
-        if (!cancelled) setError(errMessage(e))
+        if (!cancelled) setError(toAppErrorInfo(e))
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -79,7 +74,7 @@ export function InstanceFormPage({ mode }: InstanceFormPageProps) {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!typeId) {
-      setError('请选择对象类型')
+      setError(toAppErrorInfo('请选择对象类型'))
       return
     }
     setSaving(true)
@@ -87,13 +82,17 @@ export function InstanceFormPage({ mode }: InstanceFormPageProps) {
     try {
       let attributes: Record<string, unknown> | undefined
       if (attributesText.trim()) {
-        const parsed = JSON.parse(attributesText)
-        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-          setError('属性必须是 JSON 对象')
+        const parsed = parseJsonObjectInput(
+          attributesText,
+          '属性不能为空，请输入 JSON 对象',
+          '属性必须是合法 JSON 对象',
+        )
+        if (!parsed.ok) {
+          setError(toAppErrorInfo(parsed.message))
           setSaving(false)
           return
         }
-        attributes = parsed as Record<string, unknown>
+        attributes = parsed.value
       }
 
       if (mode === 'edit' && id) {
@@ -112,7 +111,7 @@ export function InstanceFormPage({ mode }: InstanceFormPageProps) {
         navigate(`/instances/${created.id}`, { replace: true })
       }
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setSaving(false)
     }
@@ -137,7 +136,7 @@ export function InstanceFormPage({ mode }: InstanceFormPageProps) {
           ) : null}
         </div>
 
-        {error ? <p className="inline-error">{error}</p> : null}
+        <ErrorAlert error={error} />
         {loading ? (
           <p className="hint-text">加载中…</p>
         ) : (

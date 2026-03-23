@@ -16,7 +16,8 @@ import type {
   ObjectTypeDto,
   PageResponse,
 } from '../../api/types'
-import { getErrorMessage } from '../../utils/error'
+import { ErrorAlert } from '../../components/ErrorAlert'
+import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import { parseJsonObjectInput } from '../../utils/json'
 import '../PageShell.css'
 
@@ -59,7 +60,7 @@ export function ActionsPage() {
     description: '',
   })
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppErrorInfo | null>(null)
   const [retryingId, setRetryingId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
@@ -138,15 +139,15 @@ export function ActionsPage() {
     const code = form.code.trim()
     const name = form.name.trim()
     if (!code) {
-      setError('请先填写动作编码')
+      setError(toAppErrorInfo('请先填写动作编码'))
       return
     }
     if (!name) {
-      setError('请先填写动作名称')
+      setError(toAppErrorInfo('请先填写动作名称'))
       return
     }
     if (!form.targetTypeId) {
-      setError('请先选择目标对象类型')
+      setError(toAppErrorInfo('请先选择目标对象类型'))
       return
     }
     if (form.parameterSchema.trim()) {
@@ -156,7 +157,7 @@ export function ActionsPage() {
         '参数 Schema 必须是合法 JSON 对象',
       )
       if (!parsedSchema.ok) {
-        setError(parsedSchema.message)
+        setError(toAppErrorInfo(parsedSchema.message))
         return
       }
     }
@@ -181,7 +182,7 @@ export function ActionsPage() {
       setTypesPageIndex(0)
       await refreshActionTypes(0)
     } catch (e: unknown) {
-      setError(getErrorMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setSubmitting(false)
     }
@@ -190,11 +191,11 @@ export function ActionsPage() {
   async function handleExecuteAction(event: FormEvent) {
     event.preventDefault()
     if (!execActionTypeId) {
-      setError('请先选择动作类型')
+      setError(toAppErrorInfo('请先选择动作类型'))
       return
     }
     if (!execTargetInstanceId) {
-      setError('请先选择目标实例')
+      setError(toAppErrorInfo('请先选择目标实例'))
       return
     }
     setSubmitting(true)
@@ -208,7 +209,7 @@ export function ActionsPage() {
           '执行参数必须是合法 JSON 对象',
         )
         if (!parsedPayload.ok) {
-          setError(parsedPayload.message)
+          setError(toAppErrorInfo(parsedPayload.message))
           return
         }
         payload = parsedPayload.value
@@ -221,7 +222,7 @@ export function ActionsPage() {
       setExecPageIndex(0)
       await refreshExecutions(0, queryActionTypeId ? Number(queryActionTypeId) : undefined)
     } catch (e: unknown) {
-      setError(getErrorMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setSubmitting(false)
     }
@@ -234,7 +235,7 @@ export function ActionsPage() {
       await retryActionExecution(executionId)
       await refreshExecutions(execPageIndex, queryActionTypeId ? Number(queryActionTypeId) : undefined)
     } catch (e: unknown) {
-      setError(getErrorMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setRetryingId(null)
     }
@@ -253,7 +254,7 @@ export function ActionsPage() {
         await refreshActionTypes(typesPageIndex)
       }
     } catch (e: unknown) {
-      setError(getErrorMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setDeletingId(null)
     }
@@ -275,7 +276,7 @@ export function ActionsPage() {
         </div>
       </header>
 
-      {error ? <p className="status error">{error}</p> : null}
+      <ErrorAlert error={error} />
 
       <div className="panel">
         <h2 className="panel-title">新建动作类型</h2>

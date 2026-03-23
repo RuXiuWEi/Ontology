@@ -2,27 +2,21 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { deleteObjectType, getObjectType } from '../../api/objectTypes'
 import type { ObjectTypeDto } from '../../api/types'
+import { ErrorAlert } from '../../components/ErrorAlert'
+import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
-}
 
 export function ObjectTypeDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [item, setItem] = useState<ObjectTypeDto | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppErrorInfo | null>(null)
   const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!id) {
-      setError('缺少对象类型 ID')
+      setError(toAppErrorInfo('缺少对象类型 ID'))
       setLoading(false)
       return
     }
@@ -36,7 +30,7 @@ export function ObjectTypeDetailPage() {
         setItem(data)
       } catch (e: unknown) {
         if (cancelled) return
-        setError(errMessage(e))
+        setError(toAppErrorInfo(e))
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -56,7 +50,7 @@ export function ObjectTypeDetailPage() {
       await deleteObjectType(item.id)
       navigate('/object-types', { replace: true })
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(toAppErrorInfo(e))
       setDeleting(false)
     }
   }
@@ -79,7 +73,7 @@ export function ObjectTypeDetailPage() {
           <h1>对象类型详情</h1>
           <p>无法加载对象类型详情。</p>
         </header>
-        <p className="error-text">{error}</p>
+        <ErrorAlert error={error} />
       </section>
     )
   }
@@ -102,7 +96,7 @@ export function ObjectTypeDetailPage() {
         <p>查看对象类型完整信息并执行编辑、删除操作。</p>
       </header>
 
-      {error ? <p className="error-text">{error}</p> : null}
+      <ErrorAlert error={error} />
 
       <div className="panel detail-grid">
         <div className="detail-item">

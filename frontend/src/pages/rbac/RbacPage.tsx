@@ -1,17 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { assignUserRoles, listRbacRoles, listRbacUsersPage } from '../../api/rbac'
 import type { RoleDto, UserSummaryDto } from '../../api/types'
+import { ErrorAlert } from '../../components/ErrorAlert'
+import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
 
 const PAGE_SIZE = 10
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
-}
 
 export function RbacPage() {
   const [roles, setRoles] = useState<RoleDto[]>([])
@@ -21,7 +15,7 @@ export function RbacPage() {
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppErrorInfo | null>(null)
   const [savingId, setSavingId] = useState<number | null>(null)
 
   const load = useCallback(async () => {
@@ -41,7 +35,7 @@ export function RbacPage() {
       setTotal(userPage.totalElements)
       setTotalPages(userPage.totalPages)
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setLoading(false)
     }
@@ -61,7 +55,7 @@ export function RbacPage() {
       next.add(roleName)
     }
     if (next.size === 0) {
-      setError('每个用户至少保留一个角色')
+      setError(toAppErrorInfo('每个用户至少保留一个角色'))
       return
     }
     setSavingId(user.id)
@@ -70,7 +64,7 @@ export function RbacPage() {
       const updated = await assignUserRoles(user.id, Array.from(next))
       setUsers((prev) => prev.map((row) => (row.id === user.id ? updated : row)))
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setSavingId(null)
     }
@@ -85,7 +79,7 @@ export function RbacPage() {
         </div>
       </header>
 
-      {error ? <p className="error-text">{error}</p> : null}
+      <ErrorAlert error={error} />
 
       <div className="panel">
         <div className="toolbar">

@@ -5,16 +5,10 @@ import {
   listObjectTypesPage,
   type ListObjectTypesParams,
 } from '../../api/objectTypes'
+import { ErrorAlert } from '../../components/ErrorAlert'
 import type { ObjectTypeDto, PageResponse } from '../../api/types'
+import { type AppErrorInfo, toAppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
-}
 
 const PAGE_SIZE = 10
 
@@ -23,7 +17,7 @@ export function ObjectTypeListPage() {
   const [rows, setRows] = useState<ObjectTypeDto[]>([])
   const [pageInfo, setPageInfo] = useState<PageResponse<ObjectTypeDto> | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppErrorInfo | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
   const load = useCallback(async (params?: ListObjectTypesParams) => {
@@ -37,7 +31,7 @@ export function ObjectTypeListPage() {
       setRows(data.content)
       setPageInfo(data)
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setLoading(false)
     }
@@ -60,7 +54,7 @@ export function ObjectTypeListPage() {
         await load({ page, size: PAGE_SIZE })
       }
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setDeletingId(null)
     }
@@ -83,7 +77,7 @@ export function ObjectTypeListPage() {
         </Link>
       </header>
 
-      {error ? <p className="status error">{error}</p> : null}
+      <ErrorAlert error={error} />
 
       <div className="panel">
         {loading ? (

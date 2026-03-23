@@ -11,6 +11,8 @@ import type {
   DashboardDimension,
   DashboardSummaryDto,
 } from '../../api/types'
+import { ErrorAlert } from '../../components/ErrorAlert'
+import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
 import './DashboardPage.css'
 
@@ -21,21 +23,13 @@ type Filters = {
   preset: AuditTimePreset | ''
 }
 
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
-}
-
 const PAGE_SIZE = 10
 
 export function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummaryDto | null>(null)
   const [dimension, setDimension] = useState<DashboardDimension>('OBJECT_TYPE')
   const [summaryLoading, setSummaryLoading] = useState(true)
-  const [summaryError, setSummaryError] = useState<string | null>(null)
+  const [summaryError, setSummaryError] = useState<AppErrorInfo | null>(null)
 
   const [filters, setFilters] = useState<Filters>({
     username: '',
@@ -48,7 +42,7 @@ export function DashboardPage() {
   const [auditTotal, setAuditTotal] = useState(0)
   const [auditTotalPages, setAuditTotalPages] = useState(0)
   const [auditLoading, setAuditLoading] = useState(true)
-  const [auditError, setAuditError] = useState<string | null>(null)
+  const [auditError, setAuditError] = useState<AppErrorInfo | null>(null)
   const [exporting, setExporting] = useState(false)
   const [expandedRows, setExpandedRows] = useState<Record<number, Set<string>>>({})
 
@@ -59,7 +53,7 @@ export function DashboardPage() {
       const data = await getDashboardSummary(dimension)
       setSummary(data)
     } catch (e: unknown) {
-      setSummaryError(errMessage(e))
+      setSummaryError(toAppErrorInfo(e))
     } finally {
       setSummaryLoading(false)
     }
@@ -81,7 +75,7 @@ export function DashboardPage() {
       setAuditTotal(pageData.totalElements)
       setAuditTotalPages(pageData.totalPages)
     } catch (e: unknown) {
-      setAuditError(errMessage(e))
+      setAuditError(toAppErrorInfo(e))
     } finally {
       setAuditLoading(false)
     }
@@ -196,7 +190,7 @@ export function DashboardPage() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch (e: unknown) {
-      setAuditError(errMessage(e))
+      setAuditError(toAppErrorInfo(e))
     } finally {
       setExporting(false)
     }
@@ -237,8 +231,8 @@ export function DashboardPage() {
         </div>
       </header>
 
-      {summaryError ? <p className="error-text">{summaryError}</p> : null}
-      {auditError ? <p className="error-text">{auditError}</p> : null}
+      <ErrorAlert error={summaryError} />
+      <ErrorAlert error={auditError} />
 
       <div className="dashboard-stats">
         <article className="panel stat-card">

@@ -2,6 +2,8 @@ import { useMemo, useState, type CSSProperties, type FormEvent } from 'react'
 import { useLocation, useNavigate, Navigate } from 'react-router-dom'
 import systemLogo from '../assets/system-logo.svg'
 import { useAuth } from '../auth/useAuth'
+import { ErrorAlert } from '../components/ErrorAlert'
+import { toAppErrorInfo, type AppErrorInfo } from '../utils/error'
 import './LoginPage.css'
 
 export function LoginPage() {
@@ -18,7 +20,7 @@ export function LoginPage() {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppErrorInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const wireframes = useMemo(
     () =>
@@ -43,14 +45,7 @@ export function LoginPage() {
       await login(username, password)
       navigate(from, { replace: true })
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === 'object' && 'response' in err
-          ? String(
-              (err as { response?: { data?: { message?: string } } }).response
-                ?.data?.message ?? '登录失败',
-            )
-          : '登录失败'
-      setError(msg)
+      setError(toAppErrorInfo(err, '登录失败'))
     } finally {
       setLoading(false)
     }
@@ -84,7 +79,7 @@ export function LoginPage() {
             <p>统一建模与治理控制台</p>
           </div>
         </div>
-        {error ? <p className="login-error">{error}</p> : null}
+        <ErrorAlert error={error} className="login-error-wrap" />
         <label className="login-field">
           <span>用户名</span>
           <input

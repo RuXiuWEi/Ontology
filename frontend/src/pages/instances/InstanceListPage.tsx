@@ -3,15 +3,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { deleteInstance, listInstancesPage } from '../../api/instances'
 import { listObjectTypes } from '../../api/objectTypes'
 import type { ObjectInstanceDto, ObjectTypeDto } from '../../api/types'
+import { ErrorAlert } from '../../components/ErrorAlert'
+import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
-
-function errMessage(err: unknown): string {
-  if (err && typeof err === 'object' && 'response' in err) {
-    const r = err as { response?: { data?: { message?: string } } }
-    return r.response?.data?.message ?? '请求失败'
-  }
-  return '请求失败'
-}
 
 const PAGE_SIZE = 10
 
@@ -27,7 +21,7 @@ export function InstanceListPage() {
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<AppErrorInfo | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -65,7 +59,7 @@ export function InstanceListPage() {
       setTotalPages(res.totalPages)
       setTotalElements(res.totalElements)
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(toAppErrorInfo(e))
     } finally {
       setLoading(false)
     }
@@ -93,7 +87,7 @@ export function InstanceListPage() {
         await load()
       }
     } catch (e: unknown) {
-      setError(errMessage(e))
+      setError(toAppErrorInfo(e))
     }
   }
 
@@ -128,7 +122,7 @@ export function InstanceListPage() {
         </button>
       </div>
 
-      {error ? <p className="error-text">{error}</p> : null}
+      <ErrorAlert error={error} />
 
       <div className="panel">
         {loading ? (
