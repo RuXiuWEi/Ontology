@@ -50,6 +50,15 @@ const ActionsPage = lazy(async () => ({
 const VersionsPage = lazy(async () => ({
   default: (await import('./pages/versions/VersionsPage')).VersionsPage,
 }))
+const ObjectSetListPage = lazy(async () => ({
+  default: (await import('./pages/objectSets/ObjectSetListPage')).ObjectSetListPage,
+}))
+const ObjectSetFormPage = lazy(async () => ({
+  default: (await import('./pages/objectSets/ObjectSetFormPage')).ObjectSetFormPage,
+}))
+const ObjectSetDetailPage = lazy(async () => ({
+  default: (await import('./pages/objectSets/ObjectSetDetailPage')).ObjectSetDetailPage,
+}))
 
 export default function App() {
   return (
@@ -83,10 +92,14 @@ export default function App() {
                   </Route>
                   <Route path=":id" element={<InstanceDetailPage />} />
                 </Route>
-                <Route
-                  path="sets"
-                  element={<PlaceholderPage title="对象集合" subtitle="对象集合模块将在后续批次接入。" />}
-                />
+                <Route path="sets">
+                  <Route index element={<ObjectSetListPage />} />
+                  <Route element={<ProtectedRoute require="canManageInstances" />}>
+                    <Route path="new" element={<ObjectSetFormPage mode="create" />} />
+                    <Route path=":id/edit" element={<ObjectSetFormPage mode="edit" />} />
+                  </Route>
+                  <Route path=":id" element={<ObjectSetDetailPage />} />
+                </Route>
                 <Route path="actions" element={<ActionsPage />} />
                 <Route path="graph" element={<GraphPage />} />
                 <Route path="versions" element={<VersionsPage />} />

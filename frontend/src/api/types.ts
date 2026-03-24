@@ -191,3 +191,24 @@ export type ModelVersionDto = {
   createdAt: string
   updatedAt: string
 }
+
+export type ObjectSetKind = 'DYNAMIC' | 'SNAPSHOT'
+
+export type ObjectSetRuleSource = 'MANUAL' | 'JSON_QUERY'
+
+export type ObjectSetDto = {
+  id: number
+  typeId: number
+  typeCode: string
+  name: string
+  description?: string | null
+  kind: ObjectSetKind
+  ruleExpression?: string | null
+  ruleSource: ObjectSetRuleSource
+  snapshotAt?: string | null
+  owner?: string | null
+  notes?: string | null
+  memberCount: number
+  createdAt: string
+  updatedAt: string
+}
