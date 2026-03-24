@@ -31,6 +31,11 @@ type GraphNode = {
 
 type GraphEdge = {
   id: string
+  entityId: number
+  code?: string
+  direction?: RelationDirection
+  sourceMeta?: string
+  targetMeta?: string
   source: string
   target: string
   label: string
@@ -71,6 +76,13 @@ type TypeNodeDetail = {
 }
 
 type SelectedNodeDetail = InstanceNodeDetail | TypeNodeDetail
+
+type EdgeDetail = {
+  title: string
+  subtitle: string
+  description: string
+  chips: string[]
+}
 
 const GRAPH_WIDTH = 980
 const GRAPH_HEIGHT = 520
@@ -188,9 +200,14 @@ function buildInstanceGraph(
 
     edges.push({
       id: `edge-${neighbor.edgeId}`,
+      entityId: neighbor.edgeId,
       source: sourceId,
       target: targetId,
       label: neighbor.relationTypeName,
+      code: neighbor.relationTypeCode,
+      direction: 'DIRECTED',
+      sourceMeta: `${neighbor.sourceInstanceName} / #${neighbor.sourceInstanceId}`,
+      targetMeta: `${neighbor.targetInstanceName} / #${neighbor.targetInstanceId}`,
       weak:
         neighbor.sourceInstanceId !== focusInstance.id &&
         neighbor.targetInstanceId !== focusInstance.id,
@@ -256,6 +273,11 @@ function buildModelGraph(
     .slice(0, 18)
     .map((relation) => ({
       id: `relation-${relation.id}`,
+      entityId: relation.id,
+      code: relation.code,
+      direction: relation.direction,
+      sourceMeta: relation.sourceTypeCode,
+      targetMeta: relation.targetTypeCode,
       source: `type-${relation.sourceTypeId}`,
       target: `type-${relation.targetTypeId}`,
       label: relation.name,
@@ -272,6 +294,8 @@ export function GraphPage() {
   const [relationTypes, setRelationTypes] = useState<RelationTypeDto[]>([])
   const [neighbors, setNeighbors] = useState<RelationNeighborDto[]>([])
   const [selectedNodeId, setSelectedNodeId] = useState('')
+  const [selectedEdgeId, setSelectedEdgeId] = useState('')
+  const [searchText, setSearchText] = useState('')
   const [instanceTypeFilterId, setInstanceTypeFilterId] = useState('')
   const [relationTypeFilterId, setRelationTypeFilterId] = useState('')
   const [directionFilter, setDirectionFilter] = useState<RelationDirection | ''>('')
@@ -302,6 +326,20 @@ export function GraphPage() {
         : instanceOptions,
     [instanceOptions, instanceTypeFilterId],
   )
+
+  const searchResultNodes = useMemo(() => {
+    const keyword = searchText.trim().toLowerCase()
+    if (!keyword) {
+      return []
+    }
+    return graphData.nodes
+      .filter(
+        (node) =>
+          node.label.toLowerCase().includes(keyword) ||
+          node.meta.toLowerCase().includes(keyword),
+      )
+      .slice(0, 8)
+  }, [graphData.nodes, searchText])
 
   const replaceQuery = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
@@ -684,6 +722,11 @@ export function GraphPage() {
 
   const handleSelectNode = useCallback((nodeId: string) => {
     setSelectedNodeId(nodeId)
+    setSelectedEdgeId('')
+  }, [])
+
+  const handleSelectEdge = useCallback((edgeId: string) => {
+    setSelectedEdgeId(edgeId)
   }, [])
 
   const handleFocusNeighbor = useCallback(
@@ -708,6 +751,41 @@ export function GraphPage() {
       setGraphLoading(false)
     }
   }, [handleSelectInstance, selectedInstanceId])
+
+  const selectedEdge = useMemo(
+    () => graphData.edges.find((edge) => edge.id === selectedEdgeId) ?? null,
+    [graphData.edges, selectedEdgeId],
+  )
+
+  const selectedEdgeDetail = useMemo<EdgeDetail | null>(() => {
+    if (!selectedEdge) {
+      return null
+    }
+    return {
+      title: selectedEdge.label,
+      subtitle: selectedEdge.code ?? `边 #${selectedEdge.entityId}`,
+      description:
+        selectedEdge.direction === 'UNDIRECTED'
+          ? '当前边为无向关系，表示两个节点之间的双向语义连接。'
+          : '当前边为有向关系，表示从源节点到目标节点的语义连接。',
+      chips: [
+        `关系 #${selectedEdge.entityId}`,
+        selectedEdge.direction ?? 'DIRECTED',
+        selectedEdge.weak ? '弱连接' : '强连接',
+      ],
+    }
+  }, [selectedEdge])
+
+  function handlePickSearchNode(nodeId: string) {
+    const node = nodeMap.get(nodeId)
+    if (!node) return
+    setSearchText('')
+    if (node.kind === 'instance') {
+      handleSelectInstance(String(node.entityId))
+      return
+    }
+    handleSelectType(String(node.entityId))
+  }
 
   return (
     <section className="page-shell">
@@ -737,6 +815,44 @@ export function GraphPage() {
             >
               模型视图
             </button>
+          </div>
+
+          <div className="graph-search-box">
+            <div className="graph-search-row">
+              <label className="field">
+                <span>节点搜索</span>
+                <input
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  placeholder={
+                    mode === 'INSTANCE'
+                      ? '搜索实例名称或类型'
+                      : '搜索对象类型名称或编码'
+                  }
+                />
+              </label>
+            </div>
+            {searchText.trim() ? (
+              <div className="graph-node-neighbor-list">
+                {searchResultNodes.length === 0 ? (
+                  <p className="status">未找到匹配节点</p>
+                ) : (
+                  searchResultNodes.map((node) => (
+                    <button
+                      key={node.id}
+                      type="button"
+                      className="graph-neighbor-item"
+                      onClick={() => handlePickSearchNode(node.id)}
+                    >
+                      <strong>{node.label}</strong>
+                      <span>
+                        {node.meta} / {node.kind === 'instance' ? '实例' : '对象类型'}
+                      </span>
+                    </button>
+                  ))
+                )}
+              </div>
+            ) : null}
           </div>
 
           {mode === 'INSTANCE' ? (
@@ -949,6 +1065,7 @@ export function GraphPage() {
                           y1={source.y}
                           x2={target.x}
                           y2={target.y}
+                          onClick={() => handleSelectEdge(edge.id)}
                         />
                         <rect
                           className="graph-stage-edge-label-bg"
@@ -1034,8 +1151,44 @@ export function GraphPage() {
         </section>
 
         <section className="panel graph-node-detail-panel">
-          <h2 className="panel-title">节点详情</h2>
-          {selectedNodeDetail ? (
+          <h2 className="panel-title">
+            {selectedEdgeDetail ? '关系详情' : '节点详情'}
+          </h2>
+          {selectedEdgeDetail ? (
+            <div className="graph-node-detail">
+              <p className="graph-summary-subtitle">{selectedEdgeDetail.subtitle}</p>
+              <h3 className="graph-node-detail-title">{selectedEdgeDetail.title}</h3>
+              <p className="graph-summary-description">
+                {selectedEdgeDetail.description}
+              </p>
+              <div className="graph-summary-tags">
+                {selectedEdgeDetail.chips.map((chip) => (
+                  <span key={chip} className="graph-summary-tag">
+                    {chip}
+                  </span>
+                ))}
+              </div>
+              <div className="graph-edge-detail">
+                <div className="graph-edge-card">
+                  <strong>源节点</strong>
+                  <p>{selectedEdge?.sourceMeta ?? '—'}</p>
+                </div>
+                <div className="graph-edge-card">
+                  <strong>目标节点</strong>
+                  <p>{selectedEdge?.targetMeta ?? '—'}</p>
+                </div>
+              </div>
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setSelectedEdgeId('')}
+                >
+                  返回节点详情
+                </button>
+              </div>
+            </div>
+          ) : selectedNodeDetail ? (
             <div className="graph-node-detail">
               <p className="graph-summary-subtitle">{selectedNodeDetail.subtitle}</p>
               <h3 className="graph-node-detail-title">{selectedNodeDetail.title}</h3>

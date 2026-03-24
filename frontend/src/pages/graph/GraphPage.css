@@ -24,6 +24,22 @@
   margin-top: var(--space-4);
 }
 
+.graph-search-box {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.graph-search-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.graph-search-row .field {
+  flex: 1;
+  min-width: 0;
+}
+
 .graph-summary-subtitle {
   color: rgb(31 79 158 / 74%);
   font-size: 0.8rem;
@@ -102,11 +118,18 @@
   stroke: url(#graph-edge-glow);
   stroke-width: 2.4;
   stroke-linecap: round;
+  cursor: pointer;
+  transition: stroke-width 0.2s ease, opacity 0.2s ease;
 }
 
 .graph-stage-edge--weak {
   stroke: rgb(77 132 226 / 24%);
   stroke-dasharray: 6 10;
+}
+
+.graph-stage-edge--selected {
+  stroke: #2f73df;
+  stroke-width: 2.9;
 }
 
 .graph-stage-edge-label-bg {
@@ -179,7 +202,8 @@
 }
 
 .graph-node-json,
-.graph-node-neighbors {
+.graph-node-neighbors,
+.graph-edge-detail {
   display: grid;
   gap: var(--space-2);
 }
@@ -227,6 +251,26 @@
   color: rgb(25 28 30 / 68%);
   font-size: 0.76rem;
   line-height: 1.5;
+}
+
+.graph-edge-card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-low);
+  box-shadow: inset 0 0 0 1px var(--color-outline-ghost);
+}
+
+.graph-edge-card strong {
+  color: var(--color-primary-container);
+  font-size: 0.9rem;
+}
+
+.graph-edge-card p {
+  color: rgb(25 28 30 / 68%);
+  font-size: 0.8rem;
+  line-height: 1.55;
 }
 
 @media (max-width: 1280px) {

@@ -137,6 +137,9 @@ export function ObjectTypeDetailPage() {
         <Link className="btn-link" to="/object-types">
           返回列表
         </Link>
+        <Link className="btn" to={`/graph?mode=MODEL&typeId=${item.id}`}>
+          在图谱中查看
+        </Link>
         {canManageModel ? (
           <>
             <Link className="btn btn-primary" to={`/object-types/${item.id}/edit`}>
