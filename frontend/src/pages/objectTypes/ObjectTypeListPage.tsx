@@ -6,6 +6,7 @@ import {
   type ListObjectTypesParams,
 } from '../../api/objectTypes'
 import { ErrorAlert } from '../../components/ErrorAlert'
+import { usePermissions } from '../../auth/usePermissions'
 import type { ObjectTypeDto, PageResponse } from '../../api/types'
 import { type AppErrorInfo, toAppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
@@ -13,12 +14,14 @@ import '../PageShell.css'
 const PAGE_SIZE = 10
 
 export function ObjectTypeListPage() {
+  const { can } = usePermissions()
   const [page, setPage] = useState(0)
   const [rows, setRows] = useState<ObjectTypeDto[]>([])
   const [pageInfo, setPageInfo] = useState<PageResponse<ObjectTypeDto> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<AppErrorInfo | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const canManageModel = can('canManageModel')
 
   const load = useCallback(async (params?: ListObjectTypesParams) => {
     setLoading(true)
@@ -72,12 +75,17 @@ export function ObjectTypeListPage() {
           <h1>对象类型</h1>
           <p>管理对象类型定义，支持查看详情与编辑。</p>
         </div>
-        <Link to="/object-types/new" className="btn btn-primary">
-          新建对象类型
-        </Link>
+        {canManageModel ? (
+          <Link to="/object-types/new" className="btn btn-primary">
+            新建对象类型
+          </Link>
+        ) : null}
       </header>
 
       <ErrorAlert error={error} />
+      {!canManageModel ? (
+        <p className="status info">当前为只读模式，可查看对象类型详情，但无法新增、编辑或删除。</p>
+      ) : null}
 
       <div className="panel">
         {loading ? (
@@ -109,17 +117,21 @@ export function ObjectTypeListPage() {
                       <Link to={`/object-types/${row.id}`} className="link-btn">
                         详情
                       </Link>
-                      <Link to={`/object-types/${row.id}/edit`} className="link-btn">
-                        编辑
-                      </Link>
-                      <button
-                        type="button"
-                        className="link-btn danger"
-                        disabled={deletingId === row.id}
-                        onClick={() => handleDelete(row.id)}
-                      >
-                        {deletingId === row.id ? '删除中…' : '删除'}
-                      </button>
+                      {canManageModel ? (
+                        <>
+                          <Link to={`/object-types/${row.id}/edit`} className="link-btn">
+                            编辑
+                          </Link>
+                          <button
+                            type="button"
+                            className="link-btn danger"
+                            disabled={deletingId === row.id}
+                            onClick={() => handleDelete(row.id)}
+                          >
+                            {deletingId === row.id ? '删除中…' : '删除'}
+                          </button>
+                        </>
+                      ) : null}
                     </td>
                   </tr>
                 ))}

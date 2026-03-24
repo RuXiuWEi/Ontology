@@ -4,12 +4,14 @@ import { deleteInstance, listInstancesPage } from '../../api/instances'
 import { listObjectTypes } from '../../api/objectTypes'
 import type { ObjectInstanceDto, ObjectTypeDto } from '../../api/types'
 import { ErrorAlert } from '../../components/ErrorAlert'
+import { usePermissions } from '../../auth/usePermissions'
 import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
 
 const PAGE_SIZE = 10
 
 export function InstanceListPage() {
+  const { can } = usePermissions()
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const pageFromQuery = Number(searchParams.get('page') ?? '1')
@@ -22,6 +24,7 @@ export function InstanceListPage() {
   const [totalElements, setTotalElements] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<AppErrorInfo | null>(null)
+  const canManageInstances = can('canManageInstances')
 
   useEffect(() => {
     let cancelled = false
@@ -94,8 +97,10 @@ export function InstanceListPage() {
   return (
     <section className="page-shell">
       <header className="page-header">
-        <h1>对象实例</h1>
-        <p>支持类型筛选、分页浏览与详情查看。</p>
+        <div>
+          <h1>对象实例</h1>
+          <p>支持类型筛选、分页浏览与详情查看。</p>
+        </div>
       </header>
 
       <div className="toolbar">
@@ -113,16 +118,21 @@ export function InstanceListPage() {
             ))}
           </select>
         </label>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => navigate('/instances/new')}
-        >
-          新建对象实例
-        </button>
+        {canManageInstances ? (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => navigate('/instances/new')}
+          >
+            新建对象实例
+          </button>
+        ) : null}
       </div>
 
       <ErrorAlert error={error} />
+      {!canManageInstances ? (
+        <p className="status info">当前为只读模式，可查看实例详情，但无法新增、编辑或删除。</p>
+      ) : null}
 
       <div className="panel">
         {loading ? (
@@ -159,16 +169,20 @@ export function InstanceListPage() {
                         <Link className="btn btn-light" to={`/instances/${item.id}`}>
                           详情
                         </Link>
-                        <Link className="btn btn-light" to={`/instances/${item.id}/edit`}>
-                          编辑
-                        </Link>
-                        <button
-                          type="button"
-                          className="btn btn-danger"
-                          onClick={() => handleDelete(item.id)}
-                        >
-                          删除
-                        </button>
+                        {canManageInstances ? (
+                          <>
+                            <Link className="btn btn-light" to={`/instances/${item.id}/edit`}>
+                              编辑
+                            </Link>
+                            <button
+                              type="button"
+                              className="btn btn-danger"
+                              onClick={() => handleDelete(item.id)}
+                            >
+                              删除
+                            </button>
+                          </>
+                        ) : null}
                       </td>
                     </tr>
                   ))

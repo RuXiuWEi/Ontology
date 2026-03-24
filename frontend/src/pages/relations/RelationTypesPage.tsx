@@ -18,6 +18,7 @@ import type {
   RelationNeighborDto,
   RelationTypeDto,
 } from '../../api/types'
+import { usePermissions } from '../../auth/usePermissions'
 import { ErrorAlert } from '../../components/ErrorAlert'
 import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import { parseJsonObjectInput } from '../../utils/json'
@@ -65,6 +66,7 @@ function prettyDirection(value: RelationDirection): string {
 }
 
 export function RelationTypesPage() {
+  const { can } = usePermissions()
   const [types, setTypes] = useState<ObjectTypeDto[]>([])
   const [instances, setInstances] = useState<ObjectInstanceDto[]>([])
   const [rows, setRows] = useState<RelationTypeDto[]>([])
@@ -84,6 +86,8 @@ export function RelationTypesPage() {
   const [neighborInstanceId, setNeighborInstanceId] = useState('')
   const [neighbors, setNeighbors] = useState<RelationNeighborDto[]>([])
   const [edgeBusy, setEdgeBusy] = useState(false)
+  const canManageModel = can('canManageModel')
+  const canManageInstances = can('canManageInstances')
 
   const objectTypeMap = useMemo(() => {
     const map = new Map<number, string>()
@@ -301,114 +305,121 @@ export function RelationTypesPage() {
       <p className="status">
         操作指引：先维护关系类型，再创建关系边。无向关系中 A-B 与 B-A 视为同一条关系。
       </p>
+      {!canManageModel || !canManageInstances ? (
+        <p className="status info">
+          当前账号为只读模式，可查看关联类型与邻居关系，但无法维护关系类型或创建、删除关系边。
+        </p>
+      ) : null}
 
       <div className="panel">
         <h2 className="panel-title">关联类型维护</h2>
-        <form className="form-grid" onSubmit={submitTypeForm}>
-          <label className="field">
-            <span>编码</span>
-            <input
-              required
-              maxLength={64}
-              value={form.code}
-              onChange={(e) => setForm((prev) => ({ ...prev, code: e.target.value }))}
-              placeholder="REL_CUSTOMER_ORDER"
-            />
-          </label>
-          <label className="field">
-            <span>名称</span>
-            <input
-              required
-              maxLength={255}
-              value={form.name}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="客户-订单"
-            />
-          </label>
-          <label className="field">
-            <span>源对象类型</span>
-            <select
-              required
-              value={form.sourceTypeId}
-              onChange={(e) => setForm((prev) => ({ ...prev, sourceTypeId: e.target.value }))}
-            >
-              <option value="">请选择</option>
-              {types.map((item) => (
-                <option key={String(item.id)} value={String(item.id)}>
-                  {item.name} ({item.code})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>目标对象类型</span>
-            <select
-              required
-              value={form.targetTypeId}
-              onChange={(e) => setForm((prev) => ({ ...prev, targetTypeId: e.target.value }))}
-            >
-              <option value="">请选择</option>
-              {types.map((item) => (
-                <option key={String(item.id)} value={String(item.id)}>
-                  {item.name} ({item.code})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>基数</span>
-            <select
-              value={form.cardinality}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  cardinality: e.target.value as RelationCardinality,
-                }))
-              }
-            >
-              <option value="ONE_TO_ONE">ONE_TO_ONE</option>
-              <option value="ONE_TO_MANY">ONE_TO_MANY</option>
-              <option value="MANY_TO_ONE">MANY_TO_ONE</option>
-              <option value="MANY_TO_MANY">MANY_TO_MANY</option>
-            </select>
-          </label>
-          <label className="field">
-            <span>方向</span>
-            <select
-              value={form.direction}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  direction: e.target.value as RelationDirection,
-                }))
-              }
-            >
-              <option value="DIRECTED">DIRECTED</option>
-              <option value="UNDIRECTED">UNDIRECTED</option>
-            </select>
-          </label>
-          <label className="field full-width">
-            <span>描述</span>
-            <textarea
-              rows={3}
-              value={form.description}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, description: e.target.value }))
-              }
-              placeholder="可选"
-            />
-          </label>
-          <div className="form-actions full-width">
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? '提交中…' : editId ? '更新关联类型' : '创建关联类型'}
-            </button>
-            {editId ? (
-              <button type="button" className="btn" onClick={resetForm}>
-                取消编辑
+        {canManageModel ? (
+          <form className="form-grid" onSubmit={submitTypeForm}>
+            <label className="field">
+              <span>编码</span>
+              <input
+                required
+                maxLength={64}
+                value={form.code}
+                onChange={(e) => setForm((prev) => ({ ...prev, code: e.target.value }))}
+                placeholder="REL_CUSTOMER_ORDER"
+              />
+            </label>
+            <label className="field">
+              <span>名称</span>
+              <input
+                required
+                maxLength={255}
+                value={form.name}
+                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="客户-订单"
+              />
+            </label>
+            <label className="field">
+              <span>源对象类型</span>
+              <select
+                required
+                value={form.sourceTypeId}
+                onChange={(e) => setForm((prev) => ({ ...prev, sourceTypeId: e.target.value }))}
+              >
+                <option value="">请选择</option>
+                {types.map((item) => (
+                  <option key={String(item.id)} value={String(item.id)}>
+                    {item.name} ({item.code})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>目标对象类型</span>
+              <select
+                required
+                value={form.targetTypeId}
+                onChange={(e) => setForm((prev) => ({ ...prev, targetTypeId: e.target.value }))}
+              >
+                <option value="">请选择</option>
+                {types.map((item) => (
+                  <option key={String(item.id)} value={String(item.id)}>
+                    {item.name} ({item.code})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>基数</span>
+              <select
+                value={form.cardinality}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    cardinality: e.target.value as RelationCardinality,
+                  }))
+                }
+              >
+                <option value="ONE_TO_ONE">ONE_TO_ONE</option>
+                <option value="ONE_TO_MANY">ONE_TO_MANY</option>
+                <option value="MANY_TO_ONE">MANY_TO_ONE</option>
+                <option value="MANY_TO_MANY">MANY_TO_MANY</option>
+              </select>
+            </label>
+            <label className="field">
+              <span>方向</span>
+              <select
+                value={form.direction}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    direction: e.target.value as RelationDirection,
+                  }))
+                }
+              >
+                <option value="DIRECTED">DIRECTED</option>
+                <option value="UNDIRECTED">UNDIRECTED</option>
+              </select>
+            </label>
+            <label className="field full-width">
+              <span>描述</span>
+              <textarea
+                rows={3}
+                value={form.description}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, description: e.target.value }))
+                }
+                placeholder="可选"
+              />
+            </label>
+            <div className="form-actions full-width">
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? '提交中…' : editId ? '更新关联类型' : '创建关联类型'}
               </button>
-            ) : null}
-          </div>
-        </form>
+              {editId ? (
+                <button type="button" className="btn" onClick={resetForm}>
+                  取消编辑
+                </button>
+              ) : null}
+            </div>
+          </form>
+        ) : null}
 
         <div className="table-wrap" style={{ marginTop: '1rem' }}>
           <table className="data-table">
@@ -454,20 +465,26 @@ export function RelationTypesPage() {
                     </td>
                     <td>{new Date(row.updatedAt).toLocaleString()}</td>
                     <td className="actions">
-                      <button
-                        type="button"
-                        className="btn"
-                        onClick={() => startEdit(row)}
-                      >
-                        编辑
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={() => void handleDeleteRelationType(row.id)}
-                      >
-                        删除
-                      </button>
+                      {canManageModel ? (
+                        <>
+                          <button
+                            type="button"
+                            className="btn"
+                            onClick={() => startEdit(row)}
+                          >
+                            编辑
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-danger"
+                            onClick={() => void handleDeleteRelationType(row.id)}
+                          >
+                            删除
+                          </button>
+                        </>
+                      ) : (
+                        <span className="muted">只读</span>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -503,61 +520,63 @@ export function RelationTypesPage() {
 
       <div className="panel">
         <h2 className="panel-title">关系边操作与邻居查询</h2>
-        <div className="form-grid">
-          <label className="field">
-            <span>关联类型</span>
-            <select
-              value={edgeRelationTypeId}
-              onChange={(e) => setEdgeRelationTypeId(e.target.value)}
-            >
-              <option value="">请选择</option>
-              {rows.map((item) => (
-                <option key={String(item.id)} value={String(item.id)}>
-                  {item.name} ({item.code})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>源实例ID</span>
-            <input
-              type="number"
-              value={edgeSourceId}
-              onChange={(e) => setEdgeSourceId(e.target.value)}
-              placeholder="例如 101"
-              list="instance-id-options"
-            />
-          </label>
-          <label className="field">
-            <span>目标实例ID</span>
-            <input
-              type="number"
-              value={edgeTargetId}
-              onChange={(e) => setEdgeTargetId(e.target.value)}
-              placeholder="例如 202"
-              list="instance-id-options"
-            />
-          </label>
-          <label className="field full-width">
-            <span>关系属性（可选，JSON对象）</span>
-            <textarea
-              rows={3}
-              value={edgeAttributes}
-              onChange={(e) => setEdgeAttributes(e.target.value)}
-              placeholder='{"weight": 0.8}'
-            />
-          </label>
-          <div className="form-actions full-width">
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={edgeBusy}
-              onClick={() => void handleCreateEdge()}
-            >
-              {edgeBusy ? '处理中…' : '创建关系边'}
-            </button>
+        {canManageInstances ? (
+          <div className="form-grid">
+            <label className="field">
+              <span>关联类型</span>
+              <select
+                value={edgeRelationTypeId}
+                onChange={(e) => setEdgeRelationTypeId(e.target.value)}
+              >
+                <option value="">请选择</option>
+                {rows.map((item) => (
+                  <option key={String(item.id)} value={String(item.id)}>
+                    {item.name} ({item.code})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>源实例ID</span>
+              <input
+                type="number"
+                value={edgeSourceId}
+                onChange={(e) => setEdgeSourceId(e.target.value)}
+                placeholder="例如 101"
+                list="instance-id-options"
+              />
+            </label>
+            <label className="field">
+              <span>目标实例ID</span>
+              <input
+                type="number"
+                value={edgeTargetId}
+                onChange={(e) => setEdgeTargetId(e.target.value)}
+                placeholder="例如 202"
+                list="instance-id-options"
+              />
+            </label>
+            <label className="field full-width">
+              <span>关系属性（可选，JSON对象）</span>
+              <textarea
+                rows={3}
+                value={edgeAttributes}
+                onChange={(e) => setEdgeAttributes(e.target.value)}
+                placeholder='{"weight": 0.8}'
+              />
+            </label>
+            <div className="form-actions full-width">
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={edgeBusy}
+                onClick={() => void handleCreateEdge()}
+              >
+                {edgeBusy ? '处理中…' : '创建关系边'}
+              </button>
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <datalist id="instance-id-options">
           {instances.map((item) => (
@@ -626,14 +645,18 @@ export function RelationTypesPage() {
                       {item.attributes ? JSON.stringify(item.attributes) : '—'}
                     </td>
                     <td>
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                        disabled={edgeBusy}
-                        onClick={() => void handleDeleteEdge(item.edgeId)}
-                      >
-                        删除关系
-                      </button>
+                      {canManageInstances ? (
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          disabled={edgeBusy}
+                          onClick={() => void handleDeleteEdge(item.edgeId)}
+                        >
+                          删除关系
+                        </button>
+                      ) : (
+                        <span className="muted">只读</span>
+                      )}
                     </td>
                   </tr>
                 ))

@@ -2,17 +2,20 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { deleteObjectType, getObjectType } from '../../api/objectTypes'
 import type { ObjectTypeDto } from '../../api/types'
+import { usePermissions } from '../../auth/usePermissions'
 import { ErrorAlert } from '../../components/ErrorAlert'
 import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import '../PageShell.css'
 
 export function ObjectTypeDetailPage() {
+  const { can } = usePermissions()
   const { id } = useParams()
   const navigate = useNavigate()
   const [item, setItem] = useState<ObjectTypeDto | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<AppErrorInfo | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const canManageModel = can('canManageModel')
 
   useEffect(() => {
     if (!id) {
@@ -92,11 +95,16 @@ export function ObjectTypeDetailPage() {
   return (
     <section className="page-shell">
       <header className="page-header">
-        <h1>对象类型详情</h1>
-        <p>查看对象类型完整信息并执行编辑、删除操作。</p>
+        <div>
+          <h1>对象类型详情</h1>
+          <p>查看对象类型完整信息并执行编辑、删除操作。</p>
+        </div>
       </header>
 
       <ErrorAlert error={error} />
+      {!canManageModel ? (
+        <p className="status info">当前为只读模式，可查看详情，但无法修改对象类型。</p>
+      ) : null}
 
       <div className="panel detail-grid">
         <div className="detail-item">
@@ -129,17 +137,21 @@ export function ObjectTypeDetailPage() {
         <Link className="btn-link" to="/object-types">
           返回列表
         </Link>
-        <Link className="btn btn-primary" to={`/object-types/${item.id}/edit`}>
-          编辑
-        </Link>
-        <button
-          type="button"
-          className="btn btn-danger"
-          onClick={handleDelete}
-          disabled={deleting}
-        >
-          {deleting ? '删除中…' : '删除'}
-        </button>
+        {canManageModel ? (
+          <>
+            <Link className="btn btn-primary" to={`/object-types/${item.id}/edit`}>
+              编辑
+            </Link>
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? '删除中…' : '删除'}
+            </button>
+          </>
+        ) : null}
       </div>
     </section>
   )
