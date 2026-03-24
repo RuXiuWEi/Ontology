@@ -1731,7 +1731,9 @@ export function GraphPage() {
                       const nodeClassName = [
                         'graph-stage-node',
                         node.emphasis ? 'graph-stage-node--emphasis' : '',
-                        node.id === selectedNodeId ? 'graph-stage-node--selected' : '',
+                        highlightedNodeIds.has(node.id)
+                          ? 'graph-stage-node--selected'
+                          : '',
                       ]
                         .filter(Boolean)
                         .join(' ')
