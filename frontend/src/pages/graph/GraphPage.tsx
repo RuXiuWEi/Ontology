@@ -513,6 +513,7 @@ export function GraphPage() {
   )
 
   const selectedNode = selectedNodeId ? nodeMap.get(selectedNodeId) ?? null : null
+  const selectedNodeEntityId = selectedNode?.entityId ?? null
 
   const highlightedEdgeIds = useMemo(
     () =>
@@ -1088,7 +1089,7 @@ export function GraphPage() {
 
                   <div className="form-actions">
                     <Link
-                      to={`/instances/${selectedNode.entityId}`}
+                      to={`/instances/${selectedNodeEntityId}`}
                       className="btn btn-primary"
                     >
                       打开实例详情
@@ -1114,7 +1115,7 @@ export function GraphPage() {
                           <div key={relation.id} className="graph-neighbor-item">
                             <strong>{relation.name}</strong>
                             <span>
-                              {relation.code} / {relation.sourceTypeCode} ->{' '}
+                              {relation.code} / {relation.sourceTypeCode} {'->'}{' '}
                               {relation.targetTypeCode} / {relation.direction}
                             </span>
                           </div>
@@ -1125,7 +1126,7 @@ export function GraphPage() {
 
                   <div className="form-actions">
                     <Link
-                      to={`/object-types/${selectedNode.entityId}`}
+                      to={`/object-types/${selectedNodeEntityId}`}
                       className="btn btn-primary"
                     >
                       打开对象类型详情
