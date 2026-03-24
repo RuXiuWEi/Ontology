@@ -64,6 +64,11 @@ export function InstanceDetailPage() {
           <Link to="/instances" className="btn ghost">
             返回列表
           </Link>
+          {Number.isFinite(id) ? (
+            <Link to={`/graph?mode=INSTANCE&instanceId=${id}`} className="btn">
+              在图谱中查看
+            </Link>
+          ) : null}
           {Number.isFinite(id) && canManageInstances ? (
             <Link to={`/instances/${id}/edit`} className="btn primary">
               编辑实例

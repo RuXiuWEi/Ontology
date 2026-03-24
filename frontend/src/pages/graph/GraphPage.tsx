@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { listInstances, listInstancesPage } from '../../api/instances'
 import { listObjectTypes } from '../../api/objectTypes'
 import { listRelationNeighbors, listRelationTypesPage } from '../../api/relations'
 import type {
   ObjectInstanceDto,
   ObjectTypeDto,
+  RelationDirection,
   RelationNeighborDto,
   RelationTypeDto,
 } from '../../api/types'
@@ -14,11 +16,13 @@ import '../PageShell.css'
 import './GraphPage.css'
 
 type GraphMode = 'INSTANCE' | 'MODEL'
+type GraphNodeKind = 'instance' | 'type'
 
 type GraphNode = {
   id: string
+  entityId: number
   label: string
-  kind: 'instance' | 'type'
+  kind: GraphNodeKind
   meta: string
   x: number
   y: number
@@ -33,14 +37,54 @@ type GraphEdge = {
   weak?: boolean
 }
 
+type InstanceNodeDetail = {
+  kind: 'instance'
+  title: string
+  subtitle: string
+  description: string
+  chips: string[]
+  attributes: Record<string, unknown> | null
+  neighbors: Array<{
+    edgeId: number
+    relationName: string
+    relatedInstanceId: number
+    relatedInstanceName: string
+    relatedTypeCode: string
+  }>
+}
+
+type TypeNodeDetail = {
+  kind: 'type'
+  title: string
+  subtitle: string
+  description: string
+  chips: string[]
+  descriptionText: string
+  relations: Array<{
+    id: number
+    name: string
+    code: string
+    sourceTypeCode: string
+    targetTypeCode: string
+    direction: RelationDirection
+  }>
+}
+
+type SelectedNodeDetail = InstanceNodeDetail | TypeNodeDetail
+
 const GRAPH_WIDTH = 980
 const GRAPH_HEIGHT = 520
 
-function distributeNodes<T extends { id: string; label: string; meta: string }>(
+function distributeNodes<T extends {
+  id: string
+  entityId: number
+  label: string
+  meta: string
+}>(
   items: readonly T[],
   options?: {
     emphasisId?: string | null
-    kind?: GraphNode['kind']
+    kind?: GraphNodeKind
     xBias?: number
     yBias?: number
   },
@@ -50,10 +94,12 @@ function distributeNodes<T extends { id: string; label: string; meta: string }>(
   const centerY = GRAPH_HEIGHT / 2 + (options?.yBias ?? 0)
   const radiusX = Math.min(320, 110 + total * 16)
   const radiusY = Math.min(190, 80 + total * 10)
+
   return items.map((item, index) => {
     const angle = (Math.PI * 2 * index) / total - Math.PI / 2
     return {
       id: item.id,
+      entityId: item.entityId,
       label: item.label,
       kind: options?.kind ?? 'instance',
       meta: item.meta,
@@ -77,6 +123,7 @@ function buildInstanceGraph(
 
   nodeMap.set(`instance-${focusInstance.id}`, {
     id: `instance-${focusInstance.id}`,
+    entityId: focusInstance.id,
     label: focusInstance.name,
     kind: 'instance',
     meta: `${focusInstance.typeCode} / #${focusInstance.id}`,
@@ -87,13 +134,21 @@ function buildInstanceGraph(
 
   const orbitItems = neighbors.map((neighbor) => {
     const isSource = neighbor.sourceInstanceId === focusInstance.id
-    const targetId = isSource ? neighbor.targetInstanceId : neighbor.sourceInstanceId
-    const targetName = isSource ? neighbor.targetInstanceName : neighbor.sourceInstanceName
-    const targetType = isSource ? neighbor.targetTypeCode : neighbor.sourceTypeCode
+    const relatedInstanceId = isSource
+      ? neighbor.targetInstanceId
+      : neighbor.sourceInstanceId
+    const relatedInstanceName = isSource
+      ? neighbor.targetInstanceName
+      : neighbor.sourceInstanceName
+    const relatedTypeCode = isSource
+      ? neighbor.targetTypeCode
+      : neighbor.sourceTypeCode
+
     return {
-      id: `instance-${targetId}`,
-      label: targetName,
-      meta: `${targetType} / #${targetId}`,
+      id: `instance-${relatedInstanceId}`,
+      entityId: relatedInstanceId,
+      label: relatedInstanceName,
+      meta: `${relatedTypeCode} / #${relatedInstanceId}`,
     }
   })
 
@@ -106,9 +161,11 @@ function buildInstanceGraph(
   for (const neighbor of neighbors) {
     const sourceId = `instance-${neighbor.sourceInstanceId}`
     const targetId = `instance-${neighbor.targetInstanceId}`
+
     if (!nodeMap.has(sourceId)) {
       nodeMap.set(sourceId, {
         id: sourceId,
+        entityId: neighbor.sourceInstanceId,
         label: neighbor.sourceInstanceName,
         kind: 'instance',
         meta: `${neighbor.sourceTypeCode} / #${neighbor.sourceInstanceId}`,
@@ -116,9 +173,11 @@ function buildInstanceGraph(
         y: GRAPH_HEIGHT / 2,
       })
     }
+
     if (!nodeMap.has(targetId)) {
       nodeMap.set(targetId, {
         id: targetId,
+        entityId: neighbor.targetInstanceId,
         label: neighbor.targetInstanceName,
         kind: 'instance',
         meta: `${neighbor.targetTypeCode} / #${neighbor.targetInstanceId}`,
@@ -126,12 +185,15 @@ function buildInstanceGraph(
         y: GRAPH_HEIGHT / 2,
       })
     }
+
     edges.push({
       id: `edge-${neighbor.edgeId}`,
       source: sourceId,
       target: targetId,
       label: neighbor.relationTypeName,
-      weak: neighbor.sourceInstanceId !== focusInstance.id && neighbor.targetInstanceId !== focusInstance.id,
+      weak:
+        neighbor.sourceInstanceId !== focusInstance.id &&
+        neighbor.targetInstanceId !== focusInstance.id,
     })
   }
 
@@ -145,13 +207,21 @@ function buildModelGraph(
   objectTypes: readonly ObjectTypeDto[],
   relationTypes: readonly RelationTypeDto[],
   selectedTypeId: number | null,
+  directionFilter: RelationDirection | '',
 ): { nodes: GraphNode[]; edges: GraphEdge[] } {
+  const filteredRelations = directionFilter
+    ? relationTypes.filter((relation) => relation.direction === directionFilter)
+    : relationTypes
+
   const visibleTypeIds = new Set<number>()
 
   if (selectedTypeId) {
     visibleTypeIds.add(selectedTypeId)
-    for (const relation of relationTypes) {
-      if (relation.sourceTypeId === selectedTypeId || relation.targetTypeId === selectedTypeId) {
+    for (const relation of filteredRelations) {
+      if (
+        relation.sourceTypeId === selectedTypeId ||
+        relation.targetTypeId === selectedTypeId
+      ) {
         visibleTypeIds.add(relation.sourceTypeId)
         visibleTypeIds.add(relation.targetTypeId)
       }
@@ -166,6 +236,7 @@ function buildModelGraph(
     .filter((item) => visibleTypeIds.has(item.id))
     .map((item) => ({
       id: `type-${item.id}`,
+      entityId: item.id,
       label: item.name,
       meta: item.code,
     }))
@@ -176,7 +247,7 @@ function buildModelGraph(
   })
 
   const nodeIds = new Set(nodes.map((item) => item.id))
-  const edges = relationTypes
+  const edges = filteredRelations
     .filter(
       (relation) =>
         nodeIds.has(`type-${relation.sourceTypeId}`) &&
@@ -195,24 +266,102 @@ function buildModelGraph(
 }
 
 export function GraphPage() {
-  const [mode, setMode] = useState<GraphMode>('INSTANCE')
+  const [searchParams, setSearchParams] = useSearchParams()
   const [typeOptions, setTypeOptions] = useState<ObjectTypeDto[]>([])
   const [instanceOptions, setInstanceOptions] = useState<ObjectInstanceDto[]>([])
   const [relationTypes, setRelationTypes] = useState<RelationTypeDto[]>([])
-  const [selectedTypeId, setSelectedTypeId] = useState('')
-  const [selectedInstanceId, setSelectedInstanceId] = useState('')
   const [neighbors, setNeighbors] = useState<RelationNeighborDto[]>([])
+  const [selectedNodeId, setSelectedNodeId] = useState('')
+  const [instanceTypeFilterId, setInstanceTypeFilterId] = useState('')
+  const [relationTypeFilterId, setRelationTypeFilterId] = useState('')
+  const [directionFilter, setDirectionFilter] = useState<RelationDirection | ''>('')
   const [loading, setLoading] = useState(true)
   const [graphLoading, setGraphLoading] = useState(false)
   const [error, setError] = useState<AppErrorInfo | null>(null)
 
+  const mode: GraphMode = searchParams.get('mode') === 'MODEL' ? 'MODEL' : 'INSTANCE'
+  const selectedInstanceId = searchParams.get('instanceId') ?? ''
+  const selectedTypeId = searchParams.get('typeId') ?? ''
+
+  const selectedInstance = useMemo(
+    () => instanceOptions.find((item) => String(item.id) === selectedInstanceId) ?? null,
+    [instanceOptions, selectedInstanceId],
+  )
+
   const selectedType = useMemo(
-    () => typeOptions.find((item) => item.id === Number(selectedTypeId)) ?? null,
+    () => typeOptions.find((item) => String(item.id) === selectedTypeId) ?? null,
     [selectedTypeId, typeOptions],
   )
-  const selectedInstance = useMemo(
-    () => instanceOptions.find((item) => item.id === Number(selectedInstanceId)) ?? null,
-    [selectedInstanceId, instanceOptions],
+
+  const filteredInstanceOptions = useMemo(
+    () =>
+      instanceTypeFilterId
+        ? instanceOptions.filter(
+            (instance) => String(instance.typeId) === instanceTypeFilterId,
+          )
+        : instanceOptions,
+    [instanceOptions, instanceTypeFilterId],
+  )
+
+  const replaceQuery = useCallback(
+    (mutate: (params: URLSearchParams) => void) => {
+      const next = new URLSearchParams(searchParams)
+      mutate(next)
+      setSearchParams(next, { replace: true })
+    },
+    [searchParams, setSearchParams],
+  )
+
+  const handleSelectInstance = useCallback(
+    (instanceId: string) => {
+      replaceQuery((params) => {
+        params.set('mode', 'INSTANCE')
+        params.delete('typeId')
+        if (instanceId) {
+          params.set('instanceId', instanceId)
+        } else {
+          params.delete('instanceId')
+        }
+      })
+      setSelectedNodeId(instanceId ? `instance-${instanceId}` : '')
+    },
+    [replaceQuery],
+  )
+
+  const handleSelectType = useCallback(
+    (typeId: string) => {
+      replaceQuery((params) => {
+        params.set('mode', 'MODEL')
+        params.delete('instanceId')
+        if (typeId) {
+          params.set('typeId', typeId)
+        } else {
+          params.delete('typeId')
+        }
+      })
+      setSelectedNodeId(typeId ? `type-${typeId}` : '')
+    },
+    [replaceQuery],
+  )
+
+  const handleChangeMode = useCallback(
+    (nextMode: GraphMode) => {
+      if (nextMode === 'INSTANCE') {
+        handleSelectInstance(
+          selectedInstanceId || String(filteredInstanceOptions[0]?.id ?? ''),
+        )
+        return
+      }
+      handleSelectType(selectedTypeId || String(typeOptions[0]?.id ?? ''))
+    },
+    [
+      filteredInstanceOptions,
+      handleSelectInstance,
+      handleSelectType,
+      selectedInstanceId,
+      selectedTypeId,
+      typeOptions,
+    ],
   )
 
   const loadBaseData = useCallback(async () => {
@@ -224,32 +373,69 @@ export function GraphPage() {
         listRelationTypesPage({ page: 0, size: 100 }),
         listInstancesPage({ page: 0, size: 100 }),
       ])
+
       setTypeOptions(types)
       setRelationTypes(relationPage.content)
       setInstanceOptions(instancePage.content)
-
-      if (!selectedTypeId && types[0]) {
-        setSelectedTypeId(String(types[0].id))
-      }
-      if (!selectedInstanceId && instancePage.content[0]) {
-        setSelectedInstanceId(String(instancePage.content[0].id))
-      }
     } catch (e: unknown) {
       setError(toAppErrorInfo(e))
     } finally {
       setLoading(false)
     }
-  }, [selectedInstanceId, selectedTypeId])
+  }, [])
 
   useEffect(() => {
     void loadBaseData()
   }, [loadBaseData])
 
   useEffect(() => {
+    if (loading) return
+
+    if (mode === 'INSTANCE') {
+      if (
+        selectedInstanceId &&
+        filteredInstanceOptions.some(
+          (instance) => String(instance.id) === selectedInstanceId,
+        )
+      ) {
+        return
+      }
+      handleSelectInstance(String(filteredInstanceOptions[0]?.id ?? ''))
+      return
+    }
+
+    if (
+      selectedTypeId &&
+      typeOptions.some((type) => String(type.id) === selectedTypeId)
+    ) {
+      return
+    }
+    handleSelectType(String(typeOptions[0]?.id ?? ''))
+  }, [
+    filteredInstanceOptions,
+    handleSelectInstance,
+    handleSelectType,
+    loading,
+    mode,
+    selectedInstanceId,
+    selectedTypeId,
+    typeOptions,
+  ])
+
+  useEffect(() => {
+    if (mode === 'INSTANCE') {
+      setDirectionFilter('')
+      return
+    }
+    setRelationTypeFilterId('')
+  }, [mode])
+
+  useEffect(() => {
     if (mode !== 'INSTANCE' || !selectedInstanceId) {
       setNeighbors([])
       return
     }
+
     let cancelled = false
     void (async () => {
       setGraphLoading(true)
@@ -270,25 +456,75 @@ export function GraphPage() {
         }
       }
     })()
+
     return () => {
       cancelled = true
     }
   }, [mode, selectedInstanceId])
 
-  const graphData = useMemo(() => {
-    if (mode === 'INSTANCE') {
-      return buildInstanceGraph(selectedInstance, neighbors)
-    }
-    return buildModelGraph(
-      typeOptions,
+  const filteredNeighbors = useMemo(
+    () =>
+      relationTypeFilterId
+        ? neighbors.filter(
+            (neighbor) => neighbor.relationTypeId === Number(relationTypeFilterId),
+          )
+        : neighbors,
+    [neighbors, relationTypeFilterId],
+  )
+
+  const graphData = useMemo(
+    () =>
+      mode === 'INSTANCE'
+        ? buildInstanceGraph(selectedInstance, filteredNeighbors)
+        : buildModelGraph(
+            typeOptions,
+            relationTypes,
+            selectedType?.id ?? null,
+            directionFilter,
+          ),
+    [
+      directionFilter,
+      filteredNeighbors,
+      mode,
       relationTypes,
-      selectedType ? selectedType.id : null,
-    )
-  }, [mode, neighbors, relationTypes, selectedInstance, selectedType, typeOptions])
+      selectedInstance,
+      selectedType,
+      typeOptions,
+    ],
+  )
+
+  useEffect(() => {
+    if (!graphData.nodes.length) {
+      setSelectedNodeId('')
+      return
+    }
+
+    if (selectedNodeId && graphData.nodes.some((node) => node.id === selectedNodeId)) {
+      return
+    }
+
+    const emphasizedNode = graphData.nodes.find((node) => node.emphasis)
+    setSelectedNodeId(emphasizedNode?.id ?? graphData.nodes[0]?.id ?? '')
+  }, [graphData.nodes, selectedNodeId])
 
   const nodeMap = useMemo(
     () => new Map(graphData.nodes.map((node) => [node.id, node])),
     [graphData.nodes],
+  )
+
+  const selectedNode = selectedNodeId ? nodeMap.get(selectedNodeId) ?? null : null
+
+  const highlightedEdgeIds = useMemo(
+    () =>
+      new Set(
+        graphData.edges
+          .filter(
+            (edge) =>
+              edge.source === selectedNodeId || edge.target === selectedNodeId,
+          )
+          .map((edge) => edge.id),
+      ),
+    [graphData.edges, selectedNodeId],
   )
 
   const sideSummary = useMemo(() => {
@@ -297,21 +533,29 @@ export function GraphPage() {
         title: selectedInstance.name,
         subtitle: `${selectedInstance.typeCode} / #${selectedInstance.id}`,
         description:
-          neighbors.length > 0
-            ? `已加载 ${neighbors.length} 条邻接关系，可用于快速核对实体在图谱中的上下游连接。`
+          filteredNeighbors.length > 0
+            ? `已加载 ${filteredNeighbors.length} 条邻接关系，可用于快速核对实体在图谱中的上下游连接。`
             : '当前实例尚未查询到邻居关系，可能尚未建立关系边。',
         tags: [
           `类型 ${selectedInstance.typeCode}`,
-          `邻居 ${neighbors.length}`,
-          `属性 ${selectedInstance.attributes ? Object.keys(selectedInstance.attributes).length : 0}`,
+          `邻居 ${filteredNeighbors.length}`,
+          `属性 ${
+            selectedInstance.attributes
+              ? Object.keys(selectedInstance.attributes).length
+              : 0
+          }`,
         ],
       }
     }
+
     if (mode === 'MODEL' && selectedType) {
       const relatedRelations = relationTypes.filter(
-        (item) =>
-          item.sourceTypeId === selectedType.id || item.targetTypeId === selectedType.id,
+        (relation) =>
+          (!directionFilter || relation.direction === directionFilter) &&
+          (relation.sourceTypeId === selectedType.id ||
+            relation.targetTypeId === selectedType.id),
       )
+
       return {
         title: selectedType.name,
         subtitle: selectedType.code,
@@ -326,36 +570,150 @@ export function GraphPage() {
         ],
       }
     }
+
     return {
       title: '图谱视图',
       subtitle: mode === 'INSTANCE' ? '实例视图' : '模型视图',
       description: '选择实例或对象类型后，可在右侧查看对应的语义网络结构。',
       tags: [],
     }
-  }, [mode, neighbors.length, relationTypes, selectedInstance, selectedType])
+  }, [
+    directionFilter,
+    filteredNeighbors.length,
+    mode,
+    relationTypes,
+    selectedInstance,
+    selectedType,
+  ])
 
-  async function handleRefreshInstances() {
+  const selectedNodeDetail = useMemo<SelectedNodeDetail | null>(() => {
+    if (!selectedNode) {
+      return null
+    }
+
+    if (selectedNode.kind === 'instance') {
+      const currentInstance =
+        instanceOptions.find((instance) => instance.id === selectedNode.entityId) ??
+        null
+      const relatedNeighbors = filteredNeighbors.filter(
+        (neighbor) =>
+          neighbor.sourceInstanceId === selectedNode.entityId ||
+          neighbor.targetInstanceId === selectedNode.entityId,
+      )
+
+      return {
+        kind: 'instance',
+        title: selectedNode.label,
+        subtitle: selectedNode.meta,
+        description:
+          relatedNeighbors.length > 0
+            ? `该实例当前在图谱中关联 ${relatedNeighbors.length} 条边，可继续切换到相邻节点进行排查。`
+            : '当前实例未查询到可视化关系，可先在关联类型页补充关系边。',
+        chips: [
+          `实例 #${selectedNode.entityId}`,
+          `关系 ${relatedNeighbors.length}`,
+          `属性 ${
+            currentInstance?.attributes
+              ? Object.keys(currentInstance.attributes).length
+              : 0
+          }`,
+        ],
+        attributes: currentInstance?.attributes ?? null,
+        neighbors: relatedNeighbors.map((neighbor) => {
+          const isSource = neighbor.sourceInstanceId === selectedNode.entityId
+          return {
+            edgeId: neighbor.edgeId,
+            relationName: neighbor.relationTypeName,
+            relatedInstanceId: isSource
+              ? neighbor.targetInstanceId
+              : neighbor.sourceInstanceId,
+            relatedInstanceName: isSource
+              ? neighbor.targetInstanceName
+              : neighbor.sourceInstanceName,
+            relatedTypeCode: isSource
+              ? neighbor.targetTypeCode
+              : neighbor.sourceTypeCode,
+          }
+        }),
+      }
+    }
+
+    const currentType =
+      typeOptions.find((objectType) => objectType.id === selectedNode.entityId) ?? null
+    const relatedRelations = relationTypes
+      .filter(
+        (relation) =>
+          (!directionFilter || relation.direction === directionFilter) &&
+          (relation.sourceTypeId === selectedNode.entityId ||
+            relation.targetTypeId === selectedNode.entityId),
+      )
+      .map((relation) => ({
+        id: relation.id,
+        name: relation.name,
+        code: relation.code,
+        sourceTypeCode: relation.sourceTypeCode,
+        targetTypeCode: relation.targetTypeCode,
+        direction: relation.direction,
+      }))
+
+    return {
+      kind: 'type',
+      title: selectedNode.label,
+      subtitle: selectedNode.meta,
+      description:
+        relatedRelations.length > 0
+          ? `该对象类型参与 ${relatedRelations.length} 条关系定义，可结合模型视图检查上下游建模。`
+          : '当前对象类型尚未配置关系定义。',
+      chips: [
+        `类型 #${selectedNode.entityId}`,
+        `关系 ${relatedRelations.length}`,
+        currentType?.description ? '含描述' : '无描述',
+      ],
+      descriptionText: currentType?.description ?? '未填写对象类型描述。',
+      relations: relatedRelations,
+    }
+  }, [
+    directionFilter,
+    filteredNeighbors,
+    instanceOptions,
+    relationTypes,
+    selectedNode,
+    typeOptions,
+  ])
+
+  const handleSelectNode = useCallback((nodeId: string) => {
+    setSelectedNodeId(nodeId)
+  }, [])
+
+  const handleFocusNeighbor = useCallback(
+    (instanceId: number) => {
+      handleSelectInstance(String(instanceId))
+    },
+    [handleSelectInstance],
+  )
+
+  const handleRefreshInstances = useCallback(async () => {
     setGraphLoading(true)
     setError(null)
     try {
-      const data = await listInstances()
-      setInstanceOptions(data)
-      if (!data.some((item) => String(item.id) === selectedInstanceId)) {
-        setSelectedInstanceId(data[0] ? String(data[0].id) : '')
+      const rows = await listInstances()
+      setInstanceOptions(rows)
+      if (!rows.some((instance) => String(instance.id) === selectedInstanceId)) {
+        handleSelectInstance(String(rows[0]?.id ?? ''))
       }
     } catch (e: unknown) {
       setError(toAppErrorInfo(e))
     } finally {
       setGraphLoading(false)
     }
-  }
+  }, [handleSelectInstance, selectedInstanceId])
 
   return (
     <section className="page-shell">
       <header className="page-header">
         <div>
           <h1>图谱</h1>
-          <p>支持实例关系图与模型关系图双视图切换，帮助快速查看实体连接与语义结构。</p>
+          <p>支持实例关系图与模型关系图双视图切换，可通过筛选、节点联动和实例跳转快速聚焦语义网络。</p>
         </div>
       </header>
 
@@ -367,14 +725,14 @@ export function GraphPage() {
             <button
               type="button"
               className={mode === 'INSTANCE' ? 'btn btn-primary' : 'btn'}
-              onClick={() => setMode('INSTANCE')}
+              onClick={() => handleChangeMode('INSTANCE')}
             >
               实例视图
             </button>
             <button
               type="button"
               className={mode === 'MODEL' ? 'btn btn-primary' : 'btn'}
-              onClick={() => setMode('MODEL')}
+              onClick={() => handleChangeMode('MODEL')}
             >
               模型视图
             </button>
@@ -383,21 +741,53 @@ export function GraphPage() {
           {mode === 'INSTANCE' ? (
             <div className="form-grid">
               <label className="field">
+                <span>对象类型筛选</span>
+                <select
+                  value={instanceTypeFilterId}
+                  onChange={(e) => setInstanceTypeFilterId(e.target.value)}
+                >
+                  <option value="">全部类型</option>
+                  {typeOptions.map((item) => (
+                    <option key={String(item.id)} value={String(item.id)}>
+                      {item.name} ({item.code})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
                 <span>实例</span>
                 <select
                   value={selectedInstanceId}
-                  onChange={(e) => setSelectedInstanceId(e.target.value)}
+                  onChange={(e) => handleSelectInstance(e.target.value)}
                 >
                   <option value="">请选择实例</option>
-                  {instanceOptions.map((item) => (
+                  {filteredInstanceOptions.map((item) => (
                     <option key={String(item.id)} value={String(item.id)}>
                       {item.name} (#{item.id} / {item.typeCode})
                     </option>
                   ))}
                 </select>
               </label>
+              <label className="field">
+                <span>关系类型筛选</span>
+                <select
+                  value={relationTypeFilterId}
+                  onChange={(e) => setRelationTypeFilterId(e.target.value)}
+                >
+                  <option value="">全部关系</option>
+                  {relationTypes.map((item) => (
+                    <option key={String(item.id)} value={String(item.id)}>
+                      {item.name} ({item.code})
+                    </option>
+                  ))}
+                </select>
+              </label>
               <div className="form-actions">
-                <button type="button" className="btn" onClick={() => void handleRefreshInstances()}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => void handleRefreshInstances()}
+                >
                   刷新实例
                 </button>
               </div>
@@ -408,7 +798,7 @@ export function GraphPage() {
                 <span>对象类型</span>
                 <select
                   value={selectedTypeId}
-                  onChange={(e) => setSelectedTypeId(e.target.value)}
+                  onChange={(e) => handleSelectType(e.target.value)}
                 >
                   <option value="">请选择对象类型</option>
                   {typeOptions.map((item) => (
@@ -416,6 +806,19 @@ export function GraphPage() {
                       {item.name} ({item.code})
                     </option>
                   ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>方向筛选</span>
+                <select
+                  value={directionFilter}
+                  onChange={(e) =>
+                    setDirectionFilter(e.target.value as RelationDirection | '')
+                  }
+                >
+                  <option value="">全部方向</option>
+                  <option value="DIRECTED">DIRECTED</option>
+                  <option value="UNDIRECTED">UNDIRECTED</option>
                 </select>
               </label>
             </div>
@@ -438,12 +841,28 @@ export function GraphPage() {
         <section className="panel graph-canvas-panel">
           <div className="graph-canvas-header">
             <div>
-              <h2 className="panel-title">{mode === 'INSTANCE' ? '实例关系网络' : '模型语义网络'}</h2>
+              <h2 className="panel-title">
+                {mode === 'INSTANCE' ? '实例关系网络' : '模型语义网络'}
+              </h2>
               <p className="hint-text">
                 {graphLoading
                   ? '图谱加载中…'
                   : `当前显示 ${graphData.nodes.length} 个节点、${graphData.edges.length} 条关系`}
               </p>
+            </div>
+            <div className="graph-legend">
+              <span className="graph-legend-item">
+                <span className="graph-legend-dot graph-legend-dot--focus" />
+                焦点节点
+              </span>
+              <span className="graph-legend-item">
+                <span className="graph-legend-dot graph-legend-dot--weak" />
+                弱连接
+              </span>
+              <span className="graph-legend-item">
+                <span className="graph-legend-dot graph-legend-dot--type" />
+                类型节点
+              </span>
             </div>
           </div>
 
@@ -470,7 +889,13 @@ export function GraphPage() {
                     <stop offset="100%" stopColor="#7ebeff" stopOpacity="0.18" />
                   </linearGradient>
                   <filter id="graph-node-shadow">
-                    <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#2f73df" floodOpacity="0.12" />
+                    <feDropShadow
+                      dx="0"
+                      dy="8"
+                      stdDeviation="10"
+                      floodColor="#2f73df"
+                      floodOpacity="0.12"
+                    />
                   </filter>
                 </defs>
 
@@ -499,13 +924,26 @@ export function GraphPage() {
                   {graphData.edges.map((edge) => {
                     const source = nodeMap.get(edge.source)
                     const target = nodeMap.get(edge.target)
-                    if (!source || !target) return null
+
+                    if (!source || !target) {
+                      return null
+                    }
+
                     const labelX = (source.x + target.x) / 2
                     const labelY = (source.y + target.y) / 2
+                    const isSelected = highlightedEdgeIds.has(edge.id)
+                    const edgeClassName = [
+                      'graph-stage-edge',
+                      edge.weak ? 'graph-stage-edge--weak' : '',
+                      isSelected ? 'graph-stage-edge--selected' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')
+
                     return (
                       <g key={edge.id}>
                         <line
-                          className={edge.weak ? 'graph-stage-edge graph-stage-edge--weak' : 'graph-stage-edge'}
+                          className={edgeClassName}
                           x1={source.x}
                           y1={source.y}
                           x2={target.x}
@@ -533,33 +971,172 @@ export function GraphPage() {
                 </g>
 
                 <g className="graph-stage-nodes">
-                  {graphData.nodes.map((node) => (
-                    <g
-                      key={node.id}
-                      className={node.emphasis ? 'graph-stage-node graph-stage-node--emphasis' : 'graph-stage-node'}
-                      transform={`translate(${node.x} ${node.y})`}
-                    >
-                      <circle className="graph-stage-node-halo" r={node.kind === 'type' ? 34 : 30} />
-                      <circle className="graph-stage-node-core" r={node.kind === 'type' ? 12 : 10} />
-                      <g className="graph-stage-node-card" filter="url(#graph-node-shadow)">
-                        <rect
-                          x={node.kind === 'type' ? -64 : -72}
-                          y="18"
-                          width={node.kind === 'type' ? 128 : 144}
-                          height="52"
-                          rx="16"
+                  {graphData.nodes.map((node) => {
+                    const nodeClassName = [
+                      'graph-stage-node',
+                      node.emphasis ? 'graph-stage-node--emphasis' : '',
+                      node.id === selectedNodeId ? 'graph-stage-node--selected' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')
+
+                    return (
+                      <g
+                        key={node.id}
+                        className={nodeClassName}
+                        transform={`translate(${node.x} ${node.y})`}
+                        onClick={() => handleSelectNode(node.id)}
+                      >
+                        <circle
+                          className="graph-stage-node-halo"
+                          r={node.kind === 'type' ? 34 : 30}
                         />
-                        <text className="graph-stage-node-title" x="0" y="42" textAnchor="middle">
-                          {node.label}
-                        </text>
-                        <text className="graph-stage-node-meta" x="0" y="58" textAnchor="middle">
-                          {node.meta}
-                        </text>
+                        <circle
+                          className="graph-stage-node-core"
+                          r={node.kind === 'type' ? 12 : 10}
+                        />
+                        <g
+                          className="graph-stage-node-card"
+                          filter="url(#graph-node-shadow)"
+                        >
+                          <rect
+                            x={node.kind === 'type' ? -64 : -72}
+                            y="18"
+                            width={node.kind === 'type' ? 128 : 144}
+                            height="52"
+                            rx="16"
+                          />
+                          <text
+                            className="graph-stage-node-title"
+                            x="0"
+                            y="42"
+                            textAnchor="middle"
+                          >
+                            {node.label}
+                          </text>
+                          <text
+                            className="graph-stage-node-meta"
+                            x="0"
+                            y="58"
+                            textAnchor="middle"
+                          >
+                            {node.meta}
+                          </text>
+                        </g>
                       </g>
-                    </g>
-                  ))}
+                    )
+                  })}
                 </g>
               </svg>
+            </div>
+          )}
+        </section>
+
+        <section className="panel graph-node-detail-panel">
+          <h2 className="panel-title">节点详情</h2>
+          {selectedNodeDetail ? (
+            <div className="graph-node-detail">
+              <p className="graph-summary-subtitle">{selectedNodeDetail.subtitle}</p>
+              <h3 className="graph-node-detail-title">{selectedNodeDetail.title}</h3>
+              <p className="graph-summary-description">
+                {selectedNodeDetail.description}
+              </p>
+              <div className="graph-summary-tags">
+                {selectedNodeDetail.chips.map((chip) => (
+                  <span key={chip} className="graph-summary-tag">
+                    {chip}
+                  </span>
+                ))}
+              </div>
+
+              {selectedNodeDetail.kind === 'instance' ? (
+                <>
+                  <div className="graph-node-json">
+                    <span className="graph-node-section-title">属性</span>
+                    <pre className="json-view">
+                      {selectedNodeDetail.attributes
+                        ? JSON.stringify(selectedNodeDetail.attributes, null, 2)
+                        : '—'}
+                    </pre>
+                  </div>
+
+                  <div className="graph-node-neighbors">
+                    <span className="graph-node-section-title">相关邻居</span>
+                    {selectedNodeDetail.neighbors.length === 0 ? (
+                      <p className="status">暂无关联边</p>
+                    ) : (
+                      <div className="graph-node-neighbor-list">
+                        {selectedNodeDetail.neighbors.map((neighbor) => (
+                          <button
+                            key={neighbor.edgeId}
+                            type="button"
+                            className="graph-neighbor-item"
+                            onClick={() =>
+                              handleFocusNeighbor(neighbor.relatedInstanceId)
+                            }
+                          >
+                            <strong>{neighbor.relatedInstanceName}</strong>
+                            <span>
+                              {neighbor.relationName} / {neighbor.relatedTypeCode} / #
+                              {neighbor.relatedInstanceId}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="form-actions">
+                    <Link
+                      to={`/instances/${selectedNode.entityId}`}
+                      className="btn btn-primary"
+                    >
+                      打开实例详情
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="graph-node-json">
+                    <span className="graph-node-section-title">对象类型描述</span>
+                    <p className="graph-node-paragraph">
+                      {selectedNodeDetail.descriptionText}
+                    </p>
+                  </div>
+
+                  <div className="graph-node-neighbors">
+                    <span className="graph-node-section-title">相关关系</span>
+                    {selectedNodeDetail.relations.length === 0 ? (
+                      <p className="status">暂无关系定义</p>
+                    ) : (
+                      <div className="graph-node-neighbor-list">
+                        {selectedNodeDetail.relations.map((relation) => (
+                          <div key={relation.id} className="graph-neighbor-item">
+                            <strong>{relation.name}</strong>
+                            <span>
+                              {relation.code} / {relation.sourceTypeCode} ->{' '}
+                              {relation.targetTypeCode} / {relation.direction}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="form-actions">
+                    <Link
+                      to={`/object-types/${selectedNode.entityId}`}
+                      className="btn btn-primary"
+                    >
+                      打开对象类型详情
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="empty-panel graph-empty-state">
+              <p>点击图谱中的节点后，可在这里查看详情、属性与相邻连接。</p>
             </div>
           )}
         </section>
