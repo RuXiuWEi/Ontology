@@ -870,6 +870,9 @@ export function GraphPage() {
         selectedEdge.direction ?? 'DIRECTED',
         selectedEdge.weak ? '弱连接' : '强连接',
       ],
+      sourceMeta: selectedEdge.sourceMeta ?? '—',
+      targetMeta: selectedEdge.targetMeta ?? '—',
+      attributes: selectedEdge.attributes ?? null,
     }
   }, [selectedEdge])
 
