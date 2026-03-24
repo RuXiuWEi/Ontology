@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { getMe } from '../api/auth'
+import { hasPermission, type PermissionFlags, type PermissionKey } from '../auth/permissions'
 import { useAuth } from '../auth/useAuth'
 import adminAvatar from '../assets/admin-avatar.svg'
 import systemLogo from '../assets/system-logo.svg'
@@ -10,6 +10,7 @@ type NavItem = {
   to: string
   label: string
   end?: boolean
+  require?: PermissionKey | ((permissions: PermissionFlags) => boolean)
 }
 
 const NAV_SECTIONS: Array<{ title: string; items: NavItem[] }> = [
@@ -22,7 +23,7 @@ const NAV_SECTIONS: Array<{ title: string; items: NavItem[] }> = [
     items: [
       { to: '/object-types', label: '对象类型' },
       { to: '/link-types', label: '关联类型' },
-      { to: '/integration', label: '集成' },
+      { to: '/integration', label: '集成', require: 'canAccessIntegration' },
     ],
   },
   {
@@ -46,7 +47,7 @@ const NAV_SECTIONS: Array<{ title: string; items: NavItem[] }> = [
   },
   {
     title: '系统',
-    items: [{ to: '/rbac', label: '权限' }],
+    items: [{ to: '/rbac', label: '权限', require: 'canManageRbac' }],
   },
 ]
 
@@ -82,34 +83,29 @@ function prettifyRole(role: string): string {
 }
 
 export function Layout() {
-  const { logout } = useAuth()
+  const { logout, me, permissions } = useAuth()
   const location = useLocation()
-  const [username, setUsername] = useState('当前用户')
-  const [roleLabel, setRoleLabel] = useState('访客')
-
-  useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      try {
-        const me = await getMe()
-        if (cancelled) return
-        setUsername(me.username)
-        setRoleLabel(prettifyRole(me.roles[0] ?? '普通用户'))
-      } catch {
-        if (cancelled) return
-        setUsername('当前用户')
-        setRoleLabel('未识别角色')
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [])
 
   const breadcrumb = useMemo(
     () => resolveBreadcrumb(location.pathname),
     [location.pathname],
   )
+
+  const navSections = useMemo(
+    () =>
+      NAV_SECTIONS.map((section) => ({
+        ...section,
+        items: section.items.filter(
+          (item) => !item.require || hasPermission(permissions, item.require),
+        ),
+      })).filter((section) => section.items.length > 0),
+    [permissions],
+  )
+
+  const username = me?.username ?? '当前用户'
+  const roleLabel = me?.roles.length
+    ? me.roles.map(prettifyRole).join(' / ')
+    : '未识别角色'
 
   return (
     <div className="app-shell">
@@ -124,7 +120,7 @@ export function Layout() {
           </div>
         </div>
         <nav className="nav-sections">
-          {NAV_SECTIONS.map((section) => (
+          {navSections.map((section) => (
             <section key={section.title} className="nav-section">
               <h3>{section.title}</h3>
               <div className="nav-group">
@@ -161,6 +157,9 @@ export function Layout() {
               <strong>{username}</strong>
               <span>{roleLabel}</span>
             </div>
+            {permissions.isReadOnly ? (
+              <span className="role-chip role-chip--readonly">只读模式</span>
+            ) : null}
             <button type="button" className="btn-logout" onClick={logout}>
               退出登录
             </button>

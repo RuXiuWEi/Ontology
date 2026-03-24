@@ -1,21 +1,29 @@
 .login-page {
   --login-accent: #5d9bff;
   --login-accent-strong: #2f73df;
+  --login-accent-soft: #8ed8ff;
   --login-bg-start: #f8fbff;
   --login-bg-end: #edf4ff;
   --login-text: #1f3560;
   --login-muted: rgb(31 53 96 / 66%);
-  --wire-color: rgb(77 132 226 / 24%);
+  --login-grid-color: rgb(77 132 226 / 10%);
+  --login-line-strong: rgb(61 120 220 / 34%);
+  --login-line-secondary: rgb(77 132 226 / 23%);
+  --login-line-bridge: rgb(93 155 255 / 22%);
+  --login-edge-label-border: rgb(56 115 220 / 11%);
+  --login-entity-border: rgb(56 115 220 / 14%);
+  --login-entity-shadow: rgb(31 73 140 / 12%);
 
   position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: grid;
   place-items: center;
   overflow: hidden;
   padding: clamp(1rem, 2.6vw, 2.5rem);
   background:
-    radial-gradient(660px 360px at 14% 10%, rgb(93 155 255 / 26%) 0%, transparent 72%),
-    radial-gradient(980px 460px at 86% 90%, rgb(93 155 255 / 16%) 0%, transparent 72%),
+    radial-gradient(720px 420px at 14% 10%, rgb(93 155 255 / 24%) 0%, transparent 72%),
+    radial-gradient(980px 520px at 86% 90%, rgb(142 216 255 / 18%) 0%, transparent 72%),
     linear-gradient(160deg, var(--login-bg-start) 0%, var(--login-bg-end) 55%, #fbfdff 100%);
 }
 
@@ -28,64 +36,310 @@
 }
 
 .login-page::before {
-  opacity: 0.3;
+  z-index: 0;
+  opacity: 0.38;
   background:
-    linear-gradient(rgb(77 132 226 / 12%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(77 132 226 / 10%) 1px, transparent 1px);
-  background-size: 36px 36px;
-  mask-image: radial-gradient(circle at center, black 32%, transparent 92%);
+    linear-gradient(var(--login-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--login-grid-color) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black 28%, transparent 88%);
 }
 
 .login-page::after {
-  inset: 12% 20%;
+  z-index: 0;
+  inset: 18% 18%;
   border-radius: 999px;
-  background: radial-gradient(circle, rgb(93 155 255 / 18%) 0%, transparent 70%);
-  filter: blur(22px);
+  background:
+    radial-gradient(circle at center, rgb(93 155 255 / 15%) 0%, rgb(93 155 255 / 6%) 42%, transparent 74%);
+  filter: blur(28px);
 }
 
-.login-wires {
+.login-graph {
   position: absolute;
-  inset: -8%;
+  inset: -6%;
+  z-index: 1;
   pointer-events: none;
-  opacity: 0.78;
+  opacity: 1;
+  animation: graph-drift 18s ease-in-out infinite;
 }
 
-.wire-ring {
+.login-graph-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.graph-lines {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.graph-line {
+  animation: graph-line-breathe 9s ease-in-out infinite;
+}
+
+.graph-line--strong {
+  stroke: var(--login-line-strong);
+  stroke-width: 1.85;
+}
+
+.graph-line--secondary {
+  stroke: var(--login-line-secondary);
+  stroke-width: 1.35;
+  stroke-dasharray: 4 10;
+}
+
+.graph-line--bridge {
+  stroke: var(--login-line-bridge);
+  stroke-width: 1.45;
+  stroke-dasharray: 5 12;
+  animation:
+    graph-line-breathe 10s ease-in-out infinite,
+    graph-line-flow 24s linear infinite;
+}
+
+.graph-line--directed {
+  stroke-linecap: round;
+}
+
+.graph-lines--signal {
+  opacity: 0.92;
+}
+
+.graph-line--signal {
+  stroke: rgb(142 216 255 / 76%);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-dasharray: 12 220;
+  filter: drop-shadow(0 0 6px rgb(142 216 255 / 30%));
+  animation: graph-signal-travel 9s linear infinite;
+}
+
+.graph-line--signal-two {
+  animation-delay: 1.4s;
+}
+
+.graph-line--signal-three {
+  animation-delay: 3.1s;
+}
+
+.graph-line--signal-four {
+  animation-delay: 0.8s;
+}
+
+.graph-line--signal-five {
+  animation-delay: 4.2s;
+}
+
+.graph-edge-label rect {
+  fill: rgb(255 255 255 / 78%);
+  stroke: var(--login-edge-label-border);
+  stroke-width: 1;
+  filter: drop-shadow(0 10px 20px rgb(38 88 162 / 8%));
+}
+
+.graph-edge-label text {
+  fill: rgb(47 88 160 / 88%);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.graph-edge-label {
+  opacity: 0.9;
+}
+
+.graph-edge-label > rect,
+.graph-edge-label > text {
+  animation: graph-edge-label-float 10s ease-in-out infinite var(--predicate-delay);
+  transform-origin: center;
+}
+
+.graph-edge-label--secondary rect {
+  fill: rgb(248 251 255 / 70%);
+}
+
+.graph-edge-label--secondary text {
+  fill: rgb(54 91 151 / 72%);
+}
+
+.graph-node-pulses {
+  fill: rgb(93 155 255 / 9%);
+}
+
+.graph-node-pulse {
+  opacity: 0.54;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: graph-node-pulse 6.4s ease-in-out infinite;
+}
+
+.graph-node-pulse--two {
+  animation-delay: 1.2s;
+}
+
+.graph-node-pulse--three {
+  animation-delay: 2.4s;
+}
+
+.graph-node-pulse--four {
+  animation-delay: 3.2s;
+}
+
+.graph-rings {
+  fill: none;
+  stroke: rgb(93 155 255 / 22%);
+}
+
+.graph-node-ring {
+  stroke-width: 1.1;
+  opacity: 0.76;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: graph-ring-breathe 7.4s ease-in-out infinite;
+}
+
+.graph-node {
+  fill: #4d87e2;
+  filter: drop-shadow(0 0 10px rgb(93 155 255 / 18%));
+}
+
+.graph-node--core {
+  fill: var(--login-accent-strong);
+}
+
+.graph-node--soft {
+  fill: rgb(93 155 255 / 46%);
+}
+
+.graph-entity {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: var(--wire-size);
-  height: var(--wire-size);
-  transform: translate(-50%, -50%) rotate(var(--wire-rotate));
-  transform-origin: center center;
-  border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%;
-  border: 1px solid var(--wire-color);
+  left: var(--entity-x);
+  top: var(--entity-y);
+  z-index: 2;
+  width: min(17rem, 20vw);
+  min-width: 11.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  transform: translate(-50%, -50%);
+  padding: 0.72rem 0.82rem;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 86%) 0%, rgb(244 249 255 / 74%) 100%);
   box-shadow:
-    0 0 0 1px rgb(106 156 255 / 8%),
-    0 0 32px rgb(93 155 255 / 10%);
-  animation: wire-spin var(--wire-duration) linear infinite, wire-pulse 10s ease-in-out infinite;
+    0 16px 40px rgb(38 88 162 / 10%),
+    inset 0 0 0 1px var(--login-entity-border);
+  backdrop-filter: blur(12px);
+  animation: graph-entity-float 14s ease-in-out infinite var(--entity-delay);
 }
 
-.wire-ring::before {
+.graph-entity::before {
   content: '';
   position: absolute;
-  inset: clamp(1rem, 2vw, 1.6rem);
-  border-radius: 48% 52% 54% 46% / 52% 48% 46% 54%;
-  border: 1px solid rgb(62 115 219 / 22%);
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgb(255 255 255 / 18%) 0%, transparent 40%);
+  pointer-events: none;
 }
 
-.wire-ring:nth-child(2n) {
-  animation-direction: reverse;
+.graph-entity::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  opacity: 0.58;
+  pointer-events: none;
+}
+
+.graph-entity--core {
+  box-shadow:
+    0 20px 48px rgb(38 88 162 / 14%),
+    inset 0 0 0 1px rgb(47 115 223 / 18%);
+}
+
+.graph-entity--core::after {
+  border: 1px solid rgb(47 115 223 / 18%);
+}
+
+.graph-entity--class::after {
+  border: 1px solid rgb(76 132 226 / 18%);
+}
+
+.graph-entity--property::after {
+  border: 1px solid rgb(98 167 255 / 16%);
+}
+
+.graph-entity--relation::after {
+  border: 1px solid rgb(93 155 255 / 22%);
+}
+
+.graph-entity--rule::after {
+  border: 1px solid rgb(110 177 255 / 20%);
+}
+
+.graph-entity--instance::after {
+  border: 1px solid rgb(82 146 230 / 18%);
+}
+
+.graph-entity-kind {
+  position: relative;
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.36rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: rgb(39 82 149 / 74%);
+}
+
+.graph-entity-kind::before {
+  content: '';
+  width: 0.36rem;
+  height: 0.36rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #8ed8ff 0%, #5d9bff 78%, #2f73df 100%);
+  box-shadow: 0 0 10px rgb(93 155 255 / 28%);
+  animation: graph-beacon 4.8s ease-in-out infinite;
+}
+
+.graph-entity-title {
+  position: relative;
+  font-size: 0.96rem;
+  line-height: 1.25;
+  color: var(--login-text);
+}
+
+.graph-entity-summary {
+  position: relative;
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: rgb(31 53 96 / 70%);
+}
+
+.graph-entity-tags {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+}
+
+.graph-entity-tag {
+  padding: 0.18rem 0.42rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  color: rgb(31 53 96 / 72%);
+  background: rgb(93 155 255 / 8%);
 }
 
 .login-card {
   width: min(100%, 476px);
   position: relative;
-  z-index: 2;
+  z-index: 3;
   padding: clamp(1.4rem, 2.7vw, 2.25rem);
   border-radius: 24px;
   background:
-    linear-gradient(165deg, rgb(255 255 255 / 88%) 0%, rgb(245 250 255 / 82%) 100%);
+    linear-gradient(165deg, rgb(255 255 255 / 90%) 0%, rgb(245 250 255 / 84%) 100%);
   backdrop-filter: blur(14px);
   box-shadow:
     0 30px 72px rgb(37 84 156 / 20%),
@@ -203,24 +457,113 @@
   text-align: center;
 }
 
-@keyframes wire-spin {
-  from {
-    transform: translate(-50%, -50%) rotate(var(--wire-rotate));
-  }
-
-  to {
-    transform: translate(-50%, -50%) rotate(calc(var(--wire-rotate) + 360deg));
-  }
-}
-
-@keyframes wire-pulse {
+@keyframes graph-line-breathe {
   0%,
   100% {
-    opacity: 0.58;
+    opacity: 0.62;
   }
 
   50% {
-    opacity: 0.92;
+    opacity: 0.98;
+  }
+}
+
+@keyframes graph-line-flow {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: -120;
+  }
+}
+
+@keyframes graph-signal-travel {
+  from {
+    stroke-dashoffset: 0;
+    opacity: 0.12;
+  }
+
+  20%,
+  75% {
+    opacity: 0.95;
+  }
+
+  to {
+    stroke-dashoffset: -260;
+    opacity: 0.12;
+  }
+}
+
+@keyframes graph-edge-label-float {
+  0%,
+  100% {
+    opacity: 0.76;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes graph-node-pulse {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: scale(0.88);
+  }
+
+  50% {
+    opacity: 0.74;
+    transform: scale(1.16);
+  }
+}
+
+@keyframes graph-ring-breathe {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 0.84;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes graph-entity-float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+
+  50% {
+    transform: translate(-50%, calc(-50% - 7px));
+  }
+}
+
+@keyframes graph-beacon {
+  0%,
+  100% {
+    opacity: 0.46;
+    transform: scale(0.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes graph-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, -0.8%, 0);
   }
 }
 
@@ -236,28 +579,60 @@
   }
 }
 
+@media (max-width: 1100px) {
+  .graph-entity {
+    width: min(15rem, 23vw);
+    min-width: 10rem;
+  }
+}
+
 @media (max-width: 900px) {
   .login-page {
     padding: 1rem;
+  }
+
+  .login-graph {
+    inset: -12% -18%;
+    opacity: 0.9;
   }
 
   .login-card {
     width: min(100%, 560px);
   }
 
-  .wire-ring:nth-child(n + 5) {
+  .graph-entity:nth-of-type(3),
+  .graph-entity:nth-of-type(5),
+  .graph-edge-label:nth-of-type(4),
+  .graph-edge-label:nth-of-type(6),
+  .graph-edge-label:nth-of-type(7) {
     display: none;
   }
 }
 
 @media (max-width: 640px) {
-  .wire-ring:nth-child(n + 4) {
-    display: none;
+  .login-page::before {
+    background-size: 28px 28px;
   }
 
   .login-card {
     border-radius: 18px;
     padding: 1.1rem;
+  }
+
+  .login-graph {
+    inset: -18% -28%;
+    opacity: 0.82;
+  }
+
+  .graph-entity {
+    min-width: 9.2rem;
+    width: min(11rem, 38vw);
+    padding: 0.58rem 0.64rem;
+  }
+
+  .graph-entity:nth-of-type(n + 4),
+  .graph-edge-label:nth-of-type(n + 4) {
+    display: none;
   }
 
   .login-brand-text h1 {
@@ -270,7 +645,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wire-ring {
+  .login-graph,
+  .graph-line,
+  .graph-node-pulse,
+  .graph-node-ring,
+  .graph-edge-label,
+  .graph-entity,
+  .graph-entity-kind::before {
     animation: none;
   }
 

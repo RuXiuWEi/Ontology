@@ -11,8 +11,14 @@ const LoginPage = lazy(async () => ({
 const PlaceholderPage = lazy(async () => ({
   default: (await import('./pages/PlaceholderPage')).PlaceholderPage,
 }))
+const ForbiddenPage = lazy(async () => ({
+  default: (await import('./pages/ForbiddenPage')).ForbiddenPage,
+}))
 const DashboardPage = lazy(async () => ({
   default: (await import('./pages/dashboard/DashboardPage')).DashboardPage,
+}))
+const GraphPage = lazy(async () => ({
+  default: (await import('./pages/graph/GraphPage')).GraphPage,
 }))
 const InstanceDetailPage = lazy(async () => ({
   default: (await import('./pages/instances/InstanceDetailPage')).InstanceDetailPage,
@@ -52,15 +58,18 @@ export default function App() {
         <Suspense fallback={<div className="route-loading">页面加载中…</div>}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forbidden" element={<ForbiddenPage />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="object-types">
                   <Route index element={<ObjectTypeListPage />} />
-                  <Route path="new" element={<ObjectTypeFormPage mode="create" />} />
+                  <Route element={<ProtectedRoute require="canManageModel" />}>
+                    <Route path="new" element={<ObjectTypeFormPage mode="create" />} />
+                    <Route path=":id/edit" element={<ObjectTypeFormPage mode="edit" />} />
+                  </Route>
                   <Route path=":id" element={<ObjectTypeDetailPage />} />
-                  <Route path=":id/edit" element={<ObjectTypeFormPage mode="edit" />} />
                 </Route>
                 <Route
                   path="link-types"
@@ -68,34 +77,29 @@ export default function App() {
                 />
                 <Route path="instances">
                   <Route index element={<InstanceListPage />} />
-                  <Route path="new" element={<InstanceFormPage mode="create" />} />
+                  <Route element={<ProtectedRoute require="canManageInstances" />}>
+                    <Route path="new" element={<InstanceFormPage mode="create" />} />
+                    <Route path=":id/edit" element={<InstanceFormPage mode="edit" />} />
+                  </Route>
                   <Route path=":id" element={<InstanceDetailPage />} />
-                  <Route path=":id/edit" element={<InstanceFormPage mode="edit" />} />
                 </Route>
                 <Route
                   path="sets"
                   element={<PlaceholderPage title="对象集合" subtitle="对象集合模块将在后续批次接入。" />}
                 />
-                <Route
-                  path="actions"
-                  element={<ActionsPage />}
-                />
-                <Route
-                  path="graph"
-                  element={<PlaceholderPage title="图谱" subtitle="图谱模块将在后续批次接入。" />}
-                />
-                <Route
-                  path="versions"
-                  element={<VersionsPage />}
-                />
+                <Route path="actions" element={<ActionsPage />} />
+                <Route path="graph" element={<GraphPage />} />
+                <Route path="versions" element={<VersionsPage />} />
                 <Route
                   path="lineage"
                   element={<PlaceholderPage title="数据血缘" subtitle="数据血缘模块将在后续批次接入。" />}
                 />
-                <Route
-                  path="rbac"
-                  element={<RbacPage />}
-                />
+                <Route element={<ProtectedRoute require="canManageRbac" />}>
+                  <Route
+                    path="rbac"
+                    element={<RbacPage />}
+                  />
+                </Route>
                 <Route
                   path="integration"
                   element={<PlaceholderPage title="集成" subtitle="集成模块将在后续批次接入。" />}

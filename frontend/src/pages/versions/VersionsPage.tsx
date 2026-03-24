@@ -7,6 +7,7 @@ import {
   saveModelDraft,
 } from '../../api/modelVersions'
 import type { ModelVersionDto } from '../../api/types'
+import { usePermissions } from '../../auth/usePermissions'
 import { ErrorAlert } from '../../components/ErrorAlert'
 import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import { parseJsonObjectInput } from '../../utils/json'
@@ -15,6 +16,7 @@ import '../PageShell.css'
 const PAGE_SIZE = 10
 
 export function VersionsPage() {
+  const { can } = usePermissions()
   const [modelCode, setModelCode] = useState('M_GOV_RULE_ENGINE')
   const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage] = useState(0)
@@ -32,6 +34,7 @@ export function VersionsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<AppErrorInfo | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const canManageVersions = can('canManageVersions')
 
   const clearTip = useCallback(() => {
     setError(null)
@@ -199,6 +202,9 @@ export function VersionsPage() {
       <p className="hint-text">
         使用建议：保存/发布前先确认“模型内容”为 JSON 对象且非空；发布说明用于后续追溯与审计。
       </p>
+      {!canManageVersions ? (
+        <p className="status info">当前为只读模式，可查询版本与草稿，但无法保存、发布或回滚。</p>
+      ) : null}
 
       <div className="panel">
         <h2 className="panel-title">草稿编辑与发布</h2>
@@ -210,6 +216,7 @@ export function VersionsPage() {
               onChange={(e) => setModelCode(e.target.value)}
               maxLength={64}
               placeholder="例如：M_GOV_RULE_ENGINE"
+              disabled={!canManageVersions}
             />
           </label>
           <label className="field">
@@ -219,6 +226,7 @@ export function VersionsPage() {
               onChange={(e) => setTitle(e.target.value)}
               maxLength={255}
               placeholder="例如：规则引擎草稿"
+              disabled={!canManageVersions}
             />
           </label>
           <label className="field full-width">
@@ -227,6 +235,7 @@ export function VersionsPage() {
               value={changeLog}
               onChange={(e) => setChangeLog(e.target.value)}
               placeholder="发布和回滚时会作为版本说明"
+              disabled={!canManageVersions}
             />
           </label>
           <label className="field full-width">
@@ -236,13 +245,24 @@ export function VersionsPage() {
               value={contentText}
               onChange={(e) => setContentText(e.target.value)}
               placeholder='{"nodes":[]}'
+              disabled={!canManageVersions}
             />
           </label>
           <div className="form-actions full-width">
-            <button type="button" className="btn btn-primary" onClick={() => void handleSaveDraft()} disabled={saving}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => void handleSaveDraft()}
+              disabled={saving || !canManageVersions}
+            >
               {saving ? '处理中…' : '保存草稿'}
             </button>
-            <button type="button" className="btn" onClick={() => void handlePublishDraft()} disabled={saving}>
+            <button
+              type="button"
+              className="btn"
+              onClick={() => void handlePublishDraft()}
+              disabled={saving || !canManageVersions}
+            >
               发布草稿
             </button>
             <input
@@ -251,8 +271,14 @@ export function VersionsPage() {
               value={rollbackVersionNo}
               onChange={(e) => setRollbackVersionNo(e.target.value)}
               placeholder="回滚版本号，如 1"
+              disabled={!canManageVersions}
             />
-            <button type="button" className="btn" onClick={() => void handleRollbackDraft()} disabled={saving}>
+            <button
+              type="button"
+              className="btn"
+              onClick={() => void handleRollbackDraft()}
+              disabled={saving || !canManageVersions}
+            >
               回滚生成草稿
             </button>
             <button type="button" className="btn btn-light" onClick={() => void loadData()} disabled={loading}>

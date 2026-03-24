@@ -17,6 +17,7 @@ import type {
   PageResponse,
 } from '../../api/types'
 import { ErrorAlert } from '../../components/ErrorAlert'
+import { usePermissions } from '../../auth/usePermissions'
 import { toAppErrorInfo, type AppErrorInfo } from '../../utils/error'
 import { parseJsonObjectInput } from '../../utils/json'
 import '../PageShell.css'
@@ -33,6 +34,7 @@ type ActionTypeFormState = {
 }
 
 export function ActionsPage() {
+  const { can } = usePermissions()
   const [types, setTypes] = useState<ActionTypeDto[]>([])
   const [typesPage, setTypesPage] = useState<PageResponse<ActionTypeDto> | null>(null)
   const [typesLoading, setTypesLoading] = useState(true)
@@ -63,6 +65,7 @@ export function ActionsPage() {
   const [error, setError] = useState<AppErrorInfo | null>(null)
   const [retryingId, setRetryingId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const canManageActions = can('canManageActions')
 
   const typeMap = useMemo(() => {
     const map = new Map<number, ObjectTypeDto>()
@@ -277,91 +280,96 @@ export function ActionsPage() {
       </header>
 
       <ErrorAlert error={error} />
+      {!canManageActions ? (
+        <p className="status info">当前为只读模式，可查看动作定义和执行记录，但无法创建、执行或重试动作。</p>
+      ) : null}
 
-      <div className="panel">
-        <h2 className="panel-title">新建动作类型</h2>
-        <p className="hint-text" style={{ marginBottom: '0.5rem' }}>
-          提示：参数 Schema 推荐填写 JSON 对象，例如
-          {' '}
-          {'{"type":"object","required":["tag"],"properties":{"tag":{"type":"string"}}}'}
-        </p>
-        <form className="form-grid" onSubmit={handleCreateActionType}>
-          <label className="field">
-            <span>编码</span>
-            <input
-              value={form.code}
-              maxLength={64}
-              required
-              onChange={(e) => setForm((prev) => ({ ...prev, code: e.target.value }))}
-            />
-          </label>
-          <label className="field">
-            <span>名称</span>
-            <input
-              value={form.name}
-              maxLength={255}
-              required
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-            />
-          </label>
-          <label className="field">
-            <span>目标对象类型</span>
-            <select
-              value={form.targetTypeId}
-              required
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, targetTypeId: e.target.value }))
-              }
-            >
-              <option value="" disabled>
-                请选择
-              </option>
-              {objectTypes.map((t) => (
-                <option key={String(t.id)} value={String(t.id)}>
-                  {t.name} ({t.code})
+      {canManageActions ? (
+        <div className="panel">
+          <h2 className="panel-title">新建动作类型</h2>
+          <p className="hint-text" style={{ marginBottom: '0.5rem' }}>
+            提示：参数 Schema 推荐填写 JSON 对象，例如
+            {' '}
+            {'{"type":"object","required":["tag"],"properties":{"tag":{"type":"string"}}}'}
+          </p>
+          <form className="form-grid" onSubmit={handleCreateActionType}>
+            <label className="field">
+              <span>编码</span>
+              <input
+                value={form.code}
+                maxLength={64}
+                required
+                onChange={(e) => setForm((prev) => ({ ...prev, code: e.target.value }))}
+              />
+            </label>
+            <label className="field">
+              <span>名称</span>
+              <input
+                value={form.name}
+                maxLength={255}
+                required
+                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            </label>
+            <label className="field">
+              <span>目标对象类型</span>
+              <select
+                value={form.targetTypeId}
+                required
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, targetTypeId: e.target.value }))
+                }
+              >
+                <option value="" disabled>
+                  请选择
                 </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>执行器类型</span>
-            <select
-              value={form.executorType}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, executorType: e.target.value }))
-              }
-            >
-              <option value="SYNC_MOCK">SYNC_MOCK</option>
-              <option value="WEBHOOK">WEBHOOK</option>
-            </select>
-          </label>
-          <label className="field full">
-            <span>参数 Schema（可选）</span>
-            <textarea
-              rows={4}
-              value={form.parameterSchema}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, parameterSchema: e.target.value }))
-              }
-            />
-          </label>
-          <label className="field full">
-            <span>描述（可选）</span>
-            <textarea
-              rows={2}
-              value={form.description}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, description: e.target.value }))
-              }
-            />
-          </label>
-          <div className="form-actions full">
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? '提交中…' : '创建动作类型'}
-            </button>
-          </div>
-        </form>
-      </div>
+                {objectTypes.map((t) => (
+                  <option key={String(t.id)} value={String(t.id)}>
+                    {t.name} ({t.code})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>执行器类型</span>
+              <select
+                value={form.executorType}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, executorType: e.target.value }))
+                }
+              >
+                <option value="SYNC_MOCK">SYNC_MOCK</option>
+                <option value="WEBHOOK">WEBHOOK</option>
+              </select>
+            </label>
+            <label className="field full">
+              <span>参数 Schema（可选）</span>
+              <textarea
+                rows={4}
+                value={form.parameterSchema}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, parameterSchema: e.target.value }))
+                }
+              />
+            </label>
+            <label className="field full">
+              <span>描述（可选）</span>
+              <textarea
+                rows={2}
+                value={form.description}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, description: e.target.value }))
+                }
+              />
+            </label>
+            <div className="form-actions full">
+              <button type="submit" className="btn btn-primary" disabled={submitting}>
+                {submitting ? '提交中…' : '创建动作类型'}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
 
       <div className="panel">
         <div className="toolbar">
@@ -408,14 +416,18 @@ export function ActionsPage() {
                         <td>{row.executorType}</td>
                         <td>{row.enabled ? '启用' : '停用'}</td>
                         <td className="actions">
-                          <button
-                            type="button"
-                            className="link-btn danger"
-                            disabled={deletingId === row.id}
-                            onClick={() => void handleDeleteActionType(row.id)}
-                          >
-                            {deletingId === row.id ? '删除中…' : '删除'}
-                          </button>
+                          {canManageActions ? (
+                            <button
+                              type="button"
+                              className="link-btn danger"
+                              disabled={deletingId === row.id}
+                              onClick={() => void handleDeleteActionType(row.id)}
+                            >
+                              {deletingId === row.id ? '删除中…' : '删除'}
+                            </button>
+                          ) : (
+                            <span className="muted">只读</span>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -455,61 +467,63 @@ export function ActionsPage() {
         )}
       </div>
 
-      <div className="panel">
-        <h2 className="panel-title">触发动作执行</h2>
-        <p className="hint-text" style={{ marginBottom: '0.5rem' }}>
-          提示：执行参数需为 JSON 对象，并尽量与动作 Schema 保持一致。
-        </p>
-        <form className="form-grid" onSubmit={handleExecuteAction}>
-          <label className="field">
-            <span>动作类型</span>
-            <select
-              value={execActionTypeId}
-              required
-              onChange={(e) => setExecActionTypeId(e.target.value)}
-            >
-              <option value="" disabled>
-                请选择
-              </option>
-              {types.map((t) => (
-                <option key={String(t.id)} value={String(t.id)}>
-                  {t.name} ({t.code})
+      {canManageActions ? (
+        <div className="panel">
+          <h2 className="panel-title">触发动作执行</h2>
+          <p className="hint-text" style={{ marginBottom: '0.5rem' }}>
+            提示：执行参数需为 JSON 对象，并尽量与动作 Schema 保持一致。
+          </p>
+          <form className="form-grid" onSubmit={handleExecuteAction}>
+            <label className="field">
+              <span>动作类型</span>
+              <select
+                value={execActionTypeId}
+                required
+                onChange={(e) => setExecActionTypeId(e.target.value)}
+              >
+                <option value="" disabled>
+                  请选择
                 </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>目标实例</span>
-            <select
-              value={execTargetInstanceId}
-              required
-              onChange={(e) => setExecTargetInstanceId(e.target.value)}
-            >
-              <option value="" disabled>
-                请选择
-              </option>
-              {instances.map((ins) => (
-                <option key={String(ins.id)} value={String(ins.id)}>
-                  {ins.name} (#{ins.id} / {typeMap.get(ins.typeId)?.code ?? ins.typeCode})
+                {types.map((t) => (
+                  <option key={String(t.id)} value={String(t.id)}>
+                    {t.name} ({t.code})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>目标实例</span>
+              <select
+                value={execTargetInstanceId}
+                required
+                onChange={(e) => setExecTargetInstanceId(e.target.value)}
+              >
+                <option value="" disabled>
+                  请选择
                 </option>
-              ))}
-            </select>
-          </label>
-          <label className="field full">
-            <span>执行参数 JSON（可选）</span>
-            <textarea
-              rows={4}
-              value={execPayloadText}
-              onChange={(e) => setExecPayloadText(e.target.value)}
-            />
-          </label>
-          <div className="form-actions full">
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? '执行中…' : '执行动作'}
-            </button>
-          </div>
-        </form>
-      </div>
+                {instances.map((ins) => (
+                  <option key={String(ins.id)} value={String(ins.id)}>
+                    {ins.name} (#{ins.id} / {typeMap.get(ins.typeId)?.code ?? ins.typeCode})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field full">
+              <span>执行参数 JSON（可选）</span>
+              <textarea
+                rows={4}
+                value={execPayloadText}
+                onChange={(e) => setExecPayloadText(e.target.value)}
+              />
+            </label>
+            <div className="form-actions full">
+              <button type="submit" className="btn btn-primary" disabled={submitting}>
+                {submitting ? '执行中…' : '执行动作'}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
 
       <div className="panel">
         <div className="toolbar">
@@ -588,14 +602,18 @@ export function ActionsPage() {
                         <td>{row.errorMessage || '—'}</td>
                         <td>{row.completedAt ? new Date(row.completedAt).toLocaleString() : '—'}</td>
                         <td className="actions">
-                          <button
-                            type="button"
-                            className="link-btn"
-                            disabled={row.status !== 'FAILED' || retryingId === row.id}
-                            onClick={() => void handleRetry(row.id)}
-                          >
-                            {retryingId === row.id ? '重试中…' : '失败重试'}
-                          </button>
+                          {canManageActions ? (
+                            <button
+                              type="button"
+                              className="link-btn"
+                              disabled={row.status !== 'FAILED' || retryingId === row.id}
+                              onClick={() => void handleRetry(row.id)}
+                            >
+                              {retryingId === row.id ? '重试中…' : '失败重试'}
+                            </button>
+                          ) : (
+                            <span className="muted">只读</span>
+                          )}
                         </td>
                       </tr>
                     ))
