@@ -4,6 +4,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type WheelEvent as ReactWheelEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -95,6 +96,14 @@ type EdgeDetail = {
   attributes: Record<string, unknown> | null
 }
 
+type PathDetail = {
+  title: string
+  subtitle: string
+  description: string
+  chips: string[]
+  steps: string[]
+}
+
 type GraphViewport = {
   scale: number
   offsetX: number
@@ -121,6 +130,105 @@ const DEFAULT_VIEWPORT: GraphViewport = {
 function normalizeDepth(value: number): number {
   if (!Number.isFinite(value)) return 1
   return Math.min(MAX_INSTANCE_DEPTH, Math.max(1, Math.round(value)))
+}
+
+function buildExportFileName(mode: GraphMode, extension: 'svg' | 'png'): string {
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+  return `graph-${mode.toLowerCase()}-${stamp}.${extension}`
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = fileName
+  document.body.appendChild(anchor)
+  anchor.click()
+  document.body.removeChild(anchor)
+  URL.revokeObjectURL(url)
+}
+
+function inlineSvgStyles(source: Element, target: Element) {
+  const computed = window.getComputedStyle(source)
+  const styleText = Array.from(computed)
+    .map((property) => `${property}:${computed.getPropertyValue(property)};`)
+    .join('')
+
+  if (styleText) {
+    target.setAttribute('style', styleText)
+  }
+
+  const sourceChildren = Array.from(source.children)
+  const targetChildren = Array.from(target.children)
+  const childCount = Math.min(sourceChildren.length, targetChildren.length)
+
+  for (let index = 0; index < childCount; index += 1) {
+    inlineSvgStyles(sourceChildren[index], targetChildren[index])
+  }
+}
+
+function serializeSvgForExport(svg: SVGSVGElement): string {
+  const clone = svg.cloneNode(true) as SVGSVGElement
+  inlineSvgStyles(svg, clone)
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+  clone.setAttribute('width', String(GRAPH_WIDTH))
+  clone.setAttribute('height', String(GRAPH_HEIGHT))
+
+  const background = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  background.setAttribute('x', '0')
+  background.setAttribute('y', '0')
+  background.setAttribute('width', String(GRAPH_WIDTH))
+  background.setAttribute('height', String(GRAPH_HEIGHT))
+  background.setAttribute('fill', '#f7fbff')
+  clone.insertBefore(background, clone.firstChild)
+
+  const serializer = new XMLSerializer()
+  return serializer.serializeToString(clone)
+}
+
+async function exportSvg(svg: SVGSVGElement, mode: GraphMode) {
+  const serialized = serializeSvgForExport(svg)
+  downloadBlob(
+    new Blob([serialized], { type: 'image/svg+xml;charset=utf-8' }),
+    buildExportFileName(mode, 'svg'),
+  )
+}
+
+async function exportPng(svg: SVGSVGElement, mode: GraphMode) {
+  const serialized = serializeSvgForExport(svg)
+  const encoded = encodeURIComponent(serialized)
+  const image = new Image()
+  image.decoding = 'async'
+
+  await new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve()
+    image.onerror = () => reject(new Error('图谱 PNG 导出失败'))
+    image.src = `data:image/svg+xml;charset=utf-8,${encoded}`
+  })
+
+  const canvas = document.createElement('canvas')
+  canvas.width = GRAPH_WIDTH * 2
+  canvas.height = GRAPH_HEIGHT * 2
+
+  const context = canvas.getContext('2d')
+  if (!context) {
+    throw new Error('当前环境不支持图谱 PNG 导出')
+  }
+
+  context.fillStyle = '#f7fbff'
+  context.fillRect(0, 0, canvas.width, canvas.height)
+  context.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, 'image/png'),
+  )
+
+  if (!blob) {
+    throw new Error('图谱 PNG 导出失败')
+  }
+
+  downloadBlob(blob, buildExportFileName(mode, 'png'))
 }
 
 function distributeNodes<T extends {
@@ -331,6 +439,8 @@ export function GraphPage() {
   const [neighbors, setNeighbors] = useState<RelationNeighborDto[]>([])
   const [selectedNodeId, setSelectedNodeId] = useState('')
   const [selectedEdgeId, setSelectedEdgeId] = useState('')
+  const [pathSourceId, setPathSourceId] = useState('')
+  const [pathTargetId, setPathTargetId] = useState('')
   const [searchText, setSearchText] = useState(searchParams.get('q') ?? '')
   const [instanceTypeFilterId, setInstanceTypeFilterId] = useState(
     searchParams.get('instanceTypeId') ?? '',
@@ -352,6 +462,7 @@ export function GraphPage() {
   const [error, setError] = useState<AppErrorInfo | null>(null)
   const [dragState, setDragState] = useState<DragState | null>(null)
   const stageWrapRef = useRef<HTMLDivElement | null>(null)
+  const svgRef = useRef<SVGSVGElement | null>(null)
 
   const mode: GraphMode = searchParams.get('mode') === 'MODEL' ? 'MODEL' : 'INSTANCE'
   const selectedInstanceId = searchParams.get('instanceId') ?? ''
@@ -529,6 +640,16 @@ export function GraphPage() {
       } else {
         params.delete('direction')
       }
+      if (pathSourceId) {
+        params.set('pathSourceId', pathSourceId)
+      } else {
+        params.delete('pathSourceId')
+      }
+      if (pathTargetId) {
+        params.set('pathTargetId', pathTargetId)
+      } else {
+        params.delete('pathTargetId')
+      }
       if (mode === 'INSTANCE') {
         params.set('depth', String(instanceDepth))
       } else {
@@ -540,6 +661,8 @@ export function GraphPage() {
     directionFilter,
     instanceTypeFilterId,
     mode,
+    pathSourceId,
+    pathTargetId,
     relationTypeFilterId,
     replaceQuery,
     searchText,
@@ -650,18 +773,88 @@ export function GraphPage() {
   const selectedNode = selectedNodeId ? nodeMap.get(selectedNodeId) ?? null : null
   const selectedNodeEntityId = selectedNode?.entityId ?? null
 
+  const adjacencyMap = useMemo(() => {
+    const map = new Map<string, GraphEdge[]>()
+    for (const edge of graphData.edges) {
+      const sourceEdges = map.get(edge.source) ?? []
+      sourceEdges.push(edge)
+      map.set(edge.source, sourceEdges)
+      const targetEdges = map.get(edge.target) ?? []
+      targetEdges.push(edge)
+      map.set(edge.target, targetEdges)
+    }
+    return map
+  }, [graphData.edges])
+
+  const highlightedPath = useMemo(() => {
+    if (!pathSourceId || !pathTargetId || pathSourceId === pathTargetId) {
+      return null
+    }
+
+    const visited = new Set<string>([pathSourceId])
+    const queue: Array<{ nodeId: string; edgeIds: string[]; nodeIds: string[] }> = [
+      { nodeId: pathSourceId, edgeIds: [], nodeIds: [pathSourceId] },
+    ]
+
+    while (queue.length > 0) {
+      const current = queue.shift()
+      if (!current) break
+      if (current.nodeId === pathTargetId) {
+        return {
+          edgeIds: new Set(current.edgeIds),
+          nodeIds: new Set(current.nodeIds),
+          orderedNodeIds: current.nodeIds,
+        }
+      }
+
+      const nextEdges = adjacencyMap.get(current.nodeId) ?? []
+      for (const edge of nextEdges) {
+        const nextNodeId = edge.source === current.nodeId ? edge.target : edge.source
+        if (visited.has(nextNodeId)) {
+          continue
+        }
+        visited.add(nextNodeId)
+        queue.push({
+          nodeId: nextNodeId,
+          edgeIds: [...current.edgeIds, edge.id],
+          nodeIds: [...current.nodeIds, nextNodeId],
+        })
+      }
+    }
+
+    return null
+  }, [adjacencyMap, pathSourceId, pathTargetId])
+
   const highlightedEdgeIds = useMemo(
-    () =>
-      new Set(
-        graphData.edges
-          .filter(
-            (edge) =>
-              edge.source === selectedNodeId || edge.target === selectedNodeId,
-          )
-          .map((edge) => edge.id),
-      ),
-    [graphData.edges, selectedNodeId],
+    () => {
+      const ids = new Set<string>()
+      if (highlightedPath) {
+        for (const id of highlightedPath.edgeIds) {
+          ids.add(id)
+        }
+      }
+      for (const edge of graphData.edges) {
+        if (edge.source === selectedNodeId || edge.target === selectedNodeId) {
+          ids.add(edge.id)
+        }
+      }
+      return ids
+    },
+    [graphData.edges, highlightedPath, selectedNodeId],
   )
+
+  const highlightedNodeIds = useMemo(() => {
+    const ids = new Set<string>()
+    if (highlightedPath) {
+      for (const id of highlightedPath.nodeIds) {
+        ids.add(id)
+      }
+    }
+    if (selectedNodeId) {
+      ids.add(selectedNodeId)
+    }
+    return ids
+  }, [highlightedPath, selectedNodeId])
 
   const sideSummary = useMemo(() => {
     if (mode === 'INSTANCE' && selectedInstance) {
@@ -876,6 +1069,33 @@ export function GraphPage() {
     }
   }, [selectedEdge])
 
+  const selectedPathDetail = useMemo<PathDetail | null>(() => {
+    if (!highlightedPath) {
+      return null
+    }
+
+    const steps = highlightedPath.orderedNodeIds
+      .map((nodeId) => nodeMap.get(nodeId))
+      .filter((node): node is GraphNode => Boolean(node))
+      .map((node) => `${node.label} (${node.meta})`)
+
+    if (steps.length === 0) {
+      return null
+    }
+
+    return {
+      title: '最短路径高亮',
+      subtitle: `${steps.length} 个节点 / ${Math.max(steps.length - 1, 0)} 条边`,
+      description: '当前高亮的是两个节点之间在现有图谱中的最短连接路径。',
+      chips: [
+        `源 ${pathSourceId}`,
+        `目标 ${pathTargetId}`,
+        `边数 ${Math.max(steps.length - 1, 0)}`,
+      ],
+      steps,
+    }
+  }, [highlightedPath, nodeMap, pathSourceId, pathTargetId])
+
   function handlePickSearchNode(nodeId: string) {
     const node = nodeMap.get(nodeId)
     if (!node) return
@@ -885,6 +1105,20 @@ export function GraphPage() {
       return
     }
     handleSelectType(String(node.entityId))
+  }
+
+  function handleUsePathEndpoint(kind: 'source' | 'target') {
+    if (!selectedNodeId) return
+    if (kind === 'source') {
+      setPathSourceId(selectedNodeId)
+      return
+    }
+    setPathTargetId(selectedNodeId)
+  }
+
+  function clearPathHighlight() {
+    setPathSourceId('')
+    setPathTargetId('')
   }
 
   async function handleExpandSecondHop() {
@@ -973,13 +1207,60 @@ export function GraphPage() {
     }))
   }
 
+  function handleStageWheel(event: ReactWheelEvent<HTMLDivElement>) {
+    event.preventDefault()
+    const stage = stageWrapRef.current
+    if (!stage) return
+
+    const rect = stage.getBoundingClientRect()
+    const cursorX = event.clientX - rect.left
+    const cursorY = event.clientY - rect.top
+    const delta = event.deltaY < 0 ? 0.08 : -0.08
+
+    setViewport((prev) => {
+      const nextScale = Math.min(
+        2.4,
+        Math.max(0.6, Number((prev.scale + delta).toFixed(2))),
+      )
+      if (nextScale === prev.scale) {
+        return prev
+      }
+
+      const worldX = (cursorX - prev.offsetX) / prev.scale
+      const worldY = (cursorY - prev.offsetY) / prev.scale
+
+      return {
+        scale: nextScale,
+        offsetX: cursorX - worldX * nextScale,
+        offsetY: cursorY - worldY * nextScale,
+      }
+    })
+  }
+
   function handleCenterSelected() {
     if (!selectedNode) return
     centerOnCoordinates(selectedNode.x, selectedNode.y)
   }
 
+  async function handleExport(kind: 'svg' | 'png') {
+    const svg = svgRef.current
+    if (!svg) {
+      return
+    }
+    try {
+      if (kind === 'svg') {
+        await exportSvg(svg, mode)
+      } else {
+        await exportPng(svg, mode)
+      }
+    } catch (e: unknown) {
+      setError(toAppErrorInfo(e))
+    }
+  }
+
   function handleStagePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (event.target !== event.currentTarget) {
+    const target = event.target as HTMLElement
+    if (target.closest('.graph-stage-node') || target.closest('.graph-stage-edges')) {
       return
     }
     setDragState({
@@ -1085,6 +1366,53 @@ export function GraphPage() {
                 )}
               </div>
             ) : null}
+          </div>
+
+          <div className="graph-search-box">
+            <div className="graph-search-row">
+              <label className="field">
+                <span>路径源节点</span>
+                <input
+                  value={pathSourceId}
+                  readOnly
+                  placeholder="先选中节点后设为源"
+                />
+              </label>
+              <label className="field">
+                <span>路径目标节点</span>
+                <input
+                  value={pathTargetId}
+                  readOnly
+                  placeholder="再选中节点后设为目标"
+                />
+              </label>
+            </div>
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => handleUsePathEndpoint('source')}
+                disabled={!selectedNodeId}
+              >
+                设为路径源
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => handleUsePathEndpoint('target')}
+                disabled={!selectedNodeId}
+              >
+                设为路径目标
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={clearPathHighlight}
+                disabled={!pathSourceId && !pathTargetId}
+              >
+                清空路径
+              </button>
+            </div>
           </div>
 
           {mode === 'INSTANCE' ? (
@@ -1260,6 +1588,20 @@ export function GraphPage() {
                   {secondHopLoading ? '扩展中…' : '展开二跳'}
                 </button>
               ) : null}
+              <button
+                type="button"
+                className="btn"
+                onClick={() => void handleExport('svg')}
+              >
+                导出 SVG
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => void handleExport('png')}
+              >
+                导出 PNG
+              </button>
             </div>
             <p className="hint-text">
               支持拖动画布平移，缩放比例 {Math.round(viewport.scale * 100)}%，
@@ -1283,8 +1625,10 @@ export function GraphPage() {
               onPointerMove={handleStagePointerMove}
               onPointerUp={handleStagePointerUp}
               onPointerLeave={handleStagePointerLeave}
+              onWheel={handleStageWheel}
             >
               <svg
+                ref={svgRef}
                 className="graph-stage-svg"
                 viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`}
                 role="img"
@@ -1447,9 +1791,43 @@ export function GraphPage() {
 
         <section className="panel graph-node-detail-panel">
           <h2 className="panel-title">
-            {selectedEdgeDetail ? '关系详情' : '节点详情'}
+            {selectedPathDetail
+              ? '路径详情'
+              : selectedEdgeDetail
+                ? '关系详情'
+                : '节点详情'}
           </h2>
-          {selectedEdgeDetail ? (
+          {selectedPathDetail ? (
+            <div className="graph-node-detail">
+              <p className="graph-summary-subtitle">{selectedPathDetail.subtitle}</p>
+              <h3 className="graph-node-detail-title">{selectedPathDetail.title}</h3>
+              <p className="graph-summary-description">
+                {selectedPathDetail.description}
+              </p>
+              <div className="graph-summary-tags">
+                {selectedPathDetail.chips.map((chip) => (
+                  <span key={chip} className="graph-summary-tag">
+                    {chip}
+                  </span>
+                ))}
+              </div>
+              <div className="graph-node-neighbors">
+                <span className="graph-node-section-title">路径节点顺序</span>
+                <div className="graph-node-neighbor-list">
+                  {selectedPathDetail.steps.map((step) => (
+                    <div key={step} className="graph-neighbor-item">
+                      <strong>{step}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="form-actions">
+                <button type="button" className="btn" onClick={clearPathHighlight}>
+                  清空路径高亮
+                </button>
+              </div>
+            </div>
+          ) : selectedEdgeDetail ? (
             <div className="graph-node-detail">
               <p className="graph-summary-subtitle">{selectedEdgeDetail.subtitle}</p>
               <h3 className="graph-node-detail-title">{selectedEdgeDetail.title}</h3>
@@ -1472,6 +1850,14 @@ export function GraphPage() {
                   <strong>目标节点</strong>
                   <p>{selectedEdge?.targetMeta ?? '—'}</p>
                 </div>
+              </div>
+              <div className="graph-edge-attributes">
+                <span>关系属性</span>
+                <pre className="json-view">
+                  {selectedEdgeDetail.attributes
+                    ? JSON.stringify(selectedEdgeDetail.attributes, null, 2)
+                    : '—'}
+                </pre>
               </div>
               <div className="form-actions">
                 <button
