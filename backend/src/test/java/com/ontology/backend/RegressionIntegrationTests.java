@@ -597,6 +597,72 @@ class RegressionIntegrationTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void objectSetCrudAndMembersShouldWork() throws Exception {
+        long typeId = createObjectType("T_OS_1", "对象集合测试类型");
+        long instA = createObjectInstance(typeId, "集合成员A");
+        long instB = createObjectInstance(typeId, "集合成员B");
+
+        MvcResult createSetResult = mockMvc.perform(post("/api/object-sets")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "typeId": %d,
+                                  "name":"华东战略客户池",
+                                  "description":"一期：手工维护成员",
+                                  "kind":"DYNAMIC",
+                                  "ruleExpression":"tier in [S,A] and region=华东",
+                                  "ruleSource":"MANUAL",
+                                  "owner":"战略客户部"
+                                }
+                                """.formatted(typeId)))
+                .andExpect(status().isOk())
+                .andReturn();
+        long setId = responseData(createSetResult).get("id").asLong();
+
+        mockMvc.perform(put("/api/object-sets/{id}/members", setId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "instanceIds":[%d, %d]
+                                }
+                                """.formatted(instA, instB)))
+                .andExpect(status().isOk());
+
+        MvcResult membersResult = mockMvc.perform(get("/api/object-sets/{id}/members", setId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode membersData = responseData(membersResult);
+        assertThat(membersData.get("totalElements").asLong()).isEqualTo(2L);
+
+        mockMvc.perform(get("/api/object-sets")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("typeId", String.valueOf(typeId)))
+                .andExpect(status().isOk());
+
+        String snapshotInstant = "2026-03-01T00:00:00Z";
+        mockMvc.perform(put("/api/object-sets/{id}", setId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "typeId": %d,
+                                  "name":"华东战略客户池（快照）",
+                                  "description":"已转快照",
+                                  "kind":"SNAPSHOT",
+                                  "ruleExpression":"snapshot baseline",
+                                  "ruleSource":"MANUAL",
+                                  "snapshotAt":"%s",
+                                  "owner":"战略客户部"
+                                }
+                                """.formatted(typeId, snapshotInstant)))
+                .andExpect(status().isOk());
+    }
+
     private String loginAndGetToken(String username, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
