@@ -40,6 +40,17 @@
   min-width: 0;
 }
 
+.graph-tool-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.graph-tool-meta .field {
+  min-width: 140px;
+}
+
 .graph-summary-subtitle {
   color: rgb(31 79 158 / 74%);
   font-size: 0.8rem;
@@ -295,6 +306,17 @@
   line-height: 1.55;
 }
 
+.graph-edge-attributes {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.graph-edge-attributes > span {
+  color: var(--color-primary-container);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 @media (max-width: 1280px) {
   .graph-layout {
     grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
@@ -323,6 +345,10 @@
   .graph-canvas-tools {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .graph-tool-meta {
+    width: 100%;
   }
 }
 

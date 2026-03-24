@@ -43,6 +43,7 @@ type GraphEdge = {
   direction?: RelationDirection
   sourceMeta?: string
   targetMeta?: string
+  attributes?: Record<string, unknown> | null
   source: string
   target: string
   label: string
@@ -89,6 +90,9 @@ type EdgeDetail = {
   subtitle: string
   description: string
   chips: string[]
+  sourceMeta: string
+  targetMeta: string
+  attributes: Record<string, unknown> | null
 }
 
 type GraphViewport = {
@@ -107,10 +111,16 @@ type DragState = {
 
 const GRAPH_WIDTH = 980
 const GRAPH_HEIGHT = 520
+const MAX_INSTANCE_DEPTH = 3
 const DEFAULT_VIEWPORT: GraphViewport = {
   scale: 1,
   offsetX: 0,
   offsetY: 0,
+}
+
+function normalizeDepth(value: number): number {
+  if (!Number.isFinite(value)) return 1
+  return Math.min(MAX_INSTANCE_DEPTH, Math.max(1, Math.round(value)))
 }
 
 function distributeNodes<T extends {
@@ -332,6 +342,9 @@ export function GraphPage() {
     (searchParams.get('direction') as RelationDirection | null) ?? '',
   )
   const [expandedInstanceIds, setExpandedInstanceIds] = useState<Set<number>>(new Set())
+  const [instanceDepth, setInstanceDepth] = useState<number>(
+    normalizeDepth(Number(searchParams.get('depth') ?? '1')),
+  )
   const [viewport, setViewport] = useState<GraphViewport>(DEFAULT_VIEWPORT)
   const [secondHopLoading, setSecondHopLoading] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -516,10 +529,17 @@ export function GraphPage() {
       } else {
         params.delete('direction')
       }
+      if (mode === 'INSTANCE') {
+        params.set('depth', String(instanceDepth))
+      } else {
+        params.delete('depth')
+      }
     })
   }, [
+    instanceDepth,
     directionFilter,
     instanceTypeFilterId,
+    mode,
     relationTypeFilterId,
     replaceQuery,
     searchText,
@@ -869,6 +889,10 @@ export function GraphPage() {
       return
     }
 
+    if (expandedInstanceIds.size >= instanceDepth) {
+      return
+    }
+
     const baseInstanceId = selectedNode.entityId
     const firstHopInstanceIds = new Set<number>([baseInstanceId])
     for (const neighbor of filteredNeighbors) {
@@ -930,11 +954,25 @@ export function GraphPage() {
     setViewport(DEFAULT_VIEWPORT)
   }
 
+  function centerOnCoordinates(x: number, y: number) {
+    const scale = viewport.scale
+    setViewport((prev) => ({
+      ...prev,
+      offsetX: GRAPH_WIDTH / 2 - x * scale,
+      offsetY: GRAPH_HEIGHT / 2 - y * scale,
+    }))
+  }
+
   function handleZoom(delta: number) {
     setViewport((prev) => ({
       ...prev,
       scale: Math.min(2.2, Math.max(0.6, Number((prev.scale + delta).toFixed(2)))),
     }))
+  }
+
+  function handleCenterSelected() {
+    if (!selectedNode) return
+    centerOnCoordinates(selectedNode.x, selectedNode.y)
   }
 
   function handleStagePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -1098,6 +1136,17 @@ export function GraphPage() {
                 >
                   刷新实例
                 </button>
+                <label className="field small">
+                  <span>展开深度</span>
+                  <select
+                    value={String(instanceDepth)}
+                    onChange={(e) => setInstanceDepth(normalizeDepth(Number(e.target.value)))}
+                  >
+                    <option value="1">1 跳</option>
+                    <option value="2">2 跳</option>
+                    <option value="3">3 跳</option>
+                  </select>
+                </label>
               </div>
             </div>
           ) : (
@@ -1185,19 +1234,33 @@ export function GraphPage() {
               <button type="button" className="btn" onClick={resetViewport}>
                 重置视图
               </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={handleCenterSelected}
+                disabled={!selectedNode}
+              >
+                居中当前节点
+              </button>
               {mode === 'INSTANCE' ? (
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={() => void handleExpandSecondHop()}
-                  disabled={secondHopLoading || !selectedNode || selectedNode.kind !== 'instance'}
+                  disabled={
+                    secondHopLoading ||
+                    !selectedNode ||
+                    selectedNode.kind !== 'instance' ||
+                    expandedInstanceIds.size >= instanceDepth
+                  }
                 >
                   {secondHopLoading ? '扩展中…' : '展开二跳'}
                 </button>
               ) : null}
             </div>
             <p className="hint-text">
-              支持拖动画布平移，缩放比例 {Math.round(viewport.scale * 100)}%
+              支持拖动画布平移，缩放比例 {Math.round(viewport.scale * 100)}%，
+              {mode === 'INSTANCE' ? `当前深度 ${instanceDepth} 跳` : '当前为模型视图'}
             </p>
           </div>
 
