@@ -327,20 +327,6 @@ export function GraphPage() {
     [instanceOptions, instanceTypeFilterId],
   )
 
-  const searchResultNodes = useMemo(() => {
-    const keyword = searchText.trim().toLowerCase()
-    if (!keyword) {
-      return []
-    }
-    return graphData.nodes
-      .filter(
-        (node) =>
-          node.label.toLowerCase().includes(keyword) ||
-          node.meta.toLowerCase().includes(keyword),
-      )
-      .slice(0, 8)
-  }, [graphData.nodes, searchText])
-
   const replaceQuery = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
       const next = new URLSearchParams(searchParams)
@@ -530,6 +516,20 @@ export function GraphPage() {
       typeOptions,
     ],
   )
+
+  const searchResultNodes = useMemo(() => {
+    const keyword = searchText.trim().toLowerCase()
+    if (!keyword) {
+      return []
+    }
+    return graphData.nodes
+      .filter(
+        (node) =>
+          node.label.toLowerCase().includes(keyword) ||
+          node.meta.toLowerCase().includes(keyword),
+      )
+      .slice(0, 8)
+  }, [graphData.nodes, searchText])
 
   useEffect(() => {
     if (!graphData.nodes.length) {
