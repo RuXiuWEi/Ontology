@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { listInstances, listInstancesPage } from '../../api/instances'
 import { listObjectTypes } from '../../api/objectTypes'
@@ -84,8 +91,27 @@ type EdgeDetail = {
   chips: string[]
 }
 
+type GraphViewport = {
+  scale: number
+  offsetX: number
+  offsetY: number
+}
+
+type DragState = {
+  pointerId: number
+  startX: number
+  startY: number
+  originOffsetX: number
+  originOffsetY: number
+}
+
 const GRAPH_WIDTH = 980
 const GRAPH_HEIGHT = 520
+const DEFAULT_VIEWPORT: GraphViewport = {
+  scale: 1,
+  offsetX: 0,
+  offsetY: 0,
+}
 
 function distributeNodes<T extends {
   id: string
@@ -295,13 +321,24 @@ export function GraphPage() {
   const [neighbors, setNeighbors] = useState<RelationNeighborDto[]>([])
   const [selectedNodeId, setSelectedNodeId] = useState('')
   const [selectedEdgeId, setSelectedEdgeId] = useState('')
-  const [searchText, setSearchText] = useState('')
-  const [instanceTypeFilterId, setInstanceTypeFilterId] = useState('')
-  const [relationTypeFilterId, setRelationTypeFilterId] = useState('')
-  const [directionFilter, setDirectionFilter] = useState<RelationDirection | ''>('')
+  const [searchText, setSearchText] = useState(searchParams.get('q') ?? '')
+  const [instanceTypeFilterId, setInstanceTypeFilterId] = useState(
+    searchParams.get('instanceTypeId') ?? '',
+  )
+  const [relationTypeFilterId, setRelationTypeFilterId] = useState(
+    searchParams.get('relationTypeId') ?? '',
+  )
+  const [directionFilter, setDirectionFilter] = useState<RelationDirection | ''>(
+    (searchParams.get('direction') as RelationDirection | null) ?? '',
+  )
+  const [expandedInstanceIds, setExpandedInstanceIds] = useState<Set<number>>(new Set())
+  const [viewport, setViewport] = useState<GraphViewport>(DEFAULT_VIEWPORT)
+  const [secondHopLoading, setSecondHopLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [graphLoading, setGraphLoading] = useState(false)
   const [error, setError] = useState<AppErrorInfo | null>(null)
+  const [dragState, setDragState] = useState<DragState | null>(null)
+  const stageWrapRef = useRef<HTMLDivElement | null>(null)
 
   const mode: GraphMode = searchParams.get('mode') === 'MODEL' ? 'MODEL' : 'INSTANCE'
   const selectedInstanceId = searchParams.get('instanceId') ?? ''
@@ -348,6 +385,7 @@ export function GraphPage() {
         }
       })
       setSelectedNodeId(instanceId ? `instance-${instanceId}` : '')
+      setSelectedEdgeId('')
     },
     [replaceQuery],
   )
@@ -364,6 +402,7 @@ export function GraphPage() {
         }
       })
       setSelectedNodeId(typeId ? `type-${typeId}` : '')
+      setSelectedEdgeId('')
     },
     [replaceQuery],
   )
@@ -452,7 +491,45 @@ export function GraphPage() {
       return
     }
     setRelationTypeFilterId('')
+    setExpandedInstanceIds(new Set())
   }, [mode])
+
+  useEffect(() => {
+    replaceQuery((params) => {
+      if (searchText.trim()) {
+        params.set('q', searchText.trim())
+      } else {
+        params.delete('q')
+      }
+      if (instanceTypeFilterId) {
+        params.set('instanceTypeId', instanceTypeFilterId)
+      } else {
+        params.delete('instanceTypeId')
+      }
+      if (relationTypeFilterId) {
+        params.set('relationTypeId', relationTypeFilterId)
+      } else {
+        params.delete('relationTypeId')
+      }
+      if (directionFilter) {
+        params.set('direction', directionFilter)
+      } else {
+        params.delete('direction')
+      }
+    })
+  }, [
+    directionFilter,
+    instanceTypeFilterId,
+    relationTypeFilterId,
+    replaceQuery,
+    searchText,
+  ])
+
+  useEffect(() => {
+    setExpandedInstanceIds(
+      selectedInstanceId ? new Set([Number(selectedInstanceId)]) : new Set(),
+    )
+  }, [selectedInstanceId])
 
   useEffect(() => {
     if (mode !== 'INSTANCE' || !selectedInstanceId) {
@@ -787,6 +864,120 @@ export function GraphPage() {
     handleSelectType(String(node.entityId))
   }
 
+  async function handleExpandSecondHop() {
+    if (mode !== 'INSTANCE' || !selectedNode || selectedNode.kind !== 'instance') {
+      return
+    }
+
+    const baseInstanceId = selectedNode.entityId
+    const firstHopInstanceIds = new Set<number>([baseInstanceId])
+    for (const neighbor of filteredNeighbors) {
+      if (neighbor.sourceInstanceId === baseInstanceId) {
+        firstHopInstanceIds.add(neighbor.targetInstanceId)
+      }
+      if (neighbor.targetInstanceId === baseInstanceId) {
+        firstHopInstanceIds.add(neighbor.sourceInstanceId)
+      }
+    }
+
+    const nextTargets = Array.from(firstHopInstanceIds).filter(
+      (instanceId) => !expandedInstanceIds.has(instanceId),
+    )
+    if (nextTargets.length === 0) {
+      return
+    }
+
+    setSecondHopLoading(true)
+    setError(null)
+    try {
+      const batches = await Promise.all(
+        nextTargets.map(async (instanceId) => ({
+          instanceId,
+          neighbors: await listRelationNeighbors(instanceId),
+        })),
+      )
+
+      setNeighbors((prev) => {
+        const seen = new Set(prev.map((item) => item.edgeId))
+        const merged = [...prev]
+        for (const batch of batches) {
+          for (const item of batch.neighbors) {
+            if (!seen.has(item.edgeId)) {
+              seen.add(item.edgeId)
+              merged.push(item)
+            }
+          }
+        }
+        return merged
+      })
+
+      setExpandedInstanceIds((prev) => {
+        const next = new Set(prev)
+        next.add(baseInstanceId)
+        for (const instanceId of nextTargets) {
+          next.add(instanceId)
+        }
+        return next
+      })
+    } catch (e: unknown) {
+      setError(toAppErrorInfo(e))
+    } finally {
+      setSecondHopLoading(false)
+    }
+  }
+
+  function resetViewport() {
+    setViewport(DEFAULT_VIEWPORT)
+  }
+
+  function handleZoom(delta: number) {
+    setViewport((prev) => ({
+      ...prev,
+      scale: Math.min(2.2, Math.max(0.6, Number((prev.scale + delta).toFixed(2)))),
+    }))
+  }
+
+  function handleStagePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.target !== event.currentTarget) {
+      return
+    }
+    setDragState({
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originOffsetX: viewport.offsetX,
+      originOffsetY: viewport.offsetY,
+    })
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  function handleStagePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return
+    }
+    const dx = event.clientX - dragState.startX
+    const dy = event.clientY - dragState.startY
+    setViewport((prev) => ({
+      ...prev,
+      offsetX: dragState.originOffsetX + dx,
+      offsetY: dragState.originOffsetY + dy,
+    }))
+  }
+
+  function handleStagePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (dragState?.pointerId === event.pointerId) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+      setDragState(null)
+    }
+  }
+
+  function handleStagePointerLeave(event: ReactPointerEvent<HTMLDivElement>) {
+    if (dragState?.pointerId === event.pointerId) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+      setDragState(null)
+    }
+  }
+
   return (
     <section className="page-shell">
       <header className="page-header">
@@ -983,6 +1174,33 @@ export function GraphPage() {
             </div>
           </div>
 
+          <div className="graph-canvas-tools">
+            <div className="form-actions">
+              <button type="button" className="btn" onClick={() => handleZoom(0.1)}>
+                放大
+              </button>
+              <button type="button" className="btn" onClick={() => handleZoom(-0.1)}>
+                缩小
+              </button>
+              <button type="button" className="btn" onClick={resetViewport}>
+                重置视图
+              </button>
+              {mode === 'INSTANCE' ? (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => void handleExpandSecondHop()}
+                  disabled={secondHopLoading || !selectedNode || selectedNode.kind !== 'instance'}
+                >
+                  {secondHopLoading ? '扩展中…' : '展开二跳'}
+                </button>
+              ) : null}
+            </div>
+            <p className="hint-text">
+              支持拖动画布平移，缩放比例 {Math.round(viewport.scale * 100)}%
+            </p>
+          </div>
+
           {loading ? (
             <div className="empty-panel graph-empty-state">
               <p>正在加载图谱数据…</p>
@@ -992,7 +1210,14 @@ export function GraphPage() {
               <p>当前筛选下暂无可展示的节点关系，请切换实例或对象类型后重试。</p>
             </div>
           ) : (
-            <div className="graph-stage">
+            <div
+              ref={stageWrapRef}
+              className={`graph-stage ${dragState ? 'graph-stage--dragging' : ''}`}
+              onPointerDown={handleStagePointerDown}
+              onPointerMove={handleStagePointerMove}
+              onPointerUp={handleStagePointerUp}
+              onPointerLeave={handleStagePointerLeave}
+            >
               <svg
                 className="graph-stage-svg"
                 viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`}
@@ -1016,134 +1241,138 @@ export function GraphPage() {
                   </filter>
                 </defs>
 
-                <g className="graph-stage-grid">
-                  {Array.from({ length: 18 }, (_, index) => (
-                    <line
-                      key={`v-${String(index)}`}
-                      x1={index * 60}
-                      y1="0"
-                      x2={index * 60}
-                      y2={GRAPH_HEIGHT}
-                    />
-                  ))}
-                  {Array.from({ length: 10 }, (_, index) => (
-                    <line
-                      key={`h-${String(index)}`}
-                      x1="0"
-                      y1={index * 58}
-                      x2={GRAPH_WIDTH}
-                      y2={index * 58}
-                    />
-                  ))}
-                </g>
+                <g
+                  transform={`translate(${viewport.offsetX} ${viewport.offsetY}) scale(${viewport.scale})`}
+                >
+                  <g className="graph-stage-grid">
+                    {Array.from({ length: 18 }, (_, index) => (
+                      <line
+                        key={`v-${String(index)}`}
+                        x1={index * 60}
+                        y1="0"
+                        x2={index * 60}
+                        y2={GRAPH_HEIGHT}
+                      />
+                    ))}
+                    {Array.from({ length: 10 }, (_, index) => (
+                      <line
+                        key={`h-${String(index)}`}
+                        x1="0"
+                        y1={index * 58}
+                        x2={GRAPH_WIDTH}
+                        y2={index * 58}
+                      />
+                    ))}
+                  </g>
 
-                <g className="graph-stage-edges">
-                  {graphData.edges.map((edge) => {
-                    const source = nodeMap.get(edge.source)
-                    const target = nodeMap.get(edge.target)
+                  <g className="graph-stage-edges">
+                    {graphData.edges.map((edge) => {
+                      const source = nodeMap.get(edge.source)
+                      const target = nodeMap.get(edge.target)
 
-                    if (!source || !target) {
-                      return null
-                    }
+                      if (!source || !target) {
+                        return null
+                      }
 
-                    const labelX = (source.x + target.x) / 2
-                    const labelY = (source.y + target.y) / 2
-                    const isSelected = highlightedEdgeIds.has(edge.id)
-                    const edgeClassName = [
-                      'graph-stage-edge',
-                      edge.weak ? 'graph-stage-edge--weak' : '',
-                      isSelected ? 'graph-stage-edge--selected' : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')
+                      const labelX = (source.x + target.x) / 2
+                      const labelY = (source.y + target.y) / 2
+                      const isSelected = highlightedEdgeIds.has(edge.id)
+                      const edgeClassName = [
+                        'graph-stage-edge',
+                        edge.weak ? 'graph-stage-edge--weak' : '',
+                        isSelected ? 'graph-stage-edge--selected' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
 
-                    return (
-                      <g key={edge.id}>
-                        <line
-                          className={edgeClassName}
-                          x1={source.x}
-                          y1={source.y}
-                          x2={target.x}
-                          y2={target.y}
-                          onClick={() => handleSelectEdge(edge.id)}
-                        />
-                        <rect
-                          className="graph-stage-edge-label-bg"
-                          x={labelX - 44}
-                          y={labelY - 12}
-                          width="88"
-                          height="24"
-                          rx="12"
-                        />
-                        <text
-                          className="graph-stage-edge-label"
-                          x={labelX}
-                          y={labelY + 4}
-                          textAnchor="middle"
-                        >
-                          {edge.label}
-                        </text>
-                      </g>
-                    )
-                  })}
-                </g>
-
-                <g className="graph-stage-nodes">
-                  {graphData.nodes.map((node) => {
-                    const nodeClassName = [
-                      'graph-stage-node',
-                      node.emphasis ? 'graph-stage-node--emphasis' : '',
-                      node.id === selectedNodeId ? 'graph-stage-node--selected' : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')
-
-                    return (
-                      <g
-                        key={node.id}
-                        className={nodeClassName}
-                        transform={`translate(${node.x} ${node.y})`}
-                        onClick={() => handleSelectNode(node.id)}
-                      >
-                        <circle
-                          className="graph-stage-node-halo"
-                          r={node.kind === 'type' ? 34 : 30}
-                        />
-                        <circle
-                          className="graph-stage-node-core"
-                          r={node.kind === 'type' ? 12 : 10}
-                        />
-                        <g
-                          className="graph-stage-node-card"
-                          filter="url(#graph-node-shadow)"
-                        >
+                      return (
+                        <g key={edge.id}>
+                          <line
+                            className={edgeClassName}
+                            x1={source.x}
+                            y1={source.y}
+                            x2={target.x}
+                            y2={target.y}
+                            onClick={() => handleSelectEdge(edge.id)}
+                          />
                           <rect
-                            x={node.kind === 'type' ? -64 : -72}
-                            y="18"
-                            width={node.kind === 'type' ? 128 : 144}
-                            height="52"
-                            rx="16"
+                            className="graph-stage-edge-label-bg"
+                            x={labelX - 44}
+                            y={labelY - 12}
+                            width="88"
+                            height="24"
+                            rx="12"
                           />
                           <text
-                            className="graph-stage-node-title"
-                            x="0"
-                            y="42"
+                            className="graph-stage-edge-label"
+                            x={labelX}
+                            y={labelY + 4}
                             textAnchor="middle"
                           >
-                            {node.label}
-                          </text>
-                          <text
-                            className="graph-stage-node-meta"
-                            x="0"
-                            y="58"
-                            textAnchor="middle"
-                          >
-                            {node.meta}
+                            {edge.label}
                           </text>
                         </g>
-                      </g>
-                    )
-                  })}
+                      )
+                    })}
+                  </g>
+
+                  <g className="graph-stage-nodes">
+                    {graphData.nodes.map((node) => {
+                      const nodeClassName = [
+                        'graph-stage-node',
+                        node.emphasis ? 'graph-stage-node--emphasis' : '',
+                        node.id === selectedNodeId ? 'graph-stage-node--selected' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
+
+                      return (
+                        <g
+                          key={node.id}
+                          className={nodeClassName}
+                          transform={`translate(${node.x} ${node.y})`}
+                          onClick={() => handleSelectNode(node.id)}
+                        >
+                          <circle
+                            className="graph-stage-node-halo"
+                            r={node.kind === 'type' ? 34 : 30}
+                          />
+                          <circle
+                            className="graph-stage-node-core"
+                            r={node.kind === 'type' ? 12 : 10}
+                          />
+                          <g
+                            className="graph-stage-node-card"
+                            filter="url(#graph-node-shadow)"
+                          >
+                            <rect
+                              x={node.kind === 'type' ? -64 : -72}
+                              y="18"
+                              width={node.kind === 'type' ? 128 : 144}
+                              height="52"
+                              rx="16"
+                            />
+                            <text
+                              className="graph-stage-node-title"
+                              x="0"
+                              y="42"
+                              textAnchor="middle"
+                            >
+                              {node.label}
+                            </text>
+                            <text
+                              className="graph-stage-node-meta"
+                              x="0"
+                              y="58"
+                              textAnchor="middle"
+                            >
+                              {node.meta}
+                            </text>
+                          </g>
+                        </g>
+                      )
+                    })}
+                  </g>
                 </g>
               </svg>
             </div>
